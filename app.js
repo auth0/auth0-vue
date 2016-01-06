@@ -1,3 +1,17 @@
+// Intercept responses and check for anything
+// unauthorized. If there is an unauthorized response,
+// log the user out and redirect to the home route
+Vue.http.interceptors.push({
+  response: function (response) {
+    if(response.status === 401) {
+      this.logout();
+      this.authenticated = false;      
+      router.go('/');
+    }
+    return response;
+  }
+});
+
 // The public route can be viewed at any time
 var Public = Vue.extend({
   template: `<p>This is a public route</p>`
@@ -45,7 +59,7 @@ var App = Vue.extend({
   methods: {
     login() {
       var self = this;
-      var lock = new Auth0Lock('AUTH_CLIENT_ID', 'AUTH0_DOMAIN');
+      var lock = new Auth0Lock('w4ibtscMzP2Zs3jk6MteHwXZ422gGyQc', 'blogtest.auth0.com');
       
       lock.show((err, profile, token) => {
         if(err) {          
