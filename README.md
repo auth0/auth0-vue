@@ -1,4 +1,4 @@
-Auth0 - Vue.js
+# Auth0 - Vue.js
 
 This repo shows how to implement Auth0 in a single page Vue.js application. It relies on [Vue components](http://vuejs.org/guide/components.html) so that **vue-router** can be used. The [Auth0 NodeJS API seed](https://github.com/auth0/node-auth0/tree/master/examples/nodejs-api) is used as a simple backend.
 
@@ -22,7 +22,7 @@ Enter your `AUTH0_CLIENT_ID` and `AUTH0_DOMAIN` when instantiating **Auth0Lock**
 ```js
 // app.js
 
-var lock = new Auth0Lock('AUTH_CLIENT_ID', 'AUTH0_DOMAIN');
+var lock = new Auth0Lock('AUTH0_CLIENT_ID', 'AUTH0_DOMAIN');
 ```
 
 Serve the app:
