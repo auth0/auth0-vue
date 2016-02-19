@@ -59,7 +59,7 @@ var App = Vue.extend({
   methods: {
     login() {
       var self = this;
-      var lock = new Auth0Lock('AUTH0_CLIENT_ID', 'AUTH0_DOMAIN');
+      var lock = new Auth0Lock(AUTH0_CLIENT_ID, AUTH0_DOMAIN);
       
       lock.show((err, profile, token) => {
         if(err) {          
