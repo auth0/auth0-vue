@@ -86,7 +86,7 @@ var App = Vue.extend({
     getSecretThing() {
       var jwtHeader = { 'Authorization': 'Bearer ' + localStorage.getItem('id_token') };
       this.$http.get('http://localhost:3001/secured/ping', (data) => {
-        console.log(data)
+        console.log(data);
         this.secretThing = data.text;
       }, { 
         headers: jwtHeader
@@ -97,11 +97,7 @@ var App = Vue.extend({
 
 // Utility to check auth status
 function checkAuth() {
-  if(localStorage.getItem('id_token')) {
-    return true;
-  } else {
-    return false;
-  }
+  return !!localStorage.getItem('id_token');
 }
 
 var router = new VueRouter();
