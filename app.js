@@ -48,30 +48,35 @@ var App = Vue.extend({
   data() {
     return {
       authenticated: false,
-      secretThing: ''
+      secretThing: '',
+      lock: new Auth0Lock(AUTH0_CLIENT_ID, AUTH0_DOMAIN,{
+        auth: { redirect: false }
+      })
     }
   },
   // Check the user's auth status when the app
   // loads to account for page refreshing
   ready() {
+    var self = this;
     this.authenticated = checkAuth();
+    this.lock.on("authenticated", function(authResult) {
+      console.log(authResult);
+      self.lock.getProfile(authResult.idToken, function(error, profile) {
+        if (error) {
+          // Handle error
+          return;
+        }
+
+        localStorage.setItem('id_token', authResult.idToken);
+        localStorage.setItem('profile', JSON.stringify(profile));
+        self.authenticated = true;
+        self.lock.hide();
+      });
+    });
   },
   methods: {
     login() {
-      var self = this;
-      var lock = new Auth0Lock(AUTH0_CLIENT_ID, AUTH0_DOMAIN);
-      
-      lock.show((err, profile, token) => {
-        if(err) {          
-          // Handle the error
-          console.log(err)          
-        } else {
-          // Set the token and user profile in local storage
-          localStorage.setItem('profile', JSON.stringify(profile));
-          localStorage.setItem('id_token', token);
-          self.authenticated = true;
-        }        
-      });
+      this.lock.show();
     },
     logout() {
       var self = this;
