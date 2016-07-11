@@ -60,7 +60,6 @@ var App = Vue.extend({
     var self = this;
     this.authenticated = checkAuth();
     this.lock.on("authenticated", function(authResult) {
-      console.log(authResult);
       self.lock.getProfile(authResult.idToken, function(error, profile) {
         if (error) {
           // Handle error
