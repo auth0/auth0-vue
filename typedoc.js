@@ -11,11 +11,7 @@ module.exports = {
     '**/__mocks__/**/*',
     ...excludeFiles.map(f => `./src/${f}.ts`)
   ],
-  mode: 'file',
-  excludeExternals: true,
+  excludeExternals: false,
   excludePrivate: true,
-  includeDeclarations: true,
-  stripInternal: true,
-  hideGenerator: true,
-  theme: 'minimal'
+  hideGenerator: true
 };
