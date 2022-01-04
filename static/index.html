@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Auth0</title>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <div id="app" class="container">
+      <h1 class="mb-5">Auth0 Vue Playground</h1>
+    </div>
+
+    <script src="/auth0-vue.development.js"></script>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script type="text/javascript">
+      const app = Vue.createApp({
+        data: function () {
+          return {};
+        }
+      });
+
+      app.use(
+        createAuth0({
+          domain: 'brucke.auth0.com',
+          clientId: 'wLSIP47wM39wKdDmOj6Zb5eSEw3JVhVp'
+        })
+      );
+
+      app.mount('#app');
+    </script>
+  </body>
+</html>

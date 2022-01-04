@@ -1,0 +1,33 @@
+version: 2.1
+parameters:
+  docker_image:
+    type: string
+    default: cypress/browsers:node14.16.0-chrome90-ff88
+jobs:
+  build:
+    docker:
+      - image: << pipeline.parameters.docker_image >>
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: npm ci
+      - run:
+          name: build
+          command: npm run build
+          environment:
+            WITH_STATS: true
+      - run: npm run test:es-check
+      - run: npm run print-bundle-size
+      - run: npm run test -- --maxWorkers=2
+      - run: npm run print-bundle-size
+      - save_cache:
+          key: vue-dist-{{ .Revision }}
+          paths:
+            - dist
+      - run:
+          name: Upload coverage
+          command: ./node_modules/.bin/codecov
+workflows:
+  build_and_test:
+    jobs:
+      - build
