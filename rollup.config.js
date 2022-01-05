@@ -9,6 +9,7 @@ import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import replace from '@rollup/plugin-replace';
 import analyze from 'rollup-plugin-analyzer';
 import dev from 'rollup-plugin-dev';
+import { createApp } from './scripts/oidc-provider';
 
 import pkg from './package.json';
 
@@ -79,7 +80,10 @@ let bundles = [
       !isProduction &&
         dev({
           dirs: ['dist', 'static'],
-          port: serverPort
+          port: serverPort,
+          extend(app, modules) {
+            app.use(modules.mount(createApp({ port: serverPort })));
+          }
         }),
       !isProduction && livereload()
     ],
