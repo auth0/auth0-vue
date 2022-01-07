@@ -1,5 +1,6 @@
 module.exports = {
   rootDir: './',
+  clearMocks: true,
   testEnvironment: 'jsdom',
   moduleFileExtensions: ['ts', 'js'],
   testMatch: ['**/__tests__/**/*.test.ts'],

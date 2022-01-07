@@ -18,7 +18,7 @@ export class Auth0ClientProxy {
   public user: Ref<User | undefined>;
   public idTokenClaims: Ref<IdToken | undefined>;
 
-  constructor(options: Auth0ClientOptions, vue: any) {
+  constructor(options: Auth0ClientOptions, vue?: any) {
     this.client = new Auth0Client(options);
 
     this.isLoading = vue ? vue.ref(true) : ref(true);
