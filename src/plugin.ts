@@ -21,7 +21,7 @@ function pluginOptionsToClientOptions(
 }
 
 export class Auth0Plugin {
-  constructor(private options: Auth0PluginOptions, private vue: any) {}
+  constructor(private options: Auth0PluginOptions, private vue?: any) {}
 
   install(app: App) {
     const proxy = new Auth0ClientProxy(
