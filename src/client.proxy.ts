@@ -16,7 +16,7 @@ export class Auth0ClientProxy {
   public isLoading: Ref<boolean>;
   public isAuthenticated: Ref<boolean>;
   public user: Ref<User | undefined>;
-  public idTokenClaims = ref<IdToken | undefined>();
+  public idTokenClaims: Ref<IdToken | undefined>;
 
   constructor(options: Auth0ClientOptions, vue: any) {
     this.client = new Auth0Client(options);
@@ -24,6 +24,7 @@ export class Auth0ClientProxy {
     this.isLoading = vue ? vue.ref(true) : ref(true);
     this.isAuthenticated = vue ? vue.ref(false) : ref(false);
     this.user = vue ? vue.ref({}) : ref({});
+    this.idTokenClaims = vue ? vue.ref() : ref();
   }
 
   loginWithRedirect<TAppState>(options?: RedirectLoginOptions<TAppState>) {
