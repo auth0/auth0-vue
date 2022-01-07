@@ -27,7 +27,7 @@ export class Auth0ClientProxy {
   }
 
   loginWithPopup(options?: PopupLoginOptions, config?: PopupConfigOptions) {
-    return this.client.loginWithPopup(options, config);
+    return this.__proxy(() => this.client.loginWithPopup(options, config));
   }
 
   logout(options?: LogoutOptions) {
@@ -47,7 +47,6 @@ export class Auth0ClientProxy {
     this.user.value = await this.client.getUser();
     this.idTokenClaims.value = await this.client.getIdTokenClaims();
     this.isLoading.value = false;
-    console.log(this.idTokenClaims.value);
   }
 
   private async __proxy(cb: Function) {

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Auth0</title>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <div id="app" class="container">
+      <h1 class="mb-5">Auth0 Vue Playground</h1>
+
+      {{foo}}
+      
+      </div>
+    </div>
+
+    <script src="/vue.global.js"></script>
+    <script src="/auth0-vue.development.js"></script>
+    <script type="text/javascript">
+      function createAuth02() {
+        return {
+          install(app) {
+            const proxy = { foo: Vue.ref('Initial Value') };
+
+            setTimeout(function() {
+              proxy.foo.value = 'Updated Value';
+            }, 2000);
+
+            app.config.globalProperties.$auth0 = proxy;
+          }
+        }
+      }
+
+      const app = Vue.createApp({
+        data: function() {
+          return {
+            foo: this.$auth0.foo
+          };
+        }
+      });
+
+      app.use(
+        createAuth02()
+      );
+
+      app.mount('#app');
+    </script>
+  </body>
+</html>
