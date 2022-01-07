@@ -83,6 +83,7 @@ let bundles = [
           port: serverPort,
           extend(app, modules) {
             app.use(modules.mount(createApp({ port: serverPort })));
+          }
         }),
       !isProduction && livereload()
     ],
