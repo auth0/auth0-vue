@@ -151,7 +151,8 @@
               JSON.stringify({
                 domain: defaultDomain,
                 clientId: defaultClientId,
-                audience: defaultAudience
+                audience: defaultAudience,
+                useFormData: false
               })
             );
 
@@ -164,7 +165,9 @@
               JSON.stringify({
                 domain: 'http://127.0.0.1:3000',
                 clientId: 'testing',
-                audience: ''
+                audience: '',
+                useFormData: true,
+
               })
             );
             window.location.reload();
@@ -178,7 +181,8 @@
         createAuth0({
           domain: res?.domain || defaultDomain,
           clientId: res?.clientId || defaultClientId,
-          audience: res?.audience || defaultAudience
+          audience: res?.audience || defaultAudience,
+          useFormData: res?.useFormData || false
         }, Vue)
       );
 
