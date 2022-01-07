@@ -8,18 +8,22 @@ import {
   RedirectLoginOptions,
   User
 } from '@auth0/auth0-spa-js';
-import { ref } from 'vue';
+import { Ref, ref } from 'vue';
 
 export class Auth0ClientProxy {
   private readonly client: Auth0Client;
 
-  public isLoading = ref(true);
-  public isAuthenticated = ref(false);
-  public user = ref<User | undefined>({});
+  public isLoading: Ref<boolean>;
+  public isAuthenticated: Ref<boolean>;
+  public user: Ref<User | undefined>;
   public idTokenClaims = ref<IdToken | undefined>();
 
-  constructor(options: Auth0ClientOptions) {
+  constructor(options: Auth0ClientOptions, vue: any) {
     this.client = new Auth0Client(options);
+
+    this.isLoading = vue ? vue.ref(true) : ref(true);
+    this.isAuthenticated = vue ? vue.ref(false) : ref(false);
+    this.user = vue ? vue.ref({}) : ref({});
   }
 
   loginWithRedirect<TAppState>(options?: RedirectLoginOptions<TAppState>) {
