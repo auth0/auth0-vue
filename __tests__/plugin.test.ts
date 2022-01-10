@@ -264,13 +264,6 @@ describe('Auth0Plugin', () => {
       client_id: ''
     });
 
-    const appMock: App<any> = {
-      config: {
-        globalProperties: {}
-      },
-      provide: jest.fn()
-    } as any as App<any>;
-
     const logoutOptions = {
       localOnly: true,
       federated: true
@@ -287,13 +280,6 @@ describe('Auth0Plugin', () => {
       domain: '',
       client_id: ''
     });
-
-    const appMock: App<any> = {
-      config: {
-        globalProperties: {}
-      },
-      provide: jest.fn()
-    } as any as App<any>;
 
     const loginOptions = {
       localOnly: true,
@@ -313,13 +299,6 @@ describe('Auth0Plugin', () => {
       domain: '',
       client_id: ''
     });
-
-    const appMock: App<any> = {
-      config: {
-        globalProperties: {}
-      },
-      provide: jest.fn()
-    } as any as App<any>;
 
     const logoutUrlOptions = {
       localOnly: true,
