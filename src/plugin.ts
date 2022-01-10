@@ -7,32 +7,23 @@ export const AUTH0_TOKEN = '$auth0';
 
 export interface Auth0PluginOptions {
   domain: string;
-  clientId: string;
+  client_id: string;
 
   [key: string]: any;
 }
 
-function pluginOptionsToClientOptions(
-  options: Auth0PluginOptions
-): Auth0ClientOptions {
-  const { domain, clientId, ...rest } = options;
-  return {
-    ...rest,
-    domain: domain,
-    client_id: clientId,
-    auth0Client: {
-      name: 'auth0-vue',
-      version: version
-    }
-  };
-}
-
 export class Auth0Plugin {
-  constructor(private options: Auth0PluginOptions, private vue?: any) {}
+  constructor(private options: Auth0ClientOptions, private vue?: any) {}
 
   install(app: App) {
     const proxy = new Auth0ClientProxy(
-      pluginOptionsToClientOptions(this.options),
+      {
+        ...this.options,
+        auth0Client: {
+          name: 'auth0-vue',
+          version: version
+        }
+      },
       this.vue
     );
 
