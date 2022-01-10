@@ -7,6 +7,8 @@ export const AUTH0_TOKEN = '$auth0';
 export interface Auth0PluginOptions {
   domain: string;
   clientId: string;
+
+  [key: string]: any;
 }
 
 function pluginOptionsToClientOptions(

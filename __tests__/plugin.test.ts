@@ -1,3 +1,4 @@
+import { Auth0Client } from '@auth0/auth0-spa-js';
 import { App } from 'vue';
 import createAuth0 from '../src/index';
 
@@ -6,6 +7,9 @@ const loginWithPopupMock = jest.fn();
 const logoutMock = jest.fn();
 const checkSessionMock = jest.fn();
 const handleRedirectCallbackMock = jest.fn();
+const isAuthenticatedMock = jest.fn().mockResolvedValue(false);
+const getUserMock = jest.fn().mockResolvedValue(null);
+const getIdTokenClaimsMock = jest.fn().mockResolvedValue(null);
 
 jest.mock('@auth0/auth0-spa-js', () => {
   return {
@@ -16,9 +20,9 @@ jest.mock('@auth0/auth0-spa-js', () => {
         loginWithRedirect: loginWithRedirectMock,
         loginWithPopup: loginWithPopupMock,
         logout: logoutMock,
-        isAuthenticated: jest.fn(),
-        getUser: jest.fn(),
-        getIdTokenClaims: jest.fn()
+        isAuthenticated: isAuthenticatedMock,
+        getUser: getUserMock,
+        getIdTokenClaims: getIdTokenClaimsMock
       };
     })
   };
@@ -38,6 +42,7 @@ describe('Auth0Plugin', () => {
   const savedLocation = window.location;
   const savedHistory = window.history;
   let replaceStateMock = jest.fn();
+  let appMock: App<any>;
 
   beforeEach(() => {
     delete window.location;
@@ -52,6 +57,15 @@ describe('Auth0Plugin', () => {
     window.history = {
       replaceState: replaceStateMock
     } as any;
+
+    isAuthenticatedMock.mockResolvedValue(false);
+
+    appMock = {
+      config: {
+        globalProperties: {}
+      },
+      provide: jest.fn()
+    } as any as App<any>;
   });
   afterEach(() => {
     window.location = savedLocation;
@@ -64,13 +78,6 @@ describe('Auth0Plugin', () => {
       clientId: ''
     });
 
-    const appMock: App<any> = {
-      config: {
-        globalProperties: {}
-      },
-      provide: jest.fn()
-    } as any as App<any>;
-
     plugin.install(appMock);
 
     expect(appMock.config.globalProperties.$auth0).toBeTruthy();
@@ -80,25 +87,24 @@ describe('Auth0Plugin', () => {
   it('should create a proxy on installation by passing global Vue', async () => {
     const plugin = createAuth0(
       {
-        domain: '',
-        clientId: ''
+        domain: 'domain 123',
+        clientId: 'client id 123',
+        foo: 'bar'
       },
       {
         ref: () => ({ value: null })
       }
     );
 
-    const appMock: App<any> = {
-      config: {
-        globalProperties: {}
-      },
-      provide: jest.fn()
-    } as any as App<any>;
-
     plugin.install(appMock);
 
     expect(appMock.config.globalProperties.$auth0).toBeTruthy();
     expect(appMock.provide).toHaveBeenCalled();
+    expect(Auth0Client).toHaveBeenCalledWith({
+      domain: 'domain 123',
+      client_id: 'client id 123',
+      foo: 'bar'
+    });
   });
 
   it('should call checkSession on installation', async () => {
@@ -130,13 +136,6 @@ describe('Auth0Plugin', () => {
       clientId: ''
     });
 
-    const appMock: App<any> = {
-      config: {
-        globalProperties: {}
-      },
-      provide: jest.fn()
-    } as any as App<any>;
-
     const urlParams = new URLSearchParams(window.location.search);
 
     urlParams.set('code', '123');
@@ -161,17 +160,16 @@ describe('Auth0Plugin', () => {
       clientId: ''
     });
 
-    const appMock: App<any> = {
-      config: {
-        globalProperties: {}
-      },
-      provide: jest.fn()
-    } as any as App<any>;
+    const loginOptions = {
+      audience: 'audience 123'
+    };
 
     plugin.install(appMock);
 
-    await appMock.config.globalProperties.$auth0.loginWithRedirect();
-    expect(loginWithRedirectMock).toHaveBeenCalled();
+    await appMock.config.globalProperties.$auth0.loginWithRedirect(
+      loginOptions
+    );
+    expect(loginWithRedirectMock).toHaveBeenCalledWith(loginOptions);
   });
 
   it('should proxy loginWithPopup', async () => {
@@ -180,17 +178,20 @@ describe('Auth0Plugin', () => {
       clientId: ''
     });
 
-    const appMock: App<any> = {
-      config: {
-        globalProperties: {}
-      },
-      provide: jest.fn()
-    } as any as App<any>;
+    const loginOptions = {
+      audience: 'audience 123'
+    };
+    const popupOptions = {
+      timeoutInSeconds: 60
+    };
 
     plugin.install(appMock);
 
-    await appMock.config.globalProperties.$auth0.loginWithPopup();
-    expect(loginWithPopupMock).toHaveBeenCalled();
+    await appMock.config.globalProperties.$auth0.loginWithPopup(
+      loginOptions,
+      popupOptions
+    );
+    expect(loginWithPopupMock).toHaveBeenCalledWith(loginOptions, popupOptions);
   });
 
   it('should proxy logout', async () => {
@@ -206,9 +207,165 @@ describe('Auth0Plugin', () => {
       provide: jest.fn()
     } as any as App<any>;
 
+    const logoutOptions = {
+      localOnly: true,
+      federated: true
+    };
+
     plugin.install(appMock);
 
-    await appMock.config.globalProperties.$auth0.logout();
-    expect(logoutMock).toHaveBeenCalled();
+    await appMock.config.globalProperties.$auth0.logout(logoutOptions);
+    expect(logoutMock).toHaveBeenCalledWith(logoutOptions);
+  });
+
+  it('should be loading by default', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    expect(appMock.config.globalProperties.$auth0.isLoading.value).toBe(true);
+  });
+
+  it('should not be loading once the SDK is finished', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      jest.runAllTimers();
+      expect(appMock.config.globalProperties.$auth0.isLoading.value).toBe(
+        false
+      );
+    });
+  });
+
+  it('should set isAuthenticated to false when not authenticated', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      jest.runAllTimers();
+      expect(appMock.config.globalProperties.$auth0.isAuthenticated.value).toBe(
+        false
+      );
+    });
+  });
+
+  it('should set isAuthenticated to true when authenticated', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    isAuthenticatedMock.mockResolvedValue(true);
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      jest.runAllTimers();
+      expect(appMock.config.globalProperties.$auth0.isAuthenticated.value).toBe(
+        true
+      );
+    });
+  });
+
+  it('should set user to null when not authenticated', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    isAuthenticatedMock.mockResolvedValue(true);
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      jest.runAllTimers();
+      expect(appMock.config.globalProperties.$auth0.user.value).toBe(null);
+    });
+  });
+
+  it('should set user when authenticated', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const userMock = { name: 'john' };
+
+    isAuthenticatedMock.mockResolvedValue(true);
+    getUserMock.mockResolvedValue(userMock);
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      jest.runAllTimers();
+      expect(appMock.config.globalProperties.$auth0.user.value).toStrictEqual(
+        userMock
+      );
+    });
+  });
+
+  it('should set idTokenClaims to null when not authenticated', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    isAuthenticatedMock.mockResolvedValue(true);
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      jest.runAllTimers();
+      expect(appMock.config.globalProperties.$auth0.idTokenClaims.value).toBe(
+        null
+      );
+    });
+  });
+
+  it('should set idTokenClaims when authenticated', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const idTokenClaims = { name: 'john' };
+
+    isAuthenticatedMock.mockResolvedValue(true);
+    getIdTokenClaimsMock.mockResolvedValue(idTokenClaims);
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      jest.runAllTimers();
+      expect(
+        appMock.config.globalProperties.$auth0.idTokenClaims.value
+      ).toStrictEqual(idTokenClaims);
+    });
   });
 });
