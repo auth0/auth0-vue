@@ -4,6 +4,7 @@ import {
   GetTokenSilentlyOptions,
   IdToken,
   LogoutOptions,
+  LogoutUrlOptions,
   PopupConfigOptions,
   PopupLoginOptions,
   RedirectLoginOptions,
@@ -49,6 +50,14 @@ export class Auth0ClientProxy {
 
   async handleRedirectCallback(url?: string) {
     return this.__proxy(() => this.client.handleRedirectCallback(url));
+  }
+
+  async buildAuthorizeUrl(options?: RedirectLoginOptions) {
+    return this.client.buildAuthorizeUrl(options);
+  }
+
+  async buildLogoutUrl(options?: LogoutUrlOptions) {
+    return this.client.buildLogoutUrl(options);
   }
 
   private async __refreshState() {
