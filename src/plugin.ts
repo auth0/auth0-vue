@@ -43,7 +43,12 @@ export class Auth0Plugin {
   }
 
   private async __checkSession(proxy: Auth0ClientProxy) {
-    if (window.location.search.includes('code=')) {
+    const search = window.location.search;
+
+    if (
+      (search.includes('code=') || search.includes('error=')) &&
+      search.includes('state=')
+    ) {
       await proxy.handleRedirectCallback();
     } else {
       await proxy.checkSession();
