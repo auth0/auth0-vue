@@ -125,6 +125,15 @@
           </div>
         </div>
 
+        <template v-if="error">
+          <hr />
+          <h3>Last error</h3>
+          <pre><code data-cy="error">
+{{JSON.stringify(error, null, 2)}}
+              </code>
+          </pre>
+        </template>
+
         <hr />
 
         <div class="card mb-3" v-if="profile">
@@ -194,6 +203,8 @@
             return scope;
           }));
 
+          const error = Vue.ref(null);
+
           return {
             loading: auth0.isLoading,
             id_token_raw: Vue.computed(() => auth0.idTokenClaims?.value?.__raw),
@@ -202,6 +213,7 @@
             profile: auth0.user,
 
             scopesWithSuffix,
+            error,
 
             loginRedirect: function () {
               auth0.loginWithRedirect({
@@ -211,7 +223,7 @@
 
             loginPopup: async function () {
               await auth0.loginWithPopup();
-              foo.value = 'Updated!';
+              error.value = null;
             },
 
             logout: function () {
@@ -228,49 +240,31 @@
             },
 
             getToken: function (audience, scope, access_tokens) {
-            var _self = this;
-
-            auth0
-              .getAccessTokenSilently({
-                audience: audience,
-                scope: scope,
-                ignoreCache: !_self.useCache
-              })
-              .then(function (token) {
-                access_tokens.push({token: obfuscateToken(token), __raw: token});
-                _self.error = null;
-
-                auth0.isAuthenticated().then(function (isAuthenticated) {
-                  _self.isAuthenticated = isAuthenticated;
+              auth0
+                .getAccessTokenSilently({
+                  audience: audience,
+                  scope: scope,
+                })
+                .then(function (token) {
+                  access_tokens.push({token: obfuscateToken(token), __raw: token});
+                  error.value = null;
+                })
+                .catch(function (e) {
+                  console.error(e);
+                  error.value = e.message || e;
                 });
-              })
-              .catch(function (e) {
-                console.error(e);
-
-                if (e.message) {
-                  _self.error = e.message;
-                } else {
-                  _self.error = e;
-                }
-
-                if (e instanceof GenericError && e.error === 'login_required') {
-                  _self.isAuthenticated = false;
-                }
-              });
-          },
-          getTokenPopup: function (audience, scope, access_tokens) {
-            var _self = this;
-
-            auth0
-              .getAccessTokenWithPopup({ audience: audience, scope: scope })
-              .then(function (token) {
-                access_tokens.push({token: obfuscateToken(token), __raw: token});
-              })
-              .catch(function (err) {
-                _self.error = err;
-              });
-          },
-
+            },
+            getTokenPopup: function (audience, scope, access_tokens) {
+              auth0
+                .getAccessTokenWithPopup({ audience: audience, scope: scope })
+                .then(function (token) {
+                  access_tokens.push({token: obfuscateToken(token), __raw: token});
+                  error.value = null;
+                })
+                .catch(function (err) {
+                  error.value = err;
+                });
+            },
           };
         },
         methods: {          
