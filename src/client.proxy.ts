@@ -2,6 +2,7 @@ import {
   Auth0Client,
   Auth0ClientOptions,
   GetTokenSilentlyOptions,
+  GetTokenWithPopupOptions,
   IdToken,
   LogoutOptions,
   LogoutUrlOptions,
@@ -42,6 +43,17 @@ export class Auth0ClientProxy {
 
   async logout(options?: LogoutOptions) {
     return this.__proxy(() => this.client.logout(options));
+  }
+
+  async getAccessTokenSilently(options?: GetTokenSilentlyOptions) {
+    return this.__proxy(() => this.client.getTokenSilently(options));
+  }
+
+  async getAccessTokenWithPopup(
+    options?: GetTokenWithPopupOptions,
+    config?: PopupConfigOptions
+  ) {
+    return this.__proxy(() => this.client.getTokenWithPopup(options, config));
   }
 
   async checkSession(options?: GetTokenSilentlyOptions) {

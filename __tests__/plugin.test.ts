@@ -12,6 +12,8 @@ const getUserMock = jest.fn().mockResolvedValue(null);
 const getIdTokenClaimsMock = jest.fn().mockResolvedValue(null);
 const buildAuthorizeUrlMock = jest.fn().mockResolvedValue(null);
 const buildLogoutUrlMock = jest.fn().mockResolvedValue(null);
+const getTokenSilentlyMock = jest.fn().mockResolvedValue(null);
+const getTokenWithPopupMock = jest.fn().mockResolvedValue(null);
 
 jest.mock('@auth0/auth0-spa-js', () => {
   return {
@@ -26,7 +28,9 @@ jest.mock('@auth0/auth0-spa-js', () => {
         getUser: getUserMock,
         getIdTokenClaims: getIdTokenClaimsMock,
         buildAuthorizeUrl: buildAuthorizeUrlMock,
-        buildLogoutUrl: buildLogoutUrlMock
+        buildLogoutUrl: buildLogoutUrlMock,
+        getTokenSilently: getTokenSilentlyMock,
+        getTokenWithPopup: getTokenWithPopupMock
       };
     })
   };
@@ -273,6 +277,59 @@ describe('Auth0Plugin', () => {
 
     await appMock.config.globalProperties.$auth0.logout(logoutOptions);
     expect(logoutMock).toHaveBeenCalledWith(logoutOptions);
+  });
+
+  it('should proxy getAccessTokenSilently', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    const appMock: App<any> = {
+      config: {
+        globalProperties: {}
+      },
+      provide: jest.fn()
+    } as any as App<any>;
+
+    const getTokenOptions = {
+      scope: 'a b c'
+    };
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.getAccessTokenSilently(
+      getTokenOptions
+    );
+    expect(getTokenSilentlyMock).toHaveBeenCalledWith(getTokenOptions);
+  });
+
+  it('should proxy getAccessTokenWithPopup', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    const appMock: App<any> = {
+      config: {
+        globalProperties: {}
+      },
+      provide: jest.fn()
+    } as any as App<any>;
+
+    const getTokenOptions = { scope: 'a b c' };
+    const popupOptions = { timeoutInSeconds: 20 };
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.getAccessTokenWithPopup(
+      getTokenOptions,
+      popupOptions
+    );
+    expect(getTokenWithPopupMock).toHaveBeenCalledWith(
+      getTokenOptions,
+      popupOptions
+    );
   });
 
   it('should proxy buildAuthorizeUrl', async () => {
