@@ -285,7 +285,7 @@ describe('Auth0Plugin', () => {
   it('should proxy buildAuthorizeUrl', async () => {
     const plugin = createAuth0({
       domain: '',
-      clientId: ''
+      client_id: ''
     });
 
     const appMock: App<any> = {
@@ -311,7 +311,7 @@ describe('Auth0Plugin', () => {
   it('should proxy buildLogoutUrl', async () => {
     const plugin = createAuth0({
       domain: '',
-      clientId: ''
+      client_id: ''
     });
 
     const appMock: App<any> = {
