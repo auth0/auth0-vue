@@ -27,9 +27,7 @@ export class Auth0ClientProxy {
     this.idTokenClaims = vue ? vue.ref() : ref();
   }
 
-  async loginWithRedirect<TAppState>(
-    options?: RedirectLoginOptions<TAppState>
-  ) {
+  async loginWithRedirect(options?: RedirectLoginOptions) {
     return this.client.loginWithRedirect(options);
   }
 
