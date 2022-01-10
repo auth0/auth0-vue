@@ -19,8 +19,8 @@
     "test:debug": "node --inspect node_modules/.bin/jest --runInBand",
     "test:open:integration": "cypress open",
     "test:watch:integration": "concurrently --raw npm:dev 'npm:test:open:integration'",
-    "test:es-check": "npm run test:es-check:es5 && npm run test:es-check:es2015:module",
-    "test:es-check:es5": "es-check es5 dist/auth0-vue.production.js",
+    "test:es-check": "npm run test:es-check:es6 && npm run test:es-check:es2015:module",
+    "test:es-check:es6": "es-check es6 dist/auth0-vue.production.js",
     "test:es-check:es2015:module": "es-check es2015 dist/auth0-vue.production.esm.js --module ",
     "test:integration:server": "npm run dev",
     "test:integration:tests": "wait-on http://localhost:3000/ && cypress run",
@@ -73,7 +73,10 @@
     "typescript": "^4.5.4",
     "wait-on": "^6.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@auth0/auth0-spa-js": "^1.19.3",
+    "vue": "^3.2.26"
+  },
   "files": [
     "src",
     "dist"

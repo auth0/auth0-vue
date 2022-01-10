@@ -79,7 +79,7 @@ let bundles = [
       ...getPlugins(false),
       !isProduction &&
         dev({
-          dirs: ['dist', 'static'],
+          dirs: ['dist', 'static', 'node_modules/vue/dist'],
           port: serverPort,
           extend(app, modules) {
             app.use(modules.mount(createApp({ port: serverPort })));

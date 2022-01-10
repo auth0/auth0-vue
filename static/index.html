@@ -14,22 +14,176 @@
   <body>
     <div id="app" class="container">
       <h1 class="mb-5">Auth0 Vue Playground</h1>
+
+      <p>
+        <strong>Is authenticated:</strong>&nbsp;<span data-cy="authenticated"
+          >{{ isAuthenticated }}</span
+        >
+      </p>
+
+      <div v-if="!loading">
+        <div class="btn-toolbar justify-content-between">
+          <div class="btn-group mb-3">
+            <button class="btn btn-info" @click="useAuth0" data-cy="use-auth0">
+              Use Auth0
+            </button>
+
+            <button
+              class="btn btn-info"
+              @click="useNodeOidcProvider"
+              data-cy="use-node-oidc-provider"
+            >
+              Use Node OIDC Provider
+            </button>
+          </div>
+          <div class="btn-group mb-3">
+            <button class="btn btn-primary" @click="loginPopup">
+              Login popup
+            </button>
+
+            <button
+              class="btn btn-primary"
+              @click="loginRedirect"
+              id="login_redirect"
+            >
+              Login redirect
+            </button>
+          </div>
+          <div class="btn-group mb-3">
+            <button
+              class="btn btn-outline-primary"
+              @click="logout"
+              id="logout"
+              data-cy="logout"
+            >
+              logout (default)
+            </button>
+
+            <button class="btn btn-outline-primary" @click="logoutNoClient">
+              logout (no client id)
+            </button>
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="card mb-3" v-if="profile">
+          <div class="card-header">Profile</div>
+          <div class="card-body">
+            <pre>
+              <code data-cy="profile">
+{{ JSON.stringify(profile, null, 2) }}
+              </code>
+            </pre>
+          </div>
+        </div>
+
+        <div class="card mb-3" v-if="id_token">
+          <div class="card-header">ID Token</div>
+          <div class="card-body">
+            {{ id_token }} (<a
+              :href="'https://jwt.io?token=' + id_token_raw"
+              target="_blank"
+              >view</a
+            >)
+          </div>
+        </div>
+      </div>
+      </div>
     </div>
 
     <script src="/auth0-vue.development.js"></script>
     <script src="https://unpkg.com/vue@next"></script>
     <script type="text/javascript">
+      const defaultDomain = 'frdrkprck.eu.auth0.com';
+      const defaultClientId = 'IJ1pIAk1G4Fd5D0elgte3EifRwfIscVx';
+      const defaultAudience = '';
+
+      const obfuscateIdToken = function (value) {
+        if (value && value.length > 35) {
+          return value.substr(0, 16) + '…  …' + value.substr(-16, 16);
+        }
+
+        return value;
+      };
+
       const app = Vue.createApp({
-        data: function () {
-          return {};
+        setup: function () {
+          const auth0 = Vue.inject('$auth0');
+
+          return {
+            loading: auth0.isLoading,
+            id_token_raw: Vue.computed(() => auth0.idTokenClaims?.value?.__raw),
+            id_token: Vue.computed(() => obfuscateIdToken(auth0.idTokenClaims?.value?.__raw)),
+            isAuthenticated: auth0.isAuthenticated,
+            profile: auth0.user,
+
+            loginRedirect: function () {
+              auth0.loginWithRedirect({
+                redirect_uri: window.location.origin
+              });
+            },
+
+            loginPopup: async function () {
+              await auth0.loginWithPopup();
+              foo.value = 'Updated!';
+            },
+
+            logout: function () {
+              auth0.logout({
+                returnTo: window.location.origin
+              });
+            },
+
+            logoutNoClient: function () {
+              auth0.logout({
+                client_id: null,
+                returnTo: window.location.origin
+              });
+            },
+
+          };
+        },
+        methods: {          
+          useAuth0: function () {
+            localStorage.setItem(
+              'vue-playground-data',
+              JSON.stringify({
+                domain: defaultDomain,
+                clientId: defaultClientId,
+                audience: defaultAudience,
+                useFormData: false
+              })
+            );
+
+            window.location.reload();
+          },
+
+          useNodeOidcProvider() {
+            localStorage.setItem(
+              'vue-playground-data',
+              JSON.stringify({
+                domain: 'http://127.0.0.1:3000',
+                clientId: 'testing',
+                audience: '',
+                useFormData: true,
+
+              })
+            );
+            window.location.reload();
+          }
         }
       });
 
+      const res = JSON.parse(localStorage.getItem('vue-playground-data'));
+
       app.use(
         createAuth0({
-          domain: 'brucke.auth0.com',
-          clientId: 'wLSIP47wM39wKdDmOj6Zb5eSEw3JVhVp'
-        })
+          domain: res?.domain || defaultDomain,
+          clientId: res?.clientId || defaultClientId,
+          audience: res?.audience || defaultAudience,
+          useFormData: res?.useFormData || false
+        }, Vue)
       );
 
       app.mount('#app');
