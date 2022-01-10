@@ -10,6 +10,8 @@ const handleRedirectCallbackMock = jest.fn();
 const isAuthenticatedMock = jest.fn().mockResolvedValue(false);
 const getUserMock = jest.fn().mockResolvedValue(null);
 const getIdTokenClaimsMock = jest.fn().mockResolvedValue(null);
+const buildAuthorizeUrlMock = jest.fn().mockResolvedValue(null);
+const buildLogoutUrlMock = jest.fn().mockResolvedValue(null);
 
 jest.mock('@auth0/auth0-spa-js', () => {
   return {
@@ -22,7 +24,9 @@ jest.mock('@auth0/auth0-spa-js', () => {
         logout: logoutMock,
         isAuthenticated: isAuthenticatedMock,
         getUser: getUserMock,
-        getIdTokenClaims: getIdTokenClaimsMock
+        getIdTokenClaims: getIdTokenClaimsMock,
+        buildAuthorizeUrl: buildAuthorizeUrlMock,
+        buildLogoutUrl: buildLogoutUrlMock
       };
     })
   };
@@ -276,6 +280,58 @@ describe('Auth0Plugin', () => {
 
     await appMock.config.globalProperties.$auth0.logout(logoutOptions);
     expect(logoutMock).toHaveBeenCalledWith(logoutOptions);
+  });
+
+  it('should proxy buildAuthorizeUrl', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const appMock: App<any> = {
+      config: {
+        globalProperties: {}
+      },
+      provide: jest.fn()
+    } as any as App<any>;
+
+    const loginOptions = {
+      localOnly: true,
+      federated: true
+    };
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.buildAuthorizeUrl(
+      loginOptions
+    );
+    expect(buildAuthorizeUrlMock).toHaveBeenCalledWith(loginOptions);
+  });
+
+  it('should proxy buildLogoutUrl', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const appMock: App<any> = {
+      config: {
+        globalProperties: {}
+      },
+      provide: jest.fn()
+    } as any as App<any>;
+
+    const logoutUrlOptions = {
+      localOnly: true,
+      federated: true
+    };
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.buildLogoutUrl(
+      logoutUrlOptions
+    );
+    expect(buildLogoutUrlMock).toHaveBeenCalledWith(logoutUrlOptions);
   });
 
   it('should be loading by default', async () => {
