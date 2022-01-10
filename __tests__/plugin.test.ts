@@ -74,14 +74,22 @@ describe('Auth0Plugin', () => {
 
   it('should create a proxy on installation', async () => {
     const plugin = createAuth0({
-      domain: '',
-      clientId: ''
+      domain: 'domain 123',
+      clientId: 'client id 123',
+      foo: 'bar'
     });
 
     plugin.install(appMock);
 
     expect(appMock.config.globalProperties.$auth0).toBeTruthy();
     expect(appMock.provide).toHaveBeenCalled();
+    expect(Auth0Client).toHaveBeenCalledWith(
+      expect.objectContaining({
+        domain: 'domain 123',
+        client_id: 'client id 123',
+        foo: 'bar'
+      })
+    );
   });
 
   it('should create a proxy on installation by passing global Vue', async () => {
@@ -100,11 +108,13 @@ describe('Auth0Plugin', () => {
 
     expect(appMock.config.globalProperties.$auth0).toBeTruthy();
     expect(appMock.provide).toHaveBeenCalled();
-    expect(Auth0Client).toHaveBeenCalledWith({
-      domain: 'domain 123',
-      client_id: 'client id 123',
-      foo: 'bar'
-    });
+    expect(Auth0Client).toHaveBeenCalledWith(
+      expect.objectContaining({
+        domain: 'domain 123',
+        client_id: 'client id 123',
+        foo: 'bar'
+      })
+    );
   });
 
   it('should call checkSession on installation', async () => {

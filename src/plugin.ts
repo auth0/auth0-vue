@@ -1,6 +1,7 @@
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import { App } from 'vue';
 import { Auth0ClientProxy } from './client.proxy';
+import version from './version';
 
 export const AUTH0_TOKEN = '$auth0';
 
@@ -18,7 +19,11 @@ function pluginOptionsToClientOptions(
   return {
     ...rest,
     domain: domain,
-    client_id: clientId
+    client_id: clientId,
+    auth0Client: {
+      name: 'auth0-vue',
+      version: version
+    }
   };
 }
 
