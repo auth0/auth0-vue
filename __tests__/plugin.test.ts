@@ -292,7 +292,9 @@ describe('Auth0Plugin', () => {
       provide: jest.fn()
     } as any as App<any>;
 
-    const getTokenOptions = {};
+    const getTokenOptions = {
+      scope: 'a b c'
+    };
 
     plugin.install(appMock);
 
@@ -315,8 +317,8 @@ describe('Auth0Plugin', () => {
       provide: jest.fn()
     } as any as App<any>;
 
-    const getTokenOptions = {};
-    const popupOptions = {};
+    const getTokenOptions = { scope: 'a b c' };
+    const popupOptions = { timeoutInSeconds: 20 };
 
     plugin.install(appMock);
 
