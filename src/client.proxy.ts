@@ -27,15 +27,20 @@ export class Auth0ClientProxy {
     this.idTokenClaims = vue ? vue.ref() : ref();
   }
 
-  loginWithRedirect<TAppState>(options?: RedirectLoginOptions<TAppState>) {
+  async loginWithRedirect<TAppState>(
+    options?: RedirectLoginOptions<TAppState>
+  ) {
     return this.client.loginWithRedirect(options);
   }
 
-  loginWithPopup(options?: PopupLoginOptions, config?: PopupConfigOptions) {
+  async loginWithPopup(
+    options?: PopupLoginOptions,
+    config?: PopupConfigOptions
+  ) {
     return this.__proxy(() => this.client.loginWithPopup(options, config));
   }
 
-  logout(options?: LogoutOptions) {
+  async logout(options?: LogoutOptions) {
     return this.__proxy(() => this.client.logout(options));
   }
 
