@@ -1,6 +1,7 @@
 import {
   Auth0Client,
   Auth0ClientOptions,
+  GetTokenSilentlyOptions,
   IdToken,
   LogoutOptions,
   PopupConfigOptions,
@@ -42,12 +43,12 @@ export class Auth0ClientProxy {
     return this.__proxy(() => this.client.logout(options));
   }
 
-  async checkSession() {
-    return this.__proxy(() => this.client.checkSession());
+  async checkSession(options?: GetTokenSilentlyOptions) {
+    return this.__proxy(() => this.client.checkSession(options));
   }
 
-  async handleRedirectCallback() {
-    return this.__proxy(() => this.client.handleRedirectCallback());
+  async handleRedirectCallback(url?: string) {
+    return this.__proxy(() => this.client.handleRedirectCallback(url));
   }
 
   private async __refreshState() {
@@ -57,7 +58,7 @@ export class Auth0ClientProxy {
     this.isLoading.value = false;
   }
 
-  private async __proxy(cb: Function) {
+  private async __proxy<T>(cb: () => T) {
     const result = await cb();
     await this.__refreshState();
     return result;
