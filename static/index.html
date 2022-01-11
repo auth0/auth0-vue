@@ -164,8 +164,8 @@
     <script src="/auth0-vue.development.js"></script>
     <script src="https://unpkg.com/vue@next"></script>
     <script type="text/javascript">
-      const defaultDomain = 'frdrkprck.eu.auth0.com';
-      const defaultClientId = 'IJ1pIAk1G4Fd5D0elgte3EifRwfIscVx';
+      const defaultDomain = 'http://127.0.0.1:3000';
+      const defaultClientId = 'testing';
       const defaultAudience = 'Test';
 
       const obfuscateToken = function (value) {
@@ -272,9 +272,9 @@
             localStorage.setItem(
               'vue-playground-data',
               JSON.stringify({
-                domain: defaultDomain,
-                client_id: defaultClientId,
-                audience: defaultAudience,
+                domain: 'frdrkprck.eu.auth0.com',
+                client_id: 'IJ1pIAk1G4Fd5D0elgte3EifRwfIscVx',
+                audience: 'Test',
                 useFormData: false
               })
             );
@@ -286,9 +286,9 @@
             localStorage.setItem(
               'vue-playground-data',
               JSON.stringify({
-                domain: 'http://127.0.0.1:3000',
-                client_id: 'testing',
-                audience: '',
+                domain: defaultDomain,
+                client_id: defaultClientId,
+                audience: defaultAudience,
                 useFormData: true,
 
               })
@@ -304,7 +304,7 @@
           domain: res?.domain || defaultDomain,
           client_id: res?.client_id || defaultClientId,
           audience: res?.audience || defaultAudience,
-          useFormData: res?.useFormData || false
+          useFormData: res?.useFormData || true
         }, Vue)
       );
 
