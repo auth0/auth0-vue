@@ -5,15 +5,12 @@ import version from './version';
 
 export const AUTH0_TOKEN = '$auth0';
 
-export interface Auth0PluginOptions {
-  domain: string;
-  client_id: string;
-
-  [key: string]: any;
+export interface Auth0PluginOptions extends Auth0ClientOptions {
+  skipRedirectCallback?: boolean;
 }
 
 export class Auth0Plugin {
-  constructor(private options: Auth0ClientOptions, private vue?: any) {}
+  constructor(private options: Auth0PluginOptions, private vue?: any) {}
 
   install(app: App) {
     const proxy = new Auth0ClientProxy(
@@ -38,7 +35,8 @@ export class Auth0Plugin {
 
     if (
       (search.includes('code=') || search.includes('error=')) &&
-      search.includes('state=')
+      search.includes('state=') &&
+      !this.options.skipRedirectCallback
     ) {
       await proxy.handleRedirectCallback();
     } else {
