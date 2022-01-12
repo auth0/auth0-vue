@@ -36,7 +36,7 @@
               Use Node OIDC Provider
             </button>
           </div>
-          <div class="btn-group mb-3">
+          <div class="btn-group mb-3" v-if="!isAuthenticated">
             <button class="btn btn-primary" @click="loginPopup">
               Login popup
             </button>
@@ -49,23 +49,26 @@
               Login redirect
             </button>
           </div>
-          <div class="btn-group mb-3">
+          <div class="btn-group mb-3" v-if="isAuthenticated">
+            <button
+              class="btn btn-outline-primary"
+              @click="logoutLocal"
+            >
+              Logout (local only)
+            </button>
+
             <button
               class="btn btn-outline-primary"
               @click="logout"
               id="logout"
               data-cy="logout"
             >
-              logout (default)
-            </button>
-
-            <button class="btn btn-outline-primary" @click="logoutNoClient">
-              logout (no client id)
+              Logout
             </button>
           </div>
         </div>
 
-        <div v-for="current in scopesWithSuffix">
+        <div v-for="current in scopesWithSuffix" v-if="isAuthenticated">
           <div class="card mb-3 bg-light">
             <div class="card-header">
               <strong>{{current.audience || 'default'}}</strong>
@@ -164,8 +167,8 @@
     <script src="/auth0-vue.development.js"></script>
     <script src="https://unpkg.com/vue@next"></script>
     <script type="text/javascript">
-      const defaultDomain = 'frdrkprck.eu.auth0.com';
-      const defaultClientId = 'IJ1pIAk1G4Fd5D0elgte3EifRwfIscVx';
+      const defaultDomain = 'http://127.0.0.1:3000';
+      const defaultClientId = 'testing';
       const defaultAudience = 'Test';
 
       const obfuscateToken = function (value) {
@@ -232,10 +235,10 @@
               });
             },
 
-            logoutNoClient: function () {
+            logoutLocal: function () {
               auth0.logout({
-                client_id: null,
-                returnTo: window.location.origin
+                returnTo: window.location.origin,
+                localOnly: true
               });
             },
 
@@ -272,9 +275,9 @@
             localStorage.setItem(
               'vue-playground-data',
               JSON.stringify({
-                domain: defaultDomain,
-                client_id: defaultClientId,
-                audience: defaultAudience,
+                domain: 'frdrkprck.eu.auth0.com',
+                client_id: 'IJ1pIAk1G4Fd5D0elgte3EifRwfIscVx',
+                audience: 'Test',
                 useFormData: false
               })
             );
@@ -286,9 +289,9 @@
             localStorage.setItem(
               'vue-playground-data',
               JSON.stringify({
-                domain: 'http://127.0.0.1:3000',
-                client_id: 'testing',
-                audience: '',
+                domain: defaultDomain,
+                client_id: defaultClientId,
+                audience: defaultAudience,
                 useFormData: true,
 
               })
@@ -304,7 +307,7 @@
           domain: res?.domain || defaultDomain,
           client_id: res?.client_id || defaultClientId,
           audience: res?.audience || defaultAudience,
-          useFormData: res?.useFormData || false
+          useFormData: res?.useFormData || true
         }, Vue)
       );
 
