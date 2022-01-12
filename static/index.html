@@ -36,7 +36,7 @@
               Use Node OIDC Provider
             </button>
           </div>
-          <div class="btn-group mb-3">
+          <div class="btn-group mb-3" v-if="!isAuthenticated">
             <button class="btn btn-primary" @click="loginPopup">
               Login popup
             </button>
@@ -49,23 +49,26 @@
               Login redirect
             </button>
           </div>
-          <div class="btn-group mb-3">
+          <div class="btn-group mb-3" v-if="isAuthenticated">
+            <button
+              class="btn btn-outline-primary"
+              @click="logoutLocal"
+            >
+              Logout (local only)
+            </button>
+
             <button
               class="btn btn-outline-primary"
               @click="logout"
               id="logout"
               data-cy="logout"
             >
-              logout (default)
-            </button>
-
-            <button class="btn btn-outline-primary" @click="logoutNoClient">
-              logout (no client id)
+              Logout
             </button>
           </div>
         </div>
 
-        <div v-for="current in scopesWithSuffix">
+        <div v-for="current in scopesWithSuffix" v-if="isAuthenticated">
           <div class="card mb-3 bg-light">
             <div class="card-header">
               <strong>{{current.audience || 'default'}}</strong>
@@ -232,10 +235,10 @@
               });
             },
 
-            logoutNoClient: function () {
+            logoutLocal: function () {
               auth0.logout({
-                client_id: null,
-                returnTo: window.location.origin
+                returnTo: window.location.origin,
+                localOnly: true
               });
             },
 
