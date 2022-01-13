@@ -66,13 +66,14 @@ this && this.${EXPORT_NAME} && (this.Auth0Client = this.Auth0Client || this.${EX
 
 let bundles = [
   {
-    input: 'src/index.ts',
+    input: 'src/index.cjs.ts',
     output: {
       name: EXPORT_NAME,
       file: 'dist/auth0-vue.development.js',
+      footer,
       format: 'umd',
       sourcemap: true,
-      exports: 'named'
+      exports: 'default'
     },
     external: ['vue'],
     globals: {

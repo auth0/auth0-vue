@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import { createAuth0 } from '../src/index';
+import createAuth0 from '../src/index';
 // Fix for https://github.com/ezolenko/rollup-plugin-typescript2/issues/129#issuecomment-454558185
 // @ts-ignore
 import Playground from './App.vue';

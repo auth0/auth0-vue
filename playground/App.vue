@@ -184,7 +184,6 @@ export default defineComponent({
     }
   },
   setup(props) {
-    console.log(props);
     const auth0 = inject('$auth0') as any;
 
     const audienceScopes = ref([
