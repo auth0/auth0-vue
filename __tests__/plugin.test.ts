@@ -146,7 +146,8 @@ describe('Auth0Plugin', () => {
   it('should call handleRedirect callback on installation with code', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      client_id: '',
+      skipRedirectCallback: false
     });
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -160,6 +161,32 @@ describe('Auth0Plugin', () => {
 
     expect(checkSessionMock).not.toHaveBeenCalled();
     expect(handleRedirectCallbackMock).toHaveBeenCalled();
+
+    return flushPromises().then(() => {
+      jest.runAllTimers();
+
+      expect(replaceStateMock).toHaveBeenCalled();
+    });
+  });
+
+  it('should not call handleRedirect callback when skipRedirectCallback is true', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: '',
+      skipRedirectCallback: true
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    urlParams.set('code', '123');
+    urlParams.set('state', 'xyz');
+
+    window.location.search = urlParams as any;
+
+    plugin.install(appMock);
+
+    expect(checkSessionMock).toHaveBeenCalled();
+    expect(handleRedirectCallbackMock).not.toHaveBeenCalled();
 
     return flushPromises().then(() => {
       jest.runAllTimers();
