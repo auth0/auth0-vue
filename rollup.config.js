@@ -73,7 +73,10 @@ let bundles = [
       footer,
       format: 'umd',
       sourcemap: true,
-      exports: 'default'
+      exports: 'default',
+      globals: {
+        vue: 'Vue'
+      }
     },
     plugins: [
       ...getPlugins(false),
@@ -89,7 +92,8 @@ let bundles = [
     ],
     watch: {
       clearScreen: false
-    }
+    },
+    external: ['vue']
   }
 ];
 
