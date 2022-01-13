@@ -21,13 +21,13 @@ export class Auth0ClientProxy {
   public user: Ref<User | undefined>;
   public idTokenClaims: Ref<IdToken | undefined>;
 
-  constructor(options: Auth0ClientOptions, vue?: any) {
+  constructor(options: Auth0ClientOptions) {
     this.client = new Auth0Client(options);
 
-    this.isLoading = vue ? vue.ref(true) : ref(true);
-    this.isAuthenticated = vue ? vue.ref(false) : ref(false);
-    this.user = vue ? vue.ref({}) : ref({});
-    this.idTokenClaims = vue ? vue.ref() : ref();
+    this.isLoading = ref(true);
+    this.isAuthenticated = ref(false);
+    this.user = ref({});
+    this.idTokenClaims = ref();
   }
 
   async loginWithRedirect(options?: RedirectLoginOptions) {
