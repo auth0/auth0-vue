@@ -97,21 +97,6 @@ let bundles = [
   }
 ];
 
-if (!isProduction) {
-  bundles = bundles.concat({
-    input: 'playground/index.ts',
-    output: {
-      format: 'umd',
-      file: 'dist/auth0-vue.playground.js',
-      globals: {
-        vue: 'Vue'
-      }
-    },
-    external: ['vue'],
-    plugins: [vue(), ...getPlugins(false)]
-  });
-}
-
 if (isProduction) {
   bundles = bundles.concat(
     {
@@ -155,5 +140,18 @@ if (isProduction) {
       external: Object.keys(pkg.dependencies)
     }
   );
+} else {
+  bundles = bundles.concat({
+    input: 'playground/index.ts',
+    output: {
+      format: 'umd',
+      file: 'dist/auth0-vue.playground.js',
+      globals: {
+        vue: 'Vue'
+      }
+    },
+    external: ['vue'],
+    plugins: [vue(), ...getPlugins(false)]
+  });
 }
 export default bundles;
