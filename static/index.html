@@ -164,8 +164,8 @@
       </div>
     </div>
 
-    <script src="/auth0-vue.development.js"></script>
     <script src="https://unpkg.com/vue@next"></script>
+    <script src="/auth0-vue.development.js"></script>
     <script type="text/javascript">
       const defaultDomain = 'http://127.0.0.1:3000';
       const defaultClientId = 'testing';
@@ -308,7 +308,7 @@
           client_id: res?.client_id || defaultClientId,
           audience: res?.audience || defaultAudience,
           useFormData: res?.useFormData || true
-        }, Vue)
+        })
       );
 
       app.mount('#app');

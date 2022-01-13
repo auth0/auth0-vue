@@ -29,19 +29,16 @@ export interface Auth0PluginOptions extends Auth0ClientOptions {
 }
 
 export class Auth0Plugin {
-  constructor(private options: Auth0PluginOptions, private vue?: any) {}
+  constructor(private options: Auth0PluginOptions) {}
 
   install(app: App) {
-    const proxy = new Auth0ClientProxy(
-      {
-        ...this.options,
-        auth0Client: {
-          name: 'auth0-vue',
-          version: version
-        }
-      },
-      this.vue
-    );
+    const proxy = new Auth0ClientProxy({
+      ...this.options,
+      auth0Client: {
+        name: 'auth0-vue',
+        version: version
+      }
+    });
 
     this.__checkSession(proxy);
 
