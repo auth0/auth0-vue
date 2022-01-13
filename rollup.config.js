@@ -93,20 +93,23 @@ let bundles = [
     watch: {
       clearScreen: false
     }
-  },
-  {
-    input: 'playground/index.js',
+  }
+];
+
+if (!isProduction) {
+  bundles = bundles.concat({
+    input: 'playground/index.ts',
     output: {
       format: 'umd',
-      file: 'dist/playground.js',
+      file: 'dist/auth0-vue.playground.js',
       globals: {
         vue: 'Vue'
       }
     },
     external: ['vue'],
-    plugins: [...getPlugins(false), vue()]
-  }
-];
+    plugins: [vue(), ...getPlugins(false)]
+  });
+}
 
 if (isProduction) {
   bundles = bundles.concat(
