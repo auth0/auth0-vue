@@ -122,9 +122,13 @@ if (isProduction) {
           file: 'dist/auth0-vue.production.js',
           footer,
           format: 'umd',
-          exports: 'default'
+          exports: 'default',
+          globals: {
+            vue: 'Vue'
+          }
         }
       ],
+      external: ['vue'],
       plugins: [...getPlugins(isProduction), ...getStatsPlugins()]
     },
     {
