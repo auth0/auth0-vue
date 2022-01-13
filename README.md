@@ -38,6 +38,14 @@ yarn add @auth0/auth0-vue@beta
 
 ## Getting Started
 
+- [Auth0 Configuration](#auth0-configuration)
+- [Configuring the plugin](#configuring-the-plugin)
+- [Add login to your application](#add-login-to-your-application)
+- [Display the user profile](#display-the-user-profile)
+- [Add logout to your application](#add-logout-to-your-application)
+- [Retrieve an Access Token](#retrieve-an-access-token)
+- [Accessing ID Token claims](#accessing-id-token-claims)
+
 ### Auth0 Configuration
 
 Create a **Single Page Application** in the [Auth0 Dashboard](https://manage.auth0.com/#/applications).
@@ -65,6 +73,7 @@ Take note of the **Client ID** and **Domain** values under the "Basic Informatio
 Create an instance of the `Auth0Plugin` by calling `createAuth0` and pass it to Vue's `app.use()`.
 
 ```js
+import createAuth0 from './auth';
 
 const app = createApp(App);
 
@@ -77,6 +86,173 @@ app.use(
 );
 
 app.mount('#app');
+```
+
+By default the application will ask Auth0 to redirect back to the root URL of your application after authentication, but this can be configured by setting the `redirect_uri` option above..
+
+### Add login to your application
+
+In order to add login to your application you can use the `loginWithRedirect` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
+
+```html
+<script>
+  import { useAuth0 } from './auth';
+
+  export default {
+    setup() {
+      const { loginWithRedirect } = useAuth0();
+
+      return {
+        login: () => {
+          loginWithRedirect();
+        }
+      };
+    }
+  };
+</script>
+```
+
+Once setup returns the correct method, you can call that method from your component's HTML.
+
+```html
+<template>
+  <div>
+    <button @click="login">Log in</button>
+  </div>
+</template>
+```
+
+### Display the user profile
+
+To display the user's information, you can use the reactive `user` property exposed by the return value of `useAuth0`, which you can access in your component's `setup` function.
+
+```html
+<script>
+  import { useAuth0 } from './auth';
+
+  export default {
+    setup() {
+      const { loginWithRedirect, user } = useAuth0();
+
+      return {
+        login: () => {
+          loginWithRedirect();
+        },
+        user
+      };
+    }
+  };
+</script>
+```
+
+Once setup returns the SDK's reactive property, you can access that property from your component's HTML.
+
+```html
+<template>
+  <div>
+    <h2>User Profile</h2>
+    <button @click="login">Log in</button>
+    <pre>
+        <code>{{ user }}</code>
+      </pre>
+  </div>
+</template>
+```
+
+Note: Ensure the user is authenticated by implementing [login in your application](#add-login-to-your-application) before accessing the user's profile.
+
+### Add logout to your application
+
+Adding logout to your application you be done by using the `logout` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
+
+```html
+<script>
+  import { useAuth0 } from './auth';
+
+  export default {
+    setup() {
+      const { logout } = useAuth0();
+
+      return {
+        logout: () => {
+          logout({ returnTo: window.location.origin });
+        }
+      };
+    }
+  };
+</script>
+```
+
+Once setup returns the correct method, you can call that method from your component's HTML.
+
+```html
+<template>
+  <div>
+    <button @click="logout">Log out</button>
+  </div>
+</template>
+```
+
+### Retrieve an Access Token
+
+Retrieving an Access Token can be done by using the `getAccessTokenSilently` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
+
+```html
+<script>
+  import { useAuth0 } from './auth';
+
+  export default {
+    setup() {
+      const { getAccessTokenSilently } = useAuth0();
+
+      return {
+        doSomethingWithToken: async () => {
+          const token = await getAccessTokenSilently();
+          // Here you can use the token the way you like
+        }
+      };
+    }
+  };
+</script>
+```
+
+Once you have an Access Token, you can use it the way you want. Typically, an Access Token is retrieved in order to attach it as an `Authorization` header to every request that needs Authorization.
+
+### Accessing ID Token claims
+
+To get access to the user's claims, you can use the reactive `idTokenClaims` property exposed by the return value of `useAuth0`, which you can access in your component's `setup` function.
+
+```html
+<script>
+  import { useAuth0 } from './auth';
+
+  export default {
+    setup() {
+      const { loginWithRedirect, idTokenClaims } = useAuth0();
+
+      return {
+        login: () => {
+          loginWithRedirect();
+        },
+        idTokenClaims
+      };
+    }
+  };
+</script>
+```
+
+Once setup returns the SDK's reactive property, you can access that property from your component's HTML.
+
+```html
+<template>
+  <div>
+    <h2>ID Token Claims</h2>
+    <button @click="login">Log in</button>
+    <pre>
+        <code>{{ idTokenClaims }}</code>
+      </pre>
+  </div>
+</template>
 ```
 
 ## Contributing
