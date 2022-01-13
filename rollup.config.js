@@ -9,8 +9,8 @@ import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import replace from '@rollup/plugin-replace';
 import analyze from 'rollup-plugin-analyzer';
 import dev from 'rollup-plugin-dev';
+import vue from 'rollup-plugin-vue';
 import { createApp } from './scripts/oidc-provider';
-
 import pkg from './package.json';
 
 const EXPORT_NAME = 'createAuth0';
@@ -66,20 +66,23 @@ this && this.${EXPORT_NAME} && (this.Auth0Client = this.Auth0Client || this.${EX
 
 let bundles = [
   {
-    input: 'src/index.cjs.ts',
+    input: 'src/index.ts',
     output: {
       name: EXPORT_NAME,
       file: 'dist/auth0-vue.development.js',
-      footer,
       format: 'umd',
       sourcemap: true,
-      exports: 'default'
+      exports: 'named'
+    },
+    external: ['vue'],
+    globals: {
+      vue: 'Vue'
     },
     plugins: [
       ...getPlugins(false),
       !isProduction &&
         dev({
-          dirs: ['dist', 'static', 'node_modules/vue/dist'],
+          dirs: ['dist', 'static', 'node_modules/vue/dist', 'playground'],
           port: serverPort,
           extend(app, modules) {
             app.use(modules.mount(createApp({ port: serverPort })));
@@ -90,6 +93,18 @@ let bundles = [
     watch: {
       clearScreen: false
     }
+  },
+  {
+    input: 'playground/index.js',
+    output: {
+      format: 'umd',
+      file: 'dist/playground.js',
+      globals: {
+        vue: 'Vue'
+      }
+    },
+    external: ['vue'],
+    plugins: [...getPlugins(false), vue()]
   }
 ];
 

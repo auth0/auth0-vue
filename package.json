@@ -76,6 +76,7 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.19.3",
+    "rollup-plugin-vue": "^6.0.0",
     "vue": "^3.2.26"
   },
   "files": [
