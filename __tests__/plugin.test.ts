@@ -101,16 +101,11 @@ describe('Auth0Plugin', () => {
   });
 
   it('should create a proxy on installation by passing global Vue', async () => {
-    const plugin = createAuth0(
-      {
-        domain: 'domain 123',
-        client_id: 'client id 123',
-        foo: 'bar'
-      },
-      {
-        ref: () => ({ value: null })
-      }
-    );
+    const plugin = createAuth0({
+      domain: 'domain 123',
+      client_id: 'client id 123',
+      foo: 'bar'
+    });
 
     plugin.install(appMock);
 
