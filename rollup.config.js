@@ -73,12 +73,12 @@ let bundles = [
       footer,
       format: 'umd',
       sourcemap: true,
-      exports: 'default'
+      exports: 'default',
+      globals: {
+        vue: 'Vue'
+      }
     },
     external: ['vue'],
-    globals: {
-      vue: 'Vue'
-    },
     plugins: [
       ...getPlugins(false),
       !isProduction &&
