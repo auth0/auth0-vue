@@ -1,7 +1,4 @@
-import './global';
-import { Auth0Plugin, Auth0PluginOptions } from './global';
-
-export * from './global';
+import { Auth0Plugin, Auth0PluginOptions } from './plugin';
 
 /**
  * Creates the Auth0 plugin`.
