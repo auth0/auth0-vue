@@ -1,3 +1,5 @@
-import createAuth0 from './index';
+import { createAuth0, useAuth0 } from './index';
 
-export default createAuth0;
+const Auth0Vue = { createAuth0, useAuth0 };
+
+export default Auth0Vue;

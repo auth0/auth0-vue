@@ -9,11 +9,11 @@ import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import replace from '@rollup/plugin-replace';
 import analyze from 'rollup-plugin-analyzer';
 import dev from 'rollup-plugin-dev';
+import vue from 'rollup-plugin-vue';
 import { createApp } from './scripts/oidc-provider';
-
 import pkg from './package.json';
 
-const EXPORT_NAME = 'createAuth0';
+const EXPORT_NAME = 'vueAuth0';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const shouldGenerateStats = process.env.WITH_STATS === 'true';
@@ -78,11 +78,12 @@ let bundles = [
         vue: 'Vue'
       }
     },
+    external: ['vue'],
     plugins: [
       ...getPlugins(false),
       !isProduction &&
         dev({
-          dirs: ['dist', 'static', 'node_modules/vue/dist'],
+          dirs: ['dist', 'static', 'node_modules/vue/dist', 'playground'],
           port: serverPort,
           extend(app, modules) {
             app.use(modules.mount(createApp({ port: serverPort })));
@@ -107,9 +108,13 @@ if (isProduction) {
           file: 'dist/auth0-vue.production.js',
           footer,
           format: 'umd',
-          exports: 'default'
+          exports: 'default',
+          globals: {
+            vue: 'Vue'
+          }
         }
       ],
+      external: ['vue'],
       plugins: [...getPlugins(isProduction), ...getStatsPlugins()]
     },
     {
@@ -136,5 +141,18 @@ if (isProduction) {
       external: Object.keys(pkg.dependencies)
     }
   );
+} else {
+  bundles = bundles.concat({
+    input: 'playground/index.ts',
+    output: {
+      format: 'umd',
+      file: 'dist/auth0-vue.playground.js',
+      globals: {
+        vue: 'Vue'
+      }
+    },
+    external: ['vue'],
+    plugins: [vue(), ...getPlugins(false)]
+  });
 }
 export default bundles;
