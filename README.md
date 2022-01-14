@@ -73,7 +73,7 @@ Take note of the **Client ID** and **Domain** values under the "Basic Informatio
 Create an instance of the `Auth0Plugin` by calling `createAuth0` and pass it to Vue's `app.use()`.
 
 ```js
-import createAuth0 from './auth';
+import { createAuth0 } from '@auth0/auth0-vue';
 
 const app = createApp(App);
 
@@ -96,7 +96,7 @@ In order to add login to your application you can use the `loginWithRedirect` fu
 
 ```html
 <script>
-  import { useAuth0 } from './auth';
+  import { useAuth0 } from '@auth0/auth0-vue';
 
   export default {
     setup() {
@@ -128,7 +128,7 @@ To display the user's information, you can use the reactive `user` property expo
 
 ```html
 <script>
-  import { useAuth0 } from './auth';
+  import { useAuth0 } from '@auth0/auth0-vue';
 
   export default {
     setup() {
@@ -167,7 +167,7 @@ Adding logout to your application you be done by using the `logout` function tha
 
 ```html
 <script>
-  import { useAuth0 } from './auth';
+  import { useAuth0 } from '@auth0/auth0-vue';
 
   export default {
     setup() {
@@ -199,7 +199,7 @@ Retrieving an Access Token can be done by using the `getAccessTokenSilently` fun
 
 ```html
 <script>
-  import { useAuth0 } from './auth';
+  import { useAuth0 } from '@auth0/auth0-vue';
 
   export default {
     setup() {
@@ -224,7 +224,7 @@ To get access to the user's claims, you can use the reactive `idTokenClaims` pro
 
 ```html
 <script>
-  import { useAuth0 } from './auth';
+  import { useAuth0 } from '@auth0/auth0-vue';
 
   export default {
     setup() {
