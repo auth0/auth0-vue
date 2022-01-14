@@ -19,6 +19,10 @@ export function createAuth0(options: Auth0PluginOptions) {
   return new Auth0Plugin(options);
 }
 
+/**
+ * Returns the registered Auth0 instance using Vue's `inject`.
+ * @returns An instance of Auth0ClientProxy
+ */
 export function useAuth0(): Auth0ClientProxy {
   return inject(AUTH0_TOKEN);
 }
