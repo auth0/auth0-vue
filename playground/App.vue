@@ -158,7 +158,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, inject, computed } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
+import { useAuth0 } from '../src';
 
 const obfuscateToken = function (value: string) {
   if (value && value.length > 35) {
@@ -184,7 +185,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const auth0 = inject('$auth0') as any;
+    const auth0 = useAuth0();
 
     const audienceScopes = ref([
       {

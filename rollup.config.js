@@ -13,7 +13,7 @@ import vue from 'rollup-plugin-vue';
 import { createApp } from './scripts/oidc-provider';
 import pkg from './package.json';
 
-const EXPORT_NAME = 'createAuth0';
+const EXPORT_NAME = 'vueAuth0';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const shouldGenerateStats = process.env.WITH_STATS === 'true';

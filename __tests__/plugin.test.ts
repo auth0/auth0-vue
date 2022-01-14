@@ -1,6 +1,6 @@
 import { Auth0Client } from '@auth0/auth0-spa-js';
 import { App } from 'vue';
-import createAuth0 from '../src/index';
+import { createAuth0 } from '../src/index';
 
 const loginWithRedirectMock = jest.fn();
 const loginWithPopupMock = jest.fn();
