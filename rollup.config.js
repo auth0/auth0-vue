@@ -93,7 +93,8 @@ let bundles = [
     ],
     watch: {
       clearScreen: false
-    }
+    },
+    external: ['vue']
   }
 ];
 
