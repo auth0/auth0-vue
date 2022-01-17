@@ -122,6 +122,29 @@ Once setup returns the correct method, you can call that method from your compon
 </template>
 ```
 
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<template>
+  <div>
+    <button @click="login">Log in</button>
+  </div>
+</template>
+
+<script>
+  export default {
+    methods: {
+      login() {
+        this.$auth0.loginWithRedirect();
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
 ### Display the user profile
 
 To display the user's information, you can use the reactive `user` property exposed by the return value of `useAuth0`, which you can access in your component's `setup` function.
@@ -161,6 +184,38 @@ Once setup returns the SDK's reactive property, you can access that property fro
 
 Note: Ensure the user is authenticated by implementing [login in your application](#add-login-to-your-application) before accessing the user's profile.
 
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<template>
+  <div>
+    <h2>User Profile</h2>
+    <button @click="login">Log in</button>
+    <pre>
+      <code>{{ user }}</code>
+    </pre>
+  </div>
+</template>
+
+<script>
+  export default {
+    data: function () {
+      return {
+        user: this.$auth0.user
+      };
+    },
+    methods: {
+      login() {
+        this.$auth0.loginWithRedirect();
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
 ### Add logout to your application
 
 Adding logout to your application you be done by using the `logout` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
@@ -193,6 +248,29 @@ Once setup returns the correct method, you can call that method from your compon
 </template>
 ```
 
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<template>
+  <div>
+    <button @click="logout">Log out</button>
+  </div>
+</template>
+
+<script>
+  export default {
+    methods: {
+      logout() {
+        this.$auth0.logout({ returnTo: window.location.origin });
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
 ### Retrieve an Access Token
 
 Retrieving an Access Token can be done by using the `getAccessTokenSilently` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
@@ -217,6 +295,24 @@ Retrieving an Access Token can be done by using the `getAccessTokenSilently` fun
 ```
 
 Once you have an Access Token, you can use it the way you want. Typically, an Access Token is retrieved in order to attach it as an `Authorization` header to every request that needs Authorization.
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  export default {
+    methods: {
+      doSomethingWithToken() {
+        const token = await this.$auth0.getAccessTokenSilently();
+        // Here you can use the token the way you like
+      },
+    },
+  };
+</script>
+```
+
+</details>
 
 ### Accessing ID Token claims
 
@@ -254,6 +350,37 @@ Once setup returns the SDK's reactive property, you can access that property fro
   </div>
 </template>
 ```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<template>
+  <div>
+    <h2>ID Token Claims</h2>
+    <button @click="login">Log in</button>
+    <pre>
+        <code>{{ idTokenClaims }}</code>
+      </pre>
+  </div>
+</template>
+<script>
+  export default {
+    data: function () {
+      return {
+        idTokenClaims: this.$auth0.idTokenClaims
+      };
+    },
+    methods: {
+      login() {
+        this.$auth0.loginWithRedirect();
+      }
+    }
+  };
+</script>
+```
+
+</details>
 
 ## Contributing
 
