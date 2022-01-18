@@ -95,7 +95,4 @@ export const createAuth0ClientProxy = (options: Auth0ClientOptions) => {
   };
 };
 
-const create = createAuth0ClientProxy({ domain: '', client_id: '' });
-const x = create.getAccessTokenSilently({ detailedResponse: true });
-
 export type Auth0ClientProxy = ReturnType<typeof createAuth0ClientProxy>;
