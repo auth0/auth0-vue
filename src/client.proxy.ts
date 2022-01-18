@@ -2,34 +2,50 @@ import {
   Auth0Client,
   Auth0ClientOptions,
   GetTokenSilentlyOptions,
+  GetTokenSilentlyVerboseResponse,
   GetTokenWithPopupOptions,
+  IdToken,
   LogoutOptions,
   LogoutUrlOptions,
   PopupConfigOptions,
   PopupLoginOptions,
-  RedirectLoginOptions
+  RedirectLoginOptions,
+  RedirectLoginResult,
+  User
 } from '@auth0/auth0-spa-js';
-import { ref, readonly } from 'vue';
+import { ref, readonly, Ref } from 'vue';
 
 export const createAuth0ClientProxy = (options: Auth0ClientOptions) => {
   const client = new Auth0Client(options);
-  const isLoading = ref(true);
-  const isAuthenticated = ref(false);
-  const user = ref({});
-  const idTokenClaims = ref();
+  const isLoading: Ref<boolean> = ref(true);
+  const isAuthenticated: Ref<boolean> = ref(false);
+  const user: Ref<User> = ref({});
+  const idTokenClaims: Ref<IdToken> = ref();
 
-  const __refreshState = async () => {
+  async function __refreshState() {
     isAuthenticated.value = await client.isAuthenticated();
     user.value = await client.getUser();
     idTokenClaims.value = await client.getIdTokenClaims();
     isLoading.value = false;
-  };
+  }
 
-  const __proxy = async <T>(cb: () => T) => {
+  async function __proxy<T>(cb: () => T) {
     const result = await cb();
     await __refreshState();
     return result;
-  };
+  }
+
+  async function getAccessTokenSilently(
+    options: GetTokenSilentlyOptions & { detailedResponse: true }
+  ): Promise<GetTokenSilentlyVerboseResponse>;
+  async function getAccessTokenSilently(
+    options?: GetTokenSilentlyOptions
+  ): Promise<string>;
+  async function getAccessTokenSilently(
+    options: GetTokenSilentlyOptions = {}
+  ): Promise<string | GetTokenSilentlyVerboseResponse> {
+    return __proxy(() => client.getTokenSilently(options));
+  }
 
   return {
     isLoading: readonly(isLoading),
@@ -52,9 +68,7 @@ export const createAuth0ClientProxy = (options: Auth0ClientOptions) => {
       return __proxy(() => client.logout(options));
     },
 
-    async getAccessTokenSilently(options?: GetTokenSilentlyOptions) {
-      return __proxy(() => client.getTokenSilently(options));
-    },
+    getAccessTokenSilently,
 
     async getAccessTokenWithPopup(
       options?: GetTokenWithPopupOptions,
@@ -67,7 +81,7 @@ export const createAuth0ClientProxy = (options: Auth0ClientOptions) => {
       return __proxy(() => client.checkSession(options));
     },
 
-    async handleRedirectCallback(url?: string) {
+    async handleRedirectCallback(url?: string): Promise<RedirectLoginResult> {
       return __proxy(() => client.handleRedirectCallback(url));
     },
 
@@ -80,5 +94,8 @@ export const createAuth0ClientProxy = (options: Auth0ClientOptions) => {
     }
   };
 };
+
+const create = createAuth0ClientProxy({ domain: '', client_id: '' });
+const x = create.getAccessTokenSilently({ detailedResponse: true });
 
 export type Auth0ClientProxy = ReturnType<typeof createAuth0ClientProxy>;
