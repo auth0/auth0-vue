@@ -125,6 +125,7 @@ if (isProduction) {
           format: 'esm'
         }
       ],
+      external: ['vue'],
       plugins: getPlugins(isProduction)
     },
     {

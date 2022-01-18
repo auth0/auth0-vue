@@ -3,85 +3,82 @@ import {
   Auth0ClientOptions,
   GetTokenSilentlyOptions,
   GetTokenWithPopupOptions,
-  IdToken,
   LogoutOptions,
   LogoutUrlOptions,
   PopupConfigOptions,
   PopupLoginOptions,
-  RedirectLoginOptions,
-  User
+  RedirectLoginOptions
 } from '@auth0/auth0-spa-js';
-import { Ref, ref } from 'vue';
+import { ref, readonly } from 'vue';
 
-export class Auth0ClientProxy {
-  private readonly client: Auth0Client;
+export const createAuth0ClientProxy = (options: Auth0ClientOptions) => {
+  const client = new Auth0Client(options);
+  const isLoading = ref(true);
+  const isAuthenticated = ref(false);
+  const user = ref({});
+  const idTokenClaims = ref();
 
-  public isLoading: Ref<boolean>;
-  public isAuthenticated: Ref<boolean>;
-  public user: Ref<User | undefined>;
-  public idTokenClaims: Ref<IdToken | undefined>;
+  const __refreshState = async () => {
+    isAuthenticated.value = await client.isAuthenticated();
+    user.value = await client.getUser();
+    idTokenClaims.value = await client.getIdTokenClaims();
+    isLoading.value = false;
+  };
 
-  constructor(options: Auth0ClientOptions) {
-    this.client = new Auth0Client(options);
-
-    this.isLoading = ref(true);
-    this.isAuthenticated = ref(false);
-    this.user = ref({});
-    this.idTokenClaims = ref();
-  }
-
-  async loginWithRedirect(options?: RedirectLoginOptions) {
-    return this.client.loginWithRedirect(options);
-  }
-
-  async loginWithPopup(
-    options?: PopupLoginOptions,
-    config?: PopupConfigOptions
-  ) {
-    return this.__proxy(() => this.client.loginWithPopup(options, config));
-  }
-
-  async logout(options?: LogoutOptions) {
-    return this.__proxy(() => this.client.logout(options));
-  }
-
-  async getAccessTokenSilently(options?: GetTokenSilentlyOptions) {
-    return this.__proxy(() => this.client.getTokenSilently(options));
-  }
-
-  async getAccessTokenWithPopup(
-    options?: GetTokenWithPopupOptions,
-    config?: PopupConfigOptions
-  ) {
-    return this.__proxy(() => this.client.getTokenWithPopup(options, config));
-  }
-
-  async checkSession(options?: GetTokenSilentlyOptions) {
-    return this.__proxy(() => this.client.checkSession(options));
-  }
-
-  async handleRedirectCallback(url?: string) {
-    return this.__proxy(() => this.client.handleRedirectCallback(url));
-  }
-
-  async buildAuthorizeUrl(options?: RedirectLoginOptions) {
-    return this.client.buildAuthorizeUrl(options);
-  }
-
-  async buildLogoutUrl(options?: LogoutUrlOptions) {
-    return this.client.buildLogoutUrl(options);
-  }
-
-  private async __refreshState() {
-    this.isAuthenticated.value = await this.client.isAuthenticated();
-    this.user.value = await this.client.getUser();
-    this.idTokenClaims.value = await this.client.getIdTokenClaims();
-    this.isLoading.value = false;
-  }
-
-  private async __proxy<T>(cb: () => T) {
+  const __proxy = async <T>(cb: () => T) => {
     const result = await cb();
-    await this.__refreshState();
+    await __refreshState();
     return result;
-  }
-}
+  };
+
+  return {
+    isLoading: readonly(isLoading),
+    isAuthenticated: readonly(isAuthenticated),
+    user: readonly(user),
+    idTokenClaims: readonly(idTokenClaims),
+
+    async loginWithRedirect(options?: RedirectLoginOptions) {
+      return client.loginWithRedirect(options);
+    },
+
+    async loginWithPopup(
+      options?: PopupLoginOptions,
+      config?: PopupConfigOptions
+    ) {
+      return __proxy(() => client.loginWithPopup(options, config));
+    },
+
+    async logout(options?: LogoutOptions) {
+      return __proxy(() => client.logout(options));
+    },
+
+    async getAccessTokenSilently(options?: GetTokenSilentlyOptions) {
+      return __proxy(() => client.getTokenSilently(options));
+    },
+
+    async getAccessTokenWithPopup(
+      options?: GetTokenWithPopupOptions,
+      config?: PopupConfigOptions
+    ) {
+      return __proxy(() => client.getTokenWithPopup(options, config));
+    },
+
+    async checkSession(options?: GetTokenSilentlyOptions) {
+      return __proxy(() => client.checkSession(options));
+    },
+
+    async handleRedirectCallback(url?: string) {
+      return __proxy(() => client.handleRedirectCallback(url));
+    },
+
+    async buildAuthorizeUrl(options?: RedirectLoginOptions) {
+      return client.buildAuthorizeUrl(options);
+    },
+
+    async buildLogoutUrl(options?: LogoutUrlOptions) {
+      return client.buildLogoutUrl(options);
+    }
+  };
+};
+
+export type Auth0ClientProxy = ReturnType<typeof createAuth0ClientProxy>;
