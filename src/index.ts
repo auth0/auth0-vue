@@ -9,6 +9,12 @@ import {
 
 export * from './global';
 
+declare module '@vue/runtime-core' {
+  export interface ComponentCustomProperties {
+    [AUTH0_TOKEN]: Auth0ClientProxy;
+  }
+}
+
 /**
  * Creates the Auth0 plugin`.
  *

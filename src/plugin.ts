@@ -1,6 +1,6 @@
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import { App } from 'vue';
-import { Auth0ClientProxy } from './client.proxy';
+import { Auth0ClientProxy, createAuth0ClientProxy } from './client.proxy';
 import version from './version';
 
 export const AUTH0_TOKEN = '$auth0';
@@ -32,7 +32,7 @@ export class Auth0Plugin {
   constructor(private options: Auth0PluginOptions) {}
 
   install(app: App) {
-    const proxy = new Auth0ClientProxy({
+    const proxy = createAuth0ClientProxy({
       ...this.options,
       auth0Client: {
         name: 'auth0-vue',
