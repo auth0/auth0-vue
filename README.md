@@ -20,7 +20,7 @@ Auth0 SDK for Vue Applications using [Authorization Code Grant Flow with PKCE](h
 
 ## Documentation
 
-- [API reference](...)
+- [API reference](https://redesigned-enigma-d5afae7c.pages.github.io)
 
 ## Installation
 
