@@ -1,12 +1,8 @@
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import { App } from 'vue';
 import { createAuth0ClientProxy, Auth0VueClient } from './client.proxy';
+import { AUTH0_INJECTION_KEY, AUTH0_TOKEN } from './token';
 import version from './version';
-
-/**
- * @ignore
- */
-export const AUTH0_TOKEN = '$auth0';
 
 /**
  * Configuration for the Auth0 Vue plugin
@@ -49,7 +45,7 @@ export class Auth0Plugin {
     this.__checkSession(proxy);
 
     app.config.globalProperties[AUTH0_TOKEN] = proxy;
-    app.provide(AUTH0_TOKEN, proxy);
+    app.provide(AUTH0_INJECTION_KEY, proxy);
   }
 
   private async __checkSession(proxy: Auth0VueClient) {
