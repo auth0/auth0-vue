@@ -1,7 +1,7 @@
 import { inject } from 'vue';
 import './global';
 import {
-  Auth0Client,
+  Auth0VueClient,
   Auth0Plugin,
   Auth0PluginOptions,
   AUTH0_TOKEN
@@ -11,7 +11,7 @@ export * from './global';
 
 declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
-    [AUTH0_TOKEN]: Auth0Client;
+    [AUTH0_TOKEN]: Auth0VueClient;
   }
 }
 
@@ -27,8 +27,8 @@ export function createAuth0(options: Auth0PluginOptions) {
 
 /**
  * Returns the registered Auth0 instance using Vue's `inject`.
- * @returns An instance of Auth0ClientProxy
+ * @returns An instance of Auth0VueClient
  */
-export function useAuth0(): Auth0Client {
+export function useAuth0(): Auth0VueClient {
   return inject(AUTH0_TOKEN);
 }

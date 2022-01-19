@@ -20,7 +20,7 @@ import { ref, readonly, Ref } from 'vue';
  */
 export const createAuth0ClientProxy = (
   options: Auth0ClientOptions
-): Auth0Client => {
+): Auth0VueClient => {
   const client = new SpaAuth0Client(options);
   const isLoading: Ref<boolean> = ref(true);
   const isAuthenticated: Ref<boolean> = ref(false);
@@ -100,7 +100,7 @@ export const createAuth0ClientProxy = (
   };
 };
 
-export interface Auth0Client {
+export interface Auth0VueClient {
   /**
    * The loading state of the SDK, `true` if the SDK is still processing the PKCE flow, `false` if the SDK has finished processing the PKCE flow.
    */

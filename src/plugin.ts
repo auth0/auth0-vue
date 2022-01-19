@@ -1,6 +1,6 @@
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import { App } from 'vue';
-import { createAuth0ClientProxy, Auth0Client } from './client.proxy';
+import { createAuth0ClientProxy, Auth0VueClient } from './client.proxy';
 import version from './version';
 
 /**
@@ -52,7 +52,7 @@ export class Auth0Plugin {
     app.provide(AUTH0_TOKEN, proxy);
   }
 
-  private async __checkSession(proxy: Auth0Client) {
+  private async __checkSession(proxy: Auth0VueClient) {
     const search = window.location.search;
 
     if (
