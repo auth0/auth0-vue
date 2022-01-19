@@ -99,8 +99,6 @@ app.use(
 app.mount('#app');
 ```
 
-By default the application will ask Auth0 to redirect back to the root URL of your application after authentication, but this can be configured by setting the `redirect_uri` option above..
-
 ### Add login to your application
 
 In order to add login to your application you can use the `loginWithRedirect` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
