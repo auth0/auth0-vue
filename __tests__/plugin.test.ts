@@ -658,7 +658,7 @@ describe('Auth0Plugin', () => {
     );
   });
 
-  it('should clear errors when succesful', async () => {
+  it('should clear errors when successful', async () => {
     const plugin = createAuth0({
       domain: '',
       client_id: ''
