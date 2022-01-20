@@ -3,6 +3,7 @@ import { createAuth0 } from '../src/index';
 // Fix for https://github.com/ezolenko/rollup-plugin-typescript2/issues/129#issuecomment-454558185
 // @ts-ignore
 import Playground from './App.vue';
+import { createRouter } from './router';
 
 const defaultDomain = 'http://127.0.0.1:3000';
 const defaultClientId = 'testing';
@@ -13,17 +14,24 @@ const domain = res?.domain || defaultDomain;
 const client_id = res?.client_id || defaultClientId;
 const audience = res?.audience || defaultAudience;
 
-createApp(Playground, {
+const app = createApp(Playground, {
   domain,
   client_id,
   audience
-})
+});
+const router = createRouter(app);
+app
   .use(
-    createAuth0({
-      domain,
-      client_id,
-      audience,
-      useFormData: res?.useFormData || true
-    })
+    createAuth0(
+      {
+        domain,
+        client_id,
+        audience,
+        useFormData: res?.useFormData || true,
+        redirect_uri: window.location.origin
+      },
+      { router }
+    )
   )
+  .use(router)
   .mount('#app');

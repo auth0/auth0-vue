@@ -7,6 +7,14 @@
     }}</span>
   </p>
 
+  <div>
+    <router-link to="/" class="btn btn-primary">Home</router-link>
+    <router-link to="/profile" class="btn btn-outline-primary"
+      >Profile</router-link
+    >
+    <router-view />
+  </div>
+
   <div v-if="!loading">
     <div class="btn-toolbar justify-content-between">
       <div class="btn-group mb-3">
