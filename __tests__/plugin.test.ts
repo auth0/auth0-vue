@@ -1,5 +1,5 @@
 import { Auth0Client } from '@auth0/auth0-spa-js';
-import { App } from 'vue';
+import { App, inject } from 'vue';
 import { AUTH0_INJECTION_KEY, createAuth0, useAuth0 } from '../src/index';
 
 const loginWithRedirectMock = jest.fn();
@@ -57,12 +57,10 @@ describe('createAuth0', () => {
 
 describe('useAuth0', () => {
   it('should call inject', async () => {
-    const plugin = createAuth0({
-      domain: '',
-      client_id: ''
-    });
-    const res = useAuth0();
-    expect(res).toBeDefined();
+    const instance = {};
+    (inject as jest.Mock).mockReturnValue(instance);
+    const result = useAuth0();
+    expect(result).toBe(instance);
   });
 });
 
