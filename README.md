@@ -419,7 +419,7 @@ Once setup returns the SDK's `error` property, you can access that property from
   <div>
     <h2>Error Handling</h2>
     <pre>
-      <code>{{ error.error }}</code>
+      <code>{{ error?.error }}</code>
     </pre>
   </div>
 </template>
@@ -433,7 +433,7 @@ Once setup returns the SDK's `error` property, you can access that property from
   <div>
     <h2>Error Handling</h2>
     <pre>
-      <code>{{ error.error }}</code>
+      <code>{{ error?.error }}</code>
     </pre>
   </div>
 </template>
