@@ -11,13 +11,19 @@ import Home from './components/Home.vue';
 // @ts-ignore
 import Profile from './components/Profile.vue';
 
-export function createRouter(app: App) {
+export function createRouter(app: App, { client_id, domain, audience }: any) {
   return createVueRouter({
+    linkActiveClass: 'btn-primary',
     routes: [
       {
         path: '/',
         name: 'home',
-        component: Home
+        component: Home,
+        props: {
+          client_id,
+          domain,
+          audience
+        }
       },
       {
         path: '/profile',

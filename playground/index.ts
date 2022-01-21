@@ -14,12 +14,12 @@ const domain = res?.domain || defaultDomain;
 const client_id = res?.client_id || defaultClientId;
 const audience = res?.audience || defaultAudience;
 
-const app = createApp(Playground, {
+const app = createApp(Playground);
+const router = createRouter(app, {
   domain,
   client_id,
   audience
 });
-const router = createRouter(app);
 app
   .use(
     createAuth0(
