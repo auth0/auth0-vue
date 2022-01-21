@@ -394,7 +394,7 @@ Once setup returns the SDK's reactive property, you can access that property fro
 
 ### Error Handling
 
-When using our SDK, it could be the case that we are unable to correctly handle the authentication flow for a variety of reasons (e.g. an expired session with Auth0 when trying to get a token silently). In these situations, calling the actual methods will result in an exception being thrown (e.g. `login_required`). On top of that, these errors are made available through the SDK's reactive `error` property:
+When using this SDK, it could be the case that it is unable to correctly handle the authentication flow for a variety of reasons (e.g. an expired session with Auth0 when trying to get a token silently). In these situations, calling the actual methods will result in an exception being thrown (e.g. `login_required`). On top of that, these errors are made available through the SDK's reactive `error` property:
 
 ```html
 <script>
@@ -412,7 +412,7 @@ When using our SDK, it could be the case that we are unable to correctly handle 
 </script>
 ```
 
-Once setup returns the SDK's error property, you can access that property from your component's HTML.
+Once setup returns the SDK's `error` property, you can access that property from your component's HTML.
 
 ```html
 <template>
