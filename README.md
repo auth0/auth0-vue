@@ -56,6 +56,7 @@ Be sure to replace the filename with the correct name based on the actual releas
 - [Add logout to your application](#add-logout-to-your-application)
 - [Retrieve an Access Token](#retrieve-an-access-token)
 - [Accessing ID Token claims](#accessing-id-token-claims)
+- [Error Handling](#error-handling)
 
 ### Auth0 Configuration
 
@@ -354,8 +355,8 @@ Once setup returns the SDK's reactive property, you can access that property fro
     <h2>ID Token Claims</h2>
     <button @click="login">Log in</button>
     <pre>
-        <code>{{ idTokenClaims }}</code>
-      </pre>
+      <code>{{ idTokenClaims }}</code>
+    </pre>
   </div>
 </template>
 ```
@@ -369,8 +370,8 @@ Once setup returns the SDK's reactive property, you can access that property fro
     <h2>ID Token Claims</h2>
     <button @click="login">Log in</button>
     <pre>
-        <code>{{ idTokenClaims }}</code>
-      </pre>
+      <code>{{ idTokenClaims }}</code>
+    </pre>
   </div>
 </template>
 <script>
@@ -384,6 +385,64 @@ Once setup returns the SDK's reactive property, you can access that property fro
       login() {
         this.$auth0.loginWithRedirect();
       }
+    }
+  };
+</script>
+```
+
+</details>
+
+### Error Handling
+
+When using our SDK, it could be the case that we are unable to correctly handle the authentication flow for a variety of reasons (e.g. an expired session with Auth0 when trying to get a token silently). In these situationsm calling the actual methods will result in an exception being thrown (e.g. `login_required`). On top of that, these errors are made available through the SDK's reactive `error` property:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { error } = useAuth0();
+
+      return {
+        error
+      };
+    }
+  };
+</script>
+```
+
+Once setup returns the SDK's error property, you can access that property from your component's HTML.
+
+```html
+<template>
+  <div>
+    <h2>Error Handling</h2>
+    <pre>
+      <code>{{ error.error }}</code>
+    </pre>
+  </div>
+</template>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<template>
+  <div>
+    <h2>Error Handling</h2>
+    <pre>
+      <code>{{ error.error }}</code>
+    </pre>
+  </div>
+</template>
+<script>
+  export default {
+    data: function () {
+      return {
+        error: this.$auth0.error
+      };
     }
   };
 </script>
