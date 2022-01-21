@@ -68,7 +68,7 @@ export class Auth0Plugin {
     if (
       (search.includes('code=') || search.includes('error=')) &&
       search.includes('state=') &&
-      !this.pluginOptions.skipRedirectCallback
+      !this.pluginOptions?.skipRedirectCallback
     ) {
       await proxy.handleRedirectCallback();
     } else {

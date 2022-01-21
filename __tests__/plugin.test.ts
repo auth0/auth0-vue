@@ -150,11 +150,15 @@ describe('Auth0Plugin', () => {
   });
 
   it('should not call handleRedirect callback when skipRedirectCallback is true', async () => {
-    const plugin = createAuth0({
-      domain: '',
-      client_id: '',
-      skipRedirectCallback: true
-    });
+    const plugin = createAuth0(
+      {
+        domain: '',
+        client_id: ''
+      },
+      {
+        skipRedirectCallback: true
+      }
+    );
 
     const urlParams = new URLSearchParams(window.location.search);
 
