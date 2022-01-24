@@ -77,8 +77,15 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.19.3",
-    "vue": "^3.2.26",
+    "vue": "^3.2.26"
+  },
+  "peerDependencies": {
     "vue-router": "^4.0.12"
+  },
+  "peerDependenciesMeta": {
+    "vue-router": {
+      "optional": true
+    }
   },
   "files": [
     "src",
