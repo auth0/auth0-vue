@@ -32,6 +32,12 @@ export interface Auth0PluginOptions {
    */
   skipRedirectCallback?: boolean;
 
+  /**
+   * The router instance to be used by our SDK when doing a redirect after handling the PKCE flow.
+   *
+   * @remarks
+   * Marked as optional, but required when using routing in your application.
+   */
   router?: Router;
 }
 
