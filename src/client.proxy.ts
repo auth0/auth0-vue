@@ -26,6 +26,7 @@ export const createAuth0ClientProxy = (
   const isAuthenticated: Ref<boolean> = ref(false);
   const user: Ref<User> = ref({});
   const idTokenClaims: Ref<IdToken> = ref();
+  const error = ref(null);
 
   async function __refreshState() {
     isAuthenticated.value = await client.isAuthenticated();
@@ -35,17 +36,29 @@ export const createAuth0ClientProxy = (
   }
 
   async function __proxy<T>(cb: () => T) {
-    const result = await cb();
-    await __refreshState();
+    let result;
+    try {
+      result = await cb();
+      error.value = null;
+    } catch (e) {
+      error.value = e;
+      throw e;
+    } finally {
+      await __refreshState();
+    }
+
     return result;
   }
 
+  /* istanbul ignore next */
   async function getAccessTokenSilently(
     options: GetTokenSilentlyOptions & { detailedResponse: true }
   ): Promise<GetTokenSilentlyVerboseResponse>;
+  /* istanbul ignore next */
   async function getAccessTokenSilently(
     options?: GetTokenSilentlyOptions
   ): Promise<string>;
+  /* istanbul ignore next */
   async function getAccessTokenSilently(
     options: GetTokenSilentlyOptions = {}
   ): Promise<string | GetTokenSilentlyVerboseResponse> {
@@ -57,6 +70,7 @@ export const createAuth0ClientProxy = (
     isAuthenticated: readonly(isAuthenticated),
     user: readonly(user),
     idTokenClaims: readonly(idTokenClaims),
+    error: readonly(error),
 
     async loginWithRedirect(options?: RedirectLoginOptions) {
       return client.loginWithRedirect(options);
@@ -120,6 +134,11 @@ export interface Auth0VueClient {
    * Contains all claims from the id_token if available.
    */
   idTokenClaims: Ref<IdToken>;
+
+  /**
+   * Contains an error that occured in the SDK
+   */
+  error: Ref<any>;
 
   /**
    * ```js

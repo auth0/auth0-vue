@@ -212,8 +212,6 @@ export default defineComponent({
       })
     );
 
-    const error = ref(null);
-
     return {
       loading: auth0.isLoading,
       id_token_raw: computed(() => auth0.idTokenClaims?.value?.__raw),
@@ -224,7 +222,7 @@ export default defineComponent({
       profile: auth0.user,
 
       scopesWithSuffix,
-      error,
+      error: auth0.error,
 
       loginRedirect: function () {
         auth0.loginWithRedirect({
@@ -234,7 +232,6 @@ export default defineComponent({
 
       loginPopup: async function () {
         await auth0.loginWithPopup();
-        error.value = null;
       },
 
       logout: function () {
@@ -265,11 +262,6 @@ export default defineComponent({
               token: obfuscateToken(token),
               __raw: token
             });
-            error.value = null;
-          })
-          .catch(function (e: any) {
-            console.error(e);
-            error.value = e.message || e;
           });
       },
       getTokenPopup: function (
@@ -284,10 +276,6 @@ export default defineComponent({
               token: obfuscateToken(token),
               __raw: token
             });
-            error.value = null;
-          })
-          .catch(function (err: any) {
-            error.value = err;
           });
       },
 
