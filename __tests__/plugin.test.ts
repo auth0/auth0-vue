@@ -1,6 +1,6 @@
 import { Auth0Client } from '@auth0/auth0-spa-js';
-import { App } from 'vue';
-import { createAuth0 } from '../src/index';
+import { App, inject } from 'vue';
+import { AUTH0_INJECTION_KEY, createAuth0, useAuth0 } from '../src/index';
 
 const loginWithRedirectMock = jest.fn();
 const loginWithPopupMock = jest.fn();
@@ -14,6 +14,15 @@ const buildAuthorizeUrlMock = jest.fn().mockResolvedValue(null);
 const buildLogoutUrlMock = jest.fn().mockResolvedValue(null);
 const getTokenSilentlyMock = jest.fn().mockResolvedValue(null);
 const getTokenWithPopupMock = jest.fn().mockResolvedValue(null);
+
+jest.mock('vue', () => {
+  const originalModule = jest.requireActual('vue');
+  return {
+    __esModule: true,
+    ...originalModule,
+    inject: jest.fn().mockResolvedValue(null)
+  };
+});
 
 jest.mock('@auth0/auth0-spa-js', () => {
   return {
@@ -43,6 +52,15 @@ describe('createAuth0', () => {
       client_id: ''
     });
     expect(plugin.install).toBeTruthy();
+  });
+});
+
+describe('useAuth0', () => {
+  it('should call inject', async () => {
+    const instance = {};
+    (inject as jest.Mock).mockReturnValue(instance);
+    const result = useAuth0();
+    expect(result).toBe(instance);
   });
 });
 
@@ -90,7 +108,10 @@ describe('Auth0Plugin', () => {
     plugin.install(appMock);
 
     expect(appMock.config.globalProperties.$auth0).toBeTruthy();
-    expect(appMock.provide).toHaveBeenCalled();
+    expect(appMock.provide).toHaveBeenCalledWith(
+      AUTH0_INJECTION_KEY,
+      expect.anything()
+    );
     expect(Auth0Client).toHaveBeenCalledWith(
       expect.objectContaining({
         domain: 'domain 123',
@@ -577,5 +598,144 @@ describe('Auth0Plugin', () => {
         appMock.config.globalProperties.$auth0.idTokenClaims.value
       ).toStrictEqual(idTokenClaims);
     });
+  });
+
+  it('should track errors when loginWithPopup throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    loginWithPopupMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.loginWithPopup();
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should track errors when logout throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    logoutMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.logout();
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should track errors when getAccessTokenWithPopup throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    getTokenWithPopupMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.getAccessTokenWithPopup();
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should track errors when getAccessTokenSilently throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    getTokenSilentlyMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.getAccessTokenSilently();
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should track errors when checkSession throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    checkSessionMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.checkSession();
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should track errors when handleRedirectCallback throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    handleRedirectCallbackMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.handleRedirectCallback();
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should clear errors when successful', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    handleRedirectCallbackMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.handleRedirectCallback();
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+
+    handleRedirectCallbackMock.mockResolvedValue({});
+
+    await appMock.config.globalProperties.$auth0.handleRedirectCallback();
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toBeFalsy();
   });
 });

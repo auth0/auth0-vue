@@ -156,7 +156,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuth0 } from '../../src';
 
 const obfuscateToken = function (value: string) {
@@ -212,8 +212,6 @@ export default {
       })
     );
 
-    const error = ref(null);
-
     return {
       loading: auth0.isLoading,
       id_token_raw: computed(() => auth0.idTokenClaims?.value?.__raw),
@@ -224,7 +222,7 @@ export default {
       profile: auth0.user,
 
       scopesWithSuffix,
-      error,
+      error: auth0.error,
 
       loginRedirect: function () {
         auth0.loginWithRedirect({
@@ -265,11 +263,6 @@ export default {
               token: obfuscateToken(token),
               __raw: token
             });
-            error.value = null;
-          })
-          .catch(function (e: any) {
-            console.error(e);
-            error.value = e.message || e;
           });
       },
       getTokenPopup: function (
@@ -284,10 +277,6 @@ export default {
               token: obfuscateToken(token),
               __raw: token
             });
-            error.value = null;
-          })
-          .catch(function (err: any) {
-            error.value = err;
           });
       },
 
