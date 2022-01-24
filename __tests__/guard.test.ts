@@ -16,7 +16,7 @@ jest.mock('vue', () => {
 describe('createAuthGuard', () => {
   let appMock: App<any>;
   let auth0Mock: Partial<Auth0VueClient> = {
-    loginWithRedirect: jest.fn(),
+    loginWithRedirect: jest.fn().mockResolvedValue({}),
     isAuthenticated: ref(false),
     isLoading: ref(false)
   };
@@ -44,19 +44,23 @@ describe('createAuthGuard', () => {
 
     auth0Mock.isLoading.value = true;
 
-    guard({
+    setTimeout(() => {
+      expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
+
+      auth0Mock.isLoading.value = false;
+
+      expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
+
+      watchEffectMock();
+
+      setTimeout(() => {
+        expect(auth0Mock.loginWithRedirect).toHaveBeenCalled();
+      });
+    });
+
+    await guard({
       fullPath: 'abc'
     } as any);
-
-    expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
-
-    auth0Mock.isLoading.value = false;
-
-    expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
-
-    watchEffectMock();
-
-    expect(auth0Mock.loginWithRedirect).toHaveBeenCalled();
   });
 
   it('should return true when authenticated', async () => {
@@ -64,7 +68,7 @@ describe('createAuthGuard', () => {
 
     auth0Mock.isAuthenticated.value = true;
 
-    const result = guard({
+    const result = await guard({
       fullPath: 'abc'
     } as any);
 
@@ -75,7 +79,7 @@ describe('createAuthGuard', () => {
   it('should call loginWithRedirect', async () => {
     const guard = createAuthGuard(appMock);
 
-    guard({
+    await guard({
       fullPath: 'abc'
     } as any);
 

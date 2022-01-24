@@ -2,11 +2,11 @@ import { Auth0Client } from '@auth0/auth0-spa-js';
 import { App, inject } from 'vue';
 import { AUTH0_INJECTION_KEY, createAuth0, useAuth0 } from '../src/index';
 
-const loginWithRedirectMock = jest.fn();
-const loginWithPopupMock = jest.fn();
+const loginWithRedirectMock = jest.fn().mockResolvedValue(null);
+const loginWithPopupMock = jest.fn().mockResolvedValue(null);
 const logoutMock = jest.fn();
-const checkSessionMock = jest.fn();
-const handleRedirectCallbackMock = jest.fn();
+const checkSessionMock = jest.fn().mockResolvedValue(null);
+const handleRedirectCallbackMock = jest.fn().mockResolvedValue(null);
 const isAuthenticatedMock = jest.fn().mockResolvedValue(false);
 const getUserMock = jest.fn().mockResolvedValue(null);
 const getIdTokenClaimsMock = jest.fn().mockResolvedValue(null);
@@ -85,6 +85,7 @@ describe('Auth0Plugin', () => {
     } as any;
 
     isAuthenticatedMock.mockResolvedValue(false);
+    checkSessionMock.mockResolvedValue(null);
 
     appMock = {
       config: {
@@ -92,6 +93,9 @@ describe('Auth0Plugin', () => {
       },
       provide: jest.fn()
     } as any as App<any>;
+
+    //jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
   afterEach(() => {
     window.location = savedLocation;
@@ -608,14 +612,14 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
-    loginWithPopupMock.mockRejectedValue('Some Error');
+    loginWithPopupMock.mockRejectedValue('Some Error!');
 
     try {
       await appMock.config.globalProperties.$auth0.loginWithPopup();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error'
+      'Some Error!'
     );
   });
 
@@ -627,14 +631,14 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
-    logoutMock.mockRejectedValue('Some Error');
+    logoutMock.mockRejectedValue('Some Error!');
 
     try {
       await appMock.config.globalProperties.$auth0.logout();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error'
+      'Some Error!'
     );
   });
 
@@ -646,14 +650,14 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
-    getTokenWithPopupMock.mockRejectedValue('Some Error');
+    getTokenWithPopupMock.mockRejectedValue('Some Error!');
 
     try {
       await appMock.config.globalProperties.$auth0.getAccessTokenWithPopup();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error'
+      'Some Error!'
     );
   });
 
@@ -665,14 +669,14 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
-    getTokenSilentlyMock.mockRejectedValue('Some Error');
+    getTokenSilentlyMock.mockRejectedValue('Some Error!');
 
     try {
       await appMock.config.globalProperties.$auth0.getAccessTokenSilently();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error'
+      'Some Error!'
     );
   });
 
@@ -682,16 +686,16 @@ describe('Auth0Plugin', () => {
       client_id: ''
     });
 
-    plugin.install(appMock);
-
-    checkSessionMock.mockRejectedValue('Some Error');
-
     try {
+      plugin.install(appMock);
+
+      checkSessionMock.mockRejectedValue('Some Error!');
+
       await appMock.config.globalProperties.$auth0.checkSession();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error'
+      'Some Error!'
     );
   });
 
