@@ -85,6 +85,9 @@ describe('Auth0Plugin', () => {
     } as any;
 
     isAuthenticatedMock.mockResolvedValue(false);
+    loginWithRedirectMock.mockResolvedValue(null);
+    loginWithPopupMock.mockResolvedValue(null);
+    checkSessionMock.mockResolvedValue(null);
 
     appMock = {
       config: {
@@ -160,12 +163,12 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
+    expect.assertions(3);
+
     expect(checkSessionMock).not.toHaveBeenCalled();
     expect(handleRedirectCallbackMock).toHaveBeenCalled();
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
-
       expect(replaceStateMock).toHaveBeenCalled();
     });
   });
@@ -186,12 +189,12 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
+    expect.assertions(3);
+
     expect(checkSessionMock).toHaveBeenCalled();
     expect(handleRedirectCallbackMock).not.toHaveBeenCalled();
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
-
       expect(replaceStateMock).toHaveBeenCalled();
     });
   });
@@ -210,12 +213,12 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
+    expect.assertions(3);
+
     expect(checkSessionMock).toHaveBeenCalled();
     expect(handleRedirectCallbackMock).not.toHaveBeenCalled();
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
-
       expect(replaceStateMock).toHaveBeenCalled();
     });
   });
@@ -235,12 +238,12 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
+    expect.assertions(3);
+
     expect(checkSessionMock).not.toHaveBeenCalled();
     expect(handleRedirectCallbackMock).toHaveBeenCalled();
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
-
       expect(replaceStateMock).toHaveBeenCalled();
     });
   });
@@ -415,7 +418,6 @@ describe('Auth0Plugin', () => {
     expect.assertions(1);
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
       expect(appMock.config.globalProperties.$auth0.isLoading.value).toBe(
         false
       );
@@ -433,7 +435,6 @@ describe('Auth0Plugin', () => {
     expect.assertions(1);
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
       expect(appMock.config.globalProperties.$auth0.isAuthenticated.value).toBe(
         false
       );
@@ -453,7 +454,6 @@ describe('Auth0Plugin', () => {
     expect.assertions(1);
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
       expect(appMock.config.globalProperties.$auth0.isAuthenticated.value).toBe(
         true
       );
@@ -473,7 +473,6 @@ describe('Auth0Plugin', () => {
     expect.assertions(1);
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
       expect(appMock.config.globalProperties.$auth0.user.value).toBe(null);
     });
   });
@@ -494,7 +493,6 @@ describe('Auth0Plugin', () => {
     expect.assertions(1);
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
       expect(appMock.config.globalProperties.$auth0.user.value).toStrictEqual(
         userMock
       );
@@ -514,7 +512,6 @@ describe('Auth0Plugin', () => {
     expect.assertions(1);
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
       expect(appMock.config.globalProperties.$auth0.idTokenClaims.value).toBe(
         null
       );
@@ -537,7 +534,6 @@ describe('Auth0Plugin', () => {
     expect.assertions(1);
 
     return flushPromises().then(() => {
-      jest.runAllTimers();
       expect(
         appMock.config.globalProperties.$auth0.idTokenClaims.value
       ).toStrictEqual(idTokenClaims);
