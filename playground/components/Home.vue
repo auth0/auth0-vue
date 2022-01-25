@@ -232,7 +232,6 @@ export default {
 
       loginPopup: async function () {
         await auth0.loginWithPopup();
-        error.value = null;
       },
 
       logout: function () {
