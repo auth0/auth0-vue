@@ -94,7 +94,6 @@ describe('Auth0Plugin', () => {
       provide: jest.fn()
     } as any as App<any>;
 
-    //jest.resetAllMocks();
     jest.restoreAllMocks();
   });
   afterEach(() => {

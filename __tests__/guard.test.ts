@@ -44,6 +44,8 @@ describe('createAuthGuard', () => {
 
     auth0Mock.isLoading.value = true;
 
+    expect.assertions(3);
+
     setTimeout(() => {
       expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
 
