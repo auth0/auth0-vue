@@ -2,11 +2,11 @@ import { Auth0Client } from '@auth0/auth0-spa-js';
 import { App, inject } from 'vue';
 import { AUTH0_INJECTION_KEY, createAuth0, useAuth0 } from '../src/index';
 
-const loginWithRedirectMock = jest.fn();
-const loginWithPopupMock = jest.fn();
+const loginWithRedirectMock = jest.fn().mockResolvedValue(null);
+const loginWithPopupMock = jest.fn().mockResolvedValue(null);
 const logoutMock = jest.fn();
-const checkSessionMock = jest.fn();
-const handleRedirectCallbackMock = jest.fn();
+const checkSessionMock = jest.fn().mockResolvedValue(null);
+const handleRedirectCallbackMock = jest.fn().mockResolvedValue(null);
 const isAuthenticatedMock = jest.fn().mockResolvedValue(false);
 const getUserMock = jest.fn().mockResolvedValue(null);
 const getIdTokenClaimsMock = jest.fn().mockResolvedValue(null);
@@ -95,6 +95,8 @@ describe('Auth0Plugin', () => {
       },
       provide: jest.fn()
     } as any as App<any>;
+
+    jest.restoreAllMocks();
   });
   afterEach(() => {
     window.location = savedLocation;
@@ -174,11 +176,15 @@ describe('Auth0Plugin', () => {
   });
 
   it('should not call handleRedirect callback when skipRedirectCallback is true', async () => {
-    const plugin = createAuth0({
-      domain: '',
-      client_id: '',
-      skipRedirectCallback: true
-    });
+    const plugin = createAuth0(
+      {
+        domain: '',
+        client_id: ''
+      },
+      {
+        skipRedirectCallback: true
+      }
+    );
 
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -246,6 +252,52 @@ describe('Auth0Plugin', () => {
     return flushPromises().then(() => {
       expect(replaceStateMock).toHaveBeenCalled();
     });
+  });
+
+  it('should call the router, if provided, with the target path', async () => {
+    const routerPushMock = jest.fn();
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    };
+
+    handleRedirectCallbackMock.mockResolvedValue({
+      appState: {
+        target: 'abc'
+      }
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.handleRedirectCallback();
+
+    expect(routerPushMock).toHaveBeenCalledWith('abc');
+  });
+
+  it('should call the router, if provided, with the default path when no target provided', async () => {
+    const routerPushMock = jest.fn();
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    };
+
+    handleRedirectCallbackMock.mockResolvedValue({
+      appState: {}
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.handleRedirectCallback();
+
+    expect(routerPushMock).toHaveBeenCalledWith('/');
   });
 
   it('should proxy loginWithRedirect', async () => {
@@ -622,11 +674,11 @@ describe('Auth0Plugin', () => {
       client_id: ''
     });
 
-    plugin.install(appMock);
-
-    checkSessionMock.mockRejectedValue('Some Error');
-
     try {
+      plugin.install(appMock);
+
+      checkSessionMock.mockRejectedValue('Some Error');
+
       await appMock.config.globalProperties.$auth0.checkSession();
     } catch (e) {}
 

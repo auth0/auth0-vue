@@ -14,12 +14,14 @@ import {
   User
 } from '@auth0/auth0-spa-js';
 import { ref, readonly, Ref } from 'vue';
+import { Router } from 'vue-router';
 
 /**
  * @ignore
  */
 export const createAuth0ClientProxy = (
-  options: Auth0ClientOptions
+  options: Auth0ClientOptions,
+  globalProperties?: Record<string, any>
 ): Auth0VueClient => {
   const client = new SpaAuth0Client(options);
   const isLoading: Ref<boolean> = ref(true);
@@ -72,7 +74,7 @@ export const createAuth0ClientProxy = (
     idTokenClaims: readonly(idTokenClaims),
     error: readonly(error),
 
-    async loginWithRedirect(options?: RedirectLoginOptions) {
+    async loginWithRedirect(options?: RedirectLoginOptions<AppState>) {
       return client.loginWithRedirect(options);
     },
 
@@ -100,8 +102,23 @@ export const createAuth0ClientProxy = (
       return __proxy(() => client.checkSession(options));
     },
 
-    async handleRedirectCallback(url?: string): Promise<RedirectLoginResult> {
-      return __proxy(() => client.handleRedirectCallback(url));
+    async handleRedirectCallback(
+      url?: string
+    ): Promise<RedirectLoginResult<AppState>> {
+      const result = await __proxy(() =>
+        client.handleRedirectCallback<AppState>(url)
+      );
+
+      const appState = result?.appState;
+      const target = appState?.target ?? '/';
+
+      const router = globalProperties.$router as Router;
+
+      if (router && router.push) {
+        router.push(target);
+      }
+
+      return result;
     },
 
     async buildAuthorizeUrl(options?: RedirectLoginOptions) {
@@ -113,6 +130,22 @@ export const createAuth0ClientProxy = (
     }
   };
 };
+
+/**
+ * Angular specific state to be stored before redirect
+ */
+export interface AppState {
+  /**
+   * Target path the app gets routed to after
+   * handling the callback from Auth0 (defaults to '/')
+   */
+  target?: string;
+
+  /**
+   * Any custom parameter to be stored in appState
+   */
+  [key: string]: any;
+}
 
 export interface Auth0VueClient {
   /**
@@ -192,7 +225,7 @@ export interface Auth0VueClient {
    *
    * @param options
    */
-  loginWithRedirect(options?: RedirectLoginOptions): Promise<void>;
+  loginWithRedirect(options?: RedirectLoginOptions<AppState>): Promise<void>;
 
   /**
    * After the browser redirects back to the callback page,
@@ -203,7 +236,7 @@ export interface Auth0VueClient {
    * **Note:** The Auth0-Vue SDK handles this for you, unless you set `skipRedirectCallback` to true.
    * In that case, be sure to explicitly call `handleRedirectCallback` yourself.
    */
-  handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
+  handleRedirectCallback(url?: string): Promise<RedirectLoginResult<AppState>>;
 
   /**
    * ```js
