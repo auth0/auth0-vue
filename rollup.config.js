@@ -75,10 +75,11 @@ let bundles = [
       sourcemap: true,
       exports: 'default',
       globals: {
-        vue: 'Vue'
+        vue: 'Vue',
+        'vue-router': 'VueRouter'
       }
     },
-    external: ['vue'],
+    external: ['vue', 'vue-router'],
     plugins: [
       ...getPlugins(false),
       !isProduction &&
@@ -94,7 +95,7 @@ let bundles = [
     watch: {
       clearScreen: false
     },
-    external: ['vue']
+    external: ['vue', 'vue-router']
   }
 ];
 
@@ -110,11 +111,12 @@ if (isProduction) {
           format: 'umd',
           exports: 'default',
           globals: {
-            vue: 'Vue'
+            vue: 'Vue',
+            'vue-router': 'VueRouter'
           }
         }
       ],
-      external: ['vue'],
+      external: ['vue', 'vue-router'],
       plugins: [...getPlugins(isProduction), ...getStatsPlugins()]
     },
     {
@@ -125,7 +127,7 @@ if (isProduction) {
           format: 'esm'
         }
       ],
-      external: ['vue'],
+      external: ['vue', 'vue-router'],
       plugins: getPlugins(isProduction)
     },
     {
@@ -149,10 +151,11 @@ if (isProduction) {
       format: 'umd',
       file: 'dist/auth0-vue.playground.js',
       globals: {
-        vue: 'Vue'
+        vue: 'Vue',
+        'vue-router': 'VueRouter'
       }
     },
-    external: ['vue'],
+    external: ['vue', 'vue-router'],
     plugins: [vue(), ...getPlugins(false)]
   });
 }

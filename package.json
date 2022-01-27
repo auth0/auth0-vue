@@ -73,11 +73,20 @@
     "tslint-config-security": "^1.16.0",
     "typedoc": "^0.22.10",
     "typescript": "^4.5.4",
+    "vue-router": "^4.0.12",
     "wait-on": "^6.0.0"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.19.3",
     "vue": "^3.2.26"
+  },
+  "peerDependencies": {
+    "vue-router": "^4.0.12"
+  },
+  "peerDependenciesMeta": {
+    "vue-router": {
+      "optional": true
+    }
   },
   "files": [
     "src",

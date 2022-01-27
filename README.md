@@ -57,6 +57,7 @@ Be sure to replace the filename with the correct name based on the actual releas
 - [Calling an API](#calling-an-api)
 - [Accessing ID Token claims](#accessing-id-token-claims)
 - [Error Handling](#error-handling)
+- [Protect a route](#protect-a-route)
 
 ### Auth0 Configuration
 
@@ -459,6 +460,37 @@ Once setup returns the SDK's `error` property, you can access that property from
 ```
 
 </details>
+
+### Protect a route
+
+If you are using our Auth0-Vue SDK with [Vue-Router](https://next.router.vuejs.org/), you can protect a route by using the [Navigation Guard](https://next.router.vuejs.org/guide/advanced/navigation-guards.html) provided by the SDK.
+
+```ts
+import { createApp } from 'vue';
+import { createRouter, createWebHashHistory } from 'vue-router';
+import { createAuthGuard } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+const router = createRouter({
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: Home
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: Profile,
+      beforeEnter: createAuthGuard(app)
+    }
+  ],
+  history: createWebHashHistory()
+});
+app.mount('#app');
+```
+
+Applying the guard to a route, as shown above, will only allow access to authenticated users. When a non-authenticated user tries to access a protected route, the SDK will redirect the user to Auth0 and redirect them back to your application's `redirect_uri` (which is configured in `createAuth0`, see [Configuring the plugin](#configuring-the-plugin)). Once the SDK is done processing the response from Auth0 and exchanging it for tokens, the SDK will redirect the user back to the protected route they were trying to access initially.
 
 ## Contributing
 
