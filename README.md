@@ -460,7 +460,7 @@ import { createApp } from 'vue';
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { createAuthGuard } from '@auth0/auth0-vue';
 
-const app = createApp(Playground);
+const app = createApp(App);
 const router = createRouter({
   routes: [
     {
