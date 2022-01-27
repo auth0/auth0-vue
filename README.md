@@ -54,7 +54,7 @@ Be sure to replace the filename with the correct name based on the actual releas
 - [Add login to your application](#add-login-to-your-application)
 - [Display the user profile](#display-the-user-profile)
 - [Add logout to your application](#add-logout-to-your-application)
-- [Retrieve an Access Token](#retrieve-an-access-token)
+- [Calling an API](#calling-an-api)
 - [Accessing ID Token claims](#accessing-id-token-claims)
 - [Error Handling](#error-handling)
 
@@ -281,7 +281,9 @@ Once setup returns the correct method, you can call that method from your compon
 
 </details>
 
-### Retrieve an Access Token
+### Calling an API
+
+In order to call an API, you will need to retrieve an Access Token and set it on the `Authorization` header of your request.
 
 Retrieving an Access Token can be done by using the `getAccessTokenSilently` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
 
@@ -296,15 +298,18 @@ Retrieving an Access Token can be done by using the `getAccessTokenSilently` fun
       return {
         doSomethingWithToken: async () => {
           const token = await getAccessTokenSilently();
-          // Here you can use the token the way you like
+          const response = await fetch('https://api.example.com/posts', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          const data = await response.json();
         }
       };
     }
   };
 </script>
 ```
-
-Once you have an Access Token, you can use it the way you want. Typically, an Access Token is retrieved in order to attach it as an `Authorization` header to every request that needs Authorization.
 
 <details>
   <summary>Using Options API</summary>
@@ -313,11 +318,16 @@ Once you have an Access Token, you can use it the way you want. Typically, an Ac
 <script>
   export default {
     methods: {
-      doSomethingWithToken() {
+      async doSomethingWithToken() {
         const token = await this.$auth0.getAccessTokenSilently();
-        // Here you can use the token the way you like
-      },
-    },
+        const response = await fetch('https://api.example.com/posts', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+      }
+    }
   };
 </script>
 ```
