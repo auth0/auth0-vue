@@ -132,7 +132,7 @@ export const createAuth0ClientProxy = (
 };
 
 /**
- * Angular specific state to be stored before redirect
+ * @ignore
  */
 export interface AppState {
   /**
