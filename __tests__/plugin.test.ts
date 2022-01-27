@@ -600,14 +600,14 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
-    loginWithPopupMock.mockRejectedValue('Some Error!');
+    loginWithPopupMock.mockRejectedValue('Some Error');
 
     try {
       await appMock.config.globalProperties.$auth0.loginWithPopup();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error!'
+      'Some Error'
     );
   });
 
@@ -619,14 +619,14 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
-    logoutMock.mockRejectedValue('Some Error!');
+    logoutMock.mockRejectedValue('Some Error');
 
     try {
       await appMock.config.globalProperties.$auth0.logout();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error!'
+      'Some Error'
     );
   });
 
@@ -638,14 +638,14 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
-    getTokenWithPopupMock.mockRejectedValue('Some Error!');
+    getTokenWithPopupMock.mockRejectedValue('Some Error');
 
     try {
       await appMock.config.globalProperties.$auth0.getAccessTokenWithPopup();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error!'
+      'Some Error'
     );
   });
 
@@ -657,14 +657,14 @@ describe('Auth0Plugin', () => {
 
     plugin.install(appMock);
 
-    getTokenSilentlyMock.mockRejectedValue('Some Error!');
+    getTokenSilentlyMock.mockRejectedValue('Some Error');
 
     try {
       await appMock.config.globalProperties.$auth0.getAccessTokenSilently();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error!'
+      'Some Error'
     );
   });
 
@@ -677,13 +677,13 @@ describe('Auth0Plugin', () => {
     try {
       plugin.install(appMock);
 
-      checkSessionMock.mockRejectedValue('Some Error!');
+      checkSessionMock.mockRejectedValue('Some Error');
 
       await appMock.config.globalProperties.$auth0.checkSession();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
-      'Some Error!'
+      'Some Error'
     );
   });
 
