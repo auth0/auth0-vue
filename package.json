@@ -83,11 +83,6 @@
   "peerDependencies": {
     "vue-router": "^4.0.12"
   },
-  "peerDependenciesMeta": {
-    "vue-router": {
-      "optional": true
-    }
-  },
   "files": [
     "src",
     "dist"
