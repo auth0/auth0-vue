@@ -44,25 +44,23 @@ describe('createAuthGuard', () => {
 
     auth0Mock.isLoading.value = true;
 
-    expect.assertions(3);
+    expect.assertions(4);
 
-    setTimeout(() => {
-      expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
-
-      auth0Mock.isLoading.value = false;
-
-      expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
-
-      watchEffectMock();
-
-      setTimeout(() => {
-        expect(auth0Mock.loginWithRedirect).toHaveBeenCalled();
-      });
+    guard({
+      fullPath: 'abc'
+    } as any).then(() => {
+      expect(true).toBeTruthy();
     });
 
-    await guard({
-      fullPath: 'abc'
-    } as any);
+    expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
+
+    auth0Mock.isLoading.value = false;
+
+    expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
+
+    await watchEffectMock();
+
+    expect(auth0Mock.loginWithRedirect).toHaveBeenCalled();
   });
 
   it('should return true when authenticated', async () => {

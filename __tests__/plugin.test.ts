@@ -254,17 +254,14 @@ describe('Auth0Plugin', () => {
 
   it('should call the router, if provided, with the target path', async () => {
     const routerPushMock = jest.fn();
-    const plugin = createAuth0(
-      {
-        domain: '',
-        client_id: ''
-      },
-      {
-        router: {
-          push: routerPushMock
-        } as any
-      }
-    );
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    };
 
     handleRedirectCallbackMock.mockResolvedValue({
       appState: {
@@ -281,17 +278,14 @@ describe('Auth0Plugin', () => {
 
   it('should call the router, if provided, with the default path when no target provided', async () => {
     const routerPushMock = jest.fn();
-    const plugin = createAuth0(
-      {
-        domain: '',
-        client_id: ''
-      },
-      {
-        router: {
-          push: routerPushMock
-        } as any
-      }
-    );
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    };
 
     handleRedirectCallbackMock.mockResolvedValue({
       appState: {}

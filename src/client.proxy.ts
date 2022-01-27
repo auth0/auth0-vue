@@ -21,7 +21,7 @@ import { Router } from 'vue-router';
  */
 export const createAuth0ClientProxy = (
   options: Auth0ClientOptions,
-  router?: Router
+  globalProperties?: Record<string, any>
 ): Auth0VueClient => {
   const client = new SpaAuth0Client(options);
   const isLoading: Ref<boolean> = ref(true);
@@ -112,7 +112,9 @@ export const createAuth0ClientProxy = (
       const appState = result?.appState;
       const target = appState?.target ?? '/';
 
-      if (router) {
+      const router = globalProperties.$router as Router;
+
+      if (router && router.push) {
         router.push(target);
       }
 

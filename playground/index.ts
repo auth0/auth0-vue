@@ -15,23 +15,21 @@ const client_id = res?.client_id || defaultClientId;
 const audience = res?.audience || defaultAudience;
 
 const app = createApp(Playground);
-const router = createRouter(app, {
-  domain,
-  client_id,
-  audience
-});
 app
   .use(
-    createAuth0(
-      {
-        domain,
-        client_id,
-        audience,
-        useFormData: res?.useFormData || true,
-        redirect_uri: window.location.origin
-      },
-      { router }
-    )
+    createRouter(app, {
+      domain,
+      client_id,
+      audience
+    })
   )
-  .use(router)
+  .use(
+    createAuth0({
+      domain,
+      client_id,
+      audience,
+      useFormData: res?.useFormData || true,
+      redirect_uri: window.location.origin
+    })
+  )
   .mount('#app');
