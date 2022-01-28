@@ -23,8 +23,6 @@ export function createAuthGuard(app: App) {
       }
 
       await auth0.loginWithRedirect({ appState: { target: to.fullPath } });
-
-      return false;
     };
 
     if (!auth0.isLoading.value) {
