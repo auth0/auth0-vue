@@ -30,6 +30,11 @@ const fixCookies = () => {
   }
 };
 
+const logout = () => {
+  cy.get('button[data-cy=logout]').should('be.visible').click();
+  cy.get('button[name=logout]').should('be.visible').click();
+};
+
 describe('Smoke tests', () => {
   afterEach(fixCookies);
 
@@ -45,6 +50,8 @@ describe('Smoke tests', () => {
     login();
 
     cy.get('[data-cy=authenticated]').contains('true');
+
+    logout();
   });
 
   it('do redirect login and show user and access token', () => {
@@ -59,8 +66,43 @@ describe('Smoke tests', () => {
     cy.get('[data-cy=access-token]').should('not.exist');
     cy.get('[data-cy=get-token]').click();
     cy.get('[data-cy=access-token]').should('have.length', 1);
-    cy.get('#logout').should('be.visible').click();
-    cy.get('button[name=logout]').should('be.visible').click();
+
+    logout();
+
     cy.get('#login_redirect').should('be.visible');
+  });
+
+  it('redirect to login when accessing a protected route', () => {
+    cy.visit('/#/profile');
+
+    cy.url().should('not.contain', 'http://127.0.0.1:3000/#/profile');
+    cy.url().should('include', 'http://127.0.0.1:3000');
+
+    login();
+
+    cy.url().should('include', 'http://127.0.0.1:3000/#/profile');
+    cy.get('.profile-header').contains(EMAIL);
+
+    cy.get('[data-cy=home-menu]').should('be.visible').click();
+
+    logout();
+  });
+
+  it('does not redirect to login when accessing a protected route while authenticated', () => {
+    cy.visit('/');
+    cy.get('#login_redirect').should('be.visible').click();
+
+    cy.url().should('include', 'http://127.0.0.1:3000');
+
+    login();
+
+    cy.get('[data-cy=profile-menu]').should('be.visible').click();
+
+    cy.url().should('include', 'http://127.0.0.1:3000/#/profile');
+    cy.get('.profile-header').contains(EMAIL);
+
+    cy.get('[data-cy=home-menu]').should('be.visible').click();
+
+    logout();
   });
 });

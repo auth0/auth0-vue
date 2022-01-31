@@ -53,14 +53,14 @@ const config = {
     }
   ],
   claims: {
-    org_id: null
+    profile: ['name']
   },
   routes: {
     authorization: '/authorize', // lgtm [js/hardcoded-credentials]
     token: '/oauth/token',
     end_session: '/v2/logout'
   },
-  scopes: ['openid', 'offline_access'],
+  scopes: ['openid', 'offline_access', 'profile'],
   clientBasedCORS(ctx, origin, client) {
     return true;
   },
@@ -72,6 +72,7 @@ const config = {
       enabled: true
     }
   },
+  conformIdTokenClaims: false,
   rotateRefreshToken: true,
   interactions: {
     policy
@@ -82,6 +83,7 @@ const config = {
       claims(use, scope, claims) {
         return {
           sub: id,
+          name: id,
           ...(claims?.org_id ? { org_id: claims.org_id.values[0] } : null)
         };
       }
