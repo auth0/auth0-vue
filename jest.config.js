@@ -1,7 +1,9 @@
+/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
 module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
   rootDir: './',
   clearMocks: true,
-  testEnvironment: 'jsdom',
   moduleFileExtensions: ['ts', 'js'],
   testMatch: ['**/__tests__/**/*.test.ts'],
   coveragePathIgnorePatterns: [
@@ -15,11 +17,5 @@ module.exports = {
     ['jest-junit', { outputDirectory: 'test-results/jest' }]
   ],
   coverageReporters: ['lcov', 'text', 'text-summary'],
-  preset: 'ts-jest',
-  setupFiles: [],
-  globals: {
-    'ts-jest': {
-      tsconfig: './tsconfig.test.json'
-    }
-  }
+  setupFiles: []
 };
