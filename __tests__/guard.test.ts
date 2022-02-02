@@ -9,6 +9,7 @@ jest.mock('vue', () => {
     ...(jest.requireActual('vue') as any),
     watchEffect: function (cb) {
       watchEffectMock = cb;
+      return () => {};
     }
   };
 });
@@ -44,13 +45,15 @@ describe('createAuthGuard', () => {
 
     auth0Mock.isLoading.value = true;
 
-    expect.assertions(4);
+    expect.assertions(3);
 
-    guard({
-      fullPath: 'abc'
-    } as any).then(() => {
-      expect(true).toBeTruthy();
-    });
+    guard(
+      {
+        fullPath: 'abc'
+      } as any,
+      null,
+      () => {}
+    );
 
     expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
 
@@ -68,20 +71,31 @@ describe('createAuthGuard', () => {
 
     auth0Mock.isAuthenticated.value = true;
 
-    const result = await guard({
-      fullPath: 'abc'
-    } as any);
+    expect.assertions(2);
 
-    expect(result).toBe(true);
+    const result = guard(
+      {
+        fullPath: 'abc'
+      } as any,
+      null,
+      r => r
+    );
+    expect(result).toBeTruthy();
     expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
   });
 
   it('should call loginWithRedirect', async () => {
     const guard = createAuthGuard(appMock);
 
-    await guard({
-      fullPath: 'abc'
-    } as any);
+    expect.assertions(1);
+
+    guard(
+      {
+        fullPath: 'abc'
+      } as any,
+      null,
+      () => {}
+    );
 
     expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
       expect.objectContaining({
