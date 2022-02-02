@@ -282,7 +282,26 @@ Once setup returns the correct method, you can call that method from your compon
 
 ### Calling an API
 
-In order to call an API, you will need to retrieve an Access Token and set it on the `Authorization` header of your request.
+In order to call an API, you will need to configure the plugin by setting the `audience` to the API Identifier of the API in question.
+
+```js
+import { createAuth0 } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    client_id: '<AUTH0_CLIENT_ID>',
+    redirect_uri: '<MY_CALLBACK_URL>',
+    audience: '<AUTH0_AUDIENCE>'
+  })
+);
+
+app.mount('#app');
+```
+
+After configuring the plugin, you will need to retrieve an Access Token and set it on the `Authorization` header of your request.
 
 Retrieving an Access Token can be done by using the `getAccessTokenSilently` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
 
