@@ -1,0 +1,9 @@
+{
+  "files": {
+    "src/version.ts": [],
+    "README.md": [
+      "{MAJOR}.{MINOR}"
+    ]
+  },
+  "postbump": "npm run docs"
+}
