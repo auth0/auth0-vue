@@ -38,7 +38,7 @@ export const createAuth0ClientProxy = (
     isLoading.value = false;
   }
 
-  async function __proxy<T>(cb: () => T) {
+  async function __proxy<T>(cb: () => T, refreshState = true) {
     let result;
     try {
       result = await cb();
@@ -47,7 +47,9 @@ export const createAuth0ClientProxy = (
       error.value = e;
       throw e;
     } finally {
-      await __refreshState();
+      if (refreshState) {
+        await __refreshState();
+      }
     }
 
     return result;
@@ -87,7 +89,7 @@ export const createAuth0ClientProxy = (
     },
 
     async logout(options?: LogoutOptions) {
-      return __proxy(() => client.logout(options));
+      return __proxy(() => client.logout(options), options.localOnly);
     },
 
     getAccessTokenSilently,
