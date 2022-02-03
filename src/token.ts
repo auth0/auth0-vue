@@ -1,5 +1,5 @@
 import { InjectionKey } from 'vue';
-import { Auth0VueClient } from './client.proxy';
+import { Auth0VueClient } from './interfaces';
 
 /**
  * @ignore
