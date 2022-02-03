@@ -466,10 +466,10 @@ If you are using our Auth0-Vue SDK with [Vue-Router](https://next.router.vuejs.o
 ```ts
 import { createApp } from 'vue';
 import { createRouter, createWebHashHistory } from 'vue-router';
-import { createAuthGuard } from '@auth0/auth0-vue';
+import { createAuth0, createAuthGuard } from '@auth0/auth0-vue';
 
 const app = createApp(App);
-const router = createRouter({
+app.use(createRouter({
   routes: [
     {
       path: '/',
@@ -484,7 +484,8 @@ const router = createRouter({
     }
   ],
   history: createWebHashHistory()
-});
+}));
+app.use(createAuth0({ ... }));
 app.mount('#app');
 ```
 
