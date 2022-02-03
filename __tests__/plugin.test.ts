@@ -622,7 +622,9 @@ describe('Auth0Plugin', () => {
     logoutMock.mockRejectedValue('Some Error');
 
     try {
-      await appMock.config.globalProperties.$auth0.logout();
+      await appMock.config.globalProperties.$auth0.logout({
+        localOnly: true
+      });
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
