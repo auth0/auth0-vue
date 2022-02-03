@@ -282,7 +282,7 @@ Once setup returns the correct method, you can call that method from your compon
 
 ### Calling an API
 
-In order to call an API, you will need to configure the plugin by setting the `audience` to the API Identifier of the API in question.
+To call an API, configure the plugin by setting the `audience` to the API Identifier of the API in question:
 
 ```js
 import { createAuth0 } from '@auth0/auth0-vue';
