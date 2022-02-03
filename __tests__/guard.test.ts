@@ -45,15 +45,13 @@ describe('createAuthGuard', () => {
 
     auth0Mock.isLoading.value = true;
 
-    expect.assertions(3);
+    expect.assertions(4);
 
-    guard(
-      {
-        fullPath: 'abc'
-      } as any,
-      null,
-      () => {}
-    );
+    guard({
+      fullPath: 'abc'
+    } as any).then(() => {
+      expect(true).toBeTruthy();
+    });
 
     expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
 
@@ -73,14 +71,11 @@ describe('createAuthGuard', () => {
 
     expect.assertions(2);
 
-    const result = guard(
-      {
-        fullPath: 'abc'
-      } as any,
-      null,
-      r => r
-    );
-    expect(result).toBeTruthy();
+    const result = await guard({
+      fullPath: 'abc'
+    } as any);
+
+    expect(result).toBe(true);
     expect(auth0Mock.loginWithRedirect).not.toHaveBeenCalled();
   });
 
@@ -89,13 +84,9 @@ describe('createAuthGuard', () => {
 
     expect.assertions(1);
 
-    guard(
-      {
-        fullPath: 'abc'
-      } as any,
-      null,
-      () => {}
-    );
+    await guard({
+      fullPath: 'abc'
+    } as any);
 
     expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
       expect.objectContaining({
