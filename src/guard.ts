@@ -1,6 +1,6 @@
 import { App, watchEffect } from 'vue';
 import { RouteLocation } from 'vue-router';
-import { Auth0VueClient } from './client.proxy';
+import { Auth0VueClient } from './interfaces';
 import { AUTH0_TOKEN } from './token';
 
 function waitForLoading(auth0: Auth0VueClient) {
