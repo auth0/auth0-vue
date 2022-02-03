@@ -469,8 +469,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import { createAuth0, createAuthGuard } from '@auth0/auth0-vue';
 
 const app = createApp(App);
-app.use(createAuth0({ ... }));
-app.use(createAuth0(createRouter({
+app.use(createRouter({
   routes: [
     {
       path: '/',
@@ -485,7 +484,8 @@ app.use(createAuth0(createRouter({
     }
   ],
   history: createWebHashHistory()
-})));
+}));
+app.use(createAuth0({ ... }));
 app.mount('#app');
 ```
 
