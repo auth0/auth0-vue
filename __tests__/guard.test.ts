@@ -9,6 +9,7 @@ jest.mock('vue', () => {
     ...(jest.requireActual('vue') as any),
     watchEffect: function (cb) {
       watchEffectMock = cb;
+      return () => {};
     }
   };
 });
@@ -68,6 +69,8 @@ describe('createAuthGuard', () => {
 
     auth0Mock.isAuthenticated.value = true;
 
+    expect.assertions(2);
+
     const result = await guard({
       fullPath: 'abc'
     } as any);
@@ -78,6 +81,8 @@ describe('createAuthGuard', () => {
 
   it('should call loginWithRedirect', async () => {
     const guard = createAuthGuard(appMock);
+
+    expect.assertions(1);
 
     await guard({
       fullPath: 'abc'

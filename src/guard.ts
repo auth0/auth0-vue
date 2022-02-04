@@ -1,17 +1,8 @@
-import { App, watchEffect } from 'vue';
+import { App } from 'vue';
 import { RouteLocation } from 'vue-router';
 import { Auth0VueClient } from './interfaces';
 import { AUTH0_TOKEN } from './token';
-
-function waitForLoading(auth0: Auth0VueClient) {
-  return new Promise<void>(resolve => {
-    watchEffect(() => {
-      if (!auth0.isLoading.value) {
-        resolve();
-      }
-    });
-  });
-}
+import { watchEffectOnceAsync } from './utils';
 
 export function createAuthGuard(app: App) {
   return async (to: RouteLocation) => {
@@ -23,13 +14,15 @@ export function createAuthGuard(app: App) {
       }
 
       await auth0.loginWithRedirect({ appState: { target: to.fullPath } });
+
+      return false;
     };
 
     if (!auth0.isLoading.value) {
       return fn();
     }
 
-    await waitForLoading(auth0);
+    await watchEffectOnceAsync(() => !auth0.isLoading.value);
 
     return fn();
   };
