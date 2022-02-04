@@ -2,7 +2,7 @@ import { App } from 'vue';
 import { RouteLocation } from 'vue-router';
 import { Auth0VueClient } from './interfaces';
 import { AUTH0_TOKEN } from './token';
-import { watchEffectOncePromise } from './utils';
+import { watchEffectOnceAsync } from './utils';
 
 export function createAuthGuard(app: App) {
   return async (to: RouteLocation) => {
@@ -22,7 +22,7 @@ export function createAuthGuard(app: App) {
       return fn();
     }
 
-    await watchEffectOncePromise(() => !auth0.isLoading.value);
+    await watchEffectOnceAsync(() => !auth0.isLoading.value);
 
     return fn();
   };

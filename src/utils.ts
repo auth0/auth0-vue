@@ -3,7 +3,7 @@ import { watchEffect } from 'vue';
 /**
  * @ignore
  */
-export function watchEffectOncePromise<T>(watcher: () => T) {
+export function watchEffectOnceAsync<T>(watcher: () => T) {
   return new Promise<void>(resolve => {
     watchEffectOnce(watcher, resolve);
   });
