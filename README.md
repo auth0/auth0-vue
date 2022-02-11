@@ -1,6 +1,8 @@
 # @auth0/auth0-vue
 
-Auth0 SDK for Vue Applications using [Authorization Code Grant Flow with PKCE](https://auth0.com/docs/api-auth/tutorials/authorization-code-grant-pkce).
+Auth0 SDK (beta) for Vue 3 Applications using [Authorization Code Grant Flow with PKCE](https://auth0.com/docs/api-auth/tutorials/authorization-code-grant-pkce).
+
+> ⚠️ For integrating Auth0 with a Vue 2 application, please read [the Vue 2 Quickstart](https://auth0.com/docs/quickstart/spa/vuejs).
 
 ![Stage: Beta Release](https://img.shields.io/badge/stage-beta-orange)
 [![CircleCI](https://img.shields.io/circleci/build/github/auth0/auth0-vue)](https://circleci.com/gh/auth0/auth0-vue)
