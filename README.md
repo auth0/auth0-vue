@@ -22,6 +22,7 @@ Auth0 SDK for Vue Applications using [Authorization Code Grant Flow with PKCE](h
 ## Documentation
 
 - [API reference](https://auth0.github.io/auth0-vue)
+- [Quickstart Guide](https://auth0.com/docs/quickstart/spa/vuejs-beta)
 
 ## Installation
 
