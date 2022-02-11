@@ -7,6 +7,8 @@ Auth0 SDK for Vue Applications using [Authorization Code Grant Flow with PKCE](h
 [![codecov](https://codecov.io/gh/auth0/auth0-vue/branch/main/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-vue)
 [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
+> ⚠️ This is a **beta release** of the Vue SDK for Auth0. As with all beta software, this **should not be considered stable or suitable for production use**. If you have any feedback on this release, please [create an issue](https://github.com/auth0/auth0-vue/issues/new/choose).
+
 ## Table of Contents
 
 - [Documentation](#documentation)
@@ -22,31 +24,21 @@ Auth0 SDK for Vue Applications using [Authorization Code Grant Flow with PKCE](h
 ## Documentation
 
 - [API reference](https://auth0.github.io/auth0-vue)
+- [Quickstart Guide](https://auth0.com/docs/quickstart/spa/vuejs-beta)
 
 ## Installation
-
-During the Early Access period, our SDK is not published to npm.
-However, a tarball is available as an artifact on the GitHub release(s) marked as `alpha`.
-
-- Navigate to https://github.com/auth0/auth0-vue/releases
-- Select the latest `v1.0.0-alpha.x` release
-- Download the corresponding tarball (`.tgz`) file.
-
-Installing the SDK in your Vue application can be done by installing the tarball:
 
 Using [npm](https://npmjs.org):
 
 ```sh
-npm install ../path/to/auth0-auth0-vue-1.0.0-alpha.x.tgz
+npm install @auth0/auth0-vue@beta
 ```
 
 Using [yarn](https://yarnpkg.com):
 
 ```sh
-yarn add ../path/to/auth0-auth0-vue-1.0.0-alpha.x.tgz
+yarn add @auth0/auth0-vue@beta
 ```
-
-Be sure to replace the filename with the correct name based on the actual release that you have downloaded.
 
 ## Getting Started
 
