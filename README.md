@@ -7,6 +7,8 @@ Auth0 SDK for Vue Applications using [Authorization Code Grant Flow with PKCE](h
 [![codecov](https://codecov.io/gh/auth0/auth0-vue/branch/main/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-vue)
 [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 
+> ⚠️ This is a **beta release** of the Vue SDK for Auth0. As with all beta software, this **should not be considered stable or suitable for production use**. If you have any feedback on this release, please [create an issue](https://github.com/auth0/auth0-vue/issues/new/choose).
+
 ## Table of Contents
 
 - [Documentation](#documentation)
