@@ -2,8 +2,17 @@
 <a href="#auth0auth0-vue" id="auth0auth0-vue" style="color: inherit; text-decoration: none;">
   <h1>@auth0/auth0-vue</h1>
 </a>
-<p>Auth0 SDK for Vue Applications using <a href="https://auth0.com/docs/api-auth/tutorials/authorization-code-grant-pkce">Authorization Code Grant Flow with PKCE</a>.</p>
-<p><a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/:license-mit-blue.svg?style=flat" alt="License"></a></p>
+<p>Auth0 SDK (beta) for Vue 3 Applications using <a href="https://auth0.com/docs/api-auth/tutorials/authorization-code-grant-pkce">Authorization Code Grant Flow with PKCE</a>.</p>
+<blockquote>
+<p>⚠️ For integrating Auth0 with a Vue 2 application, please read <a href="https://auth0.com/docs/quickstart/spa/vuejs">the Vue 2 Quickstart</a>.</p>
+</blockquote>
+<p><img src="https://img.shields.io/badge/stage-beta-orange" alt="Stage: Beta Release">
+<a href="https://circleci.com/gh/auth0/auth0-vue"><img src="https://img.shields.io/circleci/build/github/auth0/auth0-vue" alt="CircleCI"></a>
+<a href="https://codecov.io/gh/auth0/auth0-vue"><img src="https://codecov.io/gh/auth0/auth0-vue/branch/main/graph/badge.svg" alt="codecov"></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/:license-mit-blue.svg?style=flat" alt="License"></a></p>
+<blockquote>
+<p>⚠️ This is a <strong>beta release</strong> of the Vue SDK for Auth0. As with all beta software, this <strong>should not be considered stable or suitable for production use</strong>. If you have any feedback on this release, please <a href="https://github.com/auth0/auth0-vue/issues/new/choose">create an issue</a>.</p>
+</blockquote>
 
 <a href="#table-of-contents" id="table-of-contents" style="color: inherit; text-decoration: none;">
   <h2>Table of Contents</h2>
@@ -24,27 +33,19 @@
   <h2>Documentation</h2>
 </a>
 <ul>
-<li><a href="https://redesigned-enigma-d5afae7c.pages.github.io">API reference</a></li>
+<li><a href="https://auth0.github.io/auth0-vue">API reference</a></li>
+<li><a href="https://auth0.com/docs/quickstart/spa/vuejs-beta">Quickstart Guide</a></li>
 </ul>
 
 <a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
   <h2>Installation</h2>
 </a>
-<p>During the Early Access period, our SDK is not published to npm.
-However, a tarball is available as an artifact on the GitHub release(s) marked as <code>alpha</code>.</p>
-<ul>
-<li>Navigate to <a href="https://github.com/auth0/auth0-vue/releases">https://github.com/auth0/auth0-vue/releases</a></li>
-<li>Select the latest <code>v1.0.0-alpha.x</code> release</li>
-<li>Download the corresponding tarball (<code>.tgz</code>) file.</li>
-</ul>
-<p>Installing the SDK in your Vue application can be done by installing the tarball:</p>
 <p>Using <a href="https://npmjs.org">npm</a>:</p>
-<pre><code class="language-sh"><span class="hl-1">npm install ../path/to/auth0-auth0-vue-1.0.0-alpha.x.tgz</span>
+<pre><code class="language-sh"><span class="hl-1">npm install @auth0/auth0-vue@beta</span>
 </code></pre>
 <p>Using <a href="https://yarnpkg.com">yarn</a>:</p>
-<pre><code class="language-sh"><span class="hl-1">yarn add ../path/to/auth0-auth0-vue-1.0.0-alpha.x.tgz</span>
+<pre><code class="language-sh"><span class="hl-1">yarn add @auth0/auth0-vue@beta</span>
 </code></pre>
-<p>Be sure to replace the filename with the correct name based on the actual release that you have downloaded.</p>
 
 <a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
   <h2>Getting Started</h2>
