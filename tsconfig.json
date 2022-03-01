@@ -10,5 +10,5 @@
     "noImplicitAny": true,
     "downlevelIteration": true
   },
-  "exclude": ["./__tests__", "./dist/typings", "**/__mocks__/**"]
+  "exclude": ["./__tests__", "./dist/typings", "**/__mocks__/**", "./playground"]
 }
