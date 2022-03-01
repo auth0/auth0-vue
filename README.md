@@ -482,7 +482,7 @@ If you are using our Auth0-Vue SDK with [Vue-Router](https://next.router.vuejs.o
 ```ts
 import { createApp } from 'vue';
 import { createRouter, createWebHashHistory } from 'vue-router';
-import { createAuth0, createAuthGuard } from '@auth0/auth0-vue';
+import { createAuth0, authGuard } from '@auth0/auth0-vue';
 
 const app = createApp(App);
 app.use(createRouter({
@@ -496,7 +496,7 @@ app.use(createRouter({
       path: '/profile',
       name: 'profile',
       component: Profile,
-      beforeEnter: createAuthGuard(app)
+      beforeEnter: authGuard
     }
   ],
   history: createWebHashHistory()
@@ -506,6 +506,8 @@ app.mount('#app');
 ```
 
 Applying the guard to a route, as shown above, will only allow access to authenticated users. When a non-authenticated user tries to access a protected route, the SDK will redirect the user to Auth0 and redirect them back to your application's `redirect_uri` (which is configured in `createAuth0`, see [Configuring the plugin](#configuring-the-plugin)). Once the SDK is done processing the response from Auth0 and exchanging it for tokens, the SDK will redirect the user back to the protected route they were trying to access initially.
+
+> ⚠️ If you are using multiple Vue applications with our SDK on a single page, using the above guard does not support a situation where the Auth0 Domain and ClientID would be different. In that case, read [our guide on protecting a route when using multiple Vue applications](EXAMPLES.md#1-protecting-a-route-when-using-multiple-vue-applications).
 
 ## Contributing
 

@@ -1,4 +1,4 @@
-import { App } from 'vue';
+import { App, Ref, ref } from 'vue';
 import { createAuth0ClientProxy } from './client.proxy';
 import {
   Auth0PluginOptions,
@@ -7,6 +7,11 @@ import {
 } from './interfaces';
 import { AUTH0_INJECTION_KEY, AUTH0_TOKEN } from './token';
 import version from './version';
+
+/**
+ * @ignore
+ */
+export const client: Ref<Auth0VueClient> = ref(null);
 
 /**
  * @ignore
@@ -33,6 +38,8 @@ export class Auth0Plugin {
 
     app.config.globalProperties[AUTH0_TOKEN] = proxy;
     app.provide(AUTH0_INJECTION_KEY, proxy);
+
+    client.value = proxy;
   }
 
   private async __checkSession(proxy: Auth0VueClient) {
