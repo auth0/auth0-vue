@@ -14,10 +14,9 @@ const domain = res?.domain || defaultDomain;
 const client_id = res?.client_id || defaultClientId;
 const audience = res?.audience || defaultAudience;
 
-const app = createApp(Playground);
-app
+createApp(Playground)
   .use(
-    createRouter(app, {
+    createRouter({
       domain,
       client_id,
       audience
