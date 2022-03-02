@@ -53,7 +53,6 @@ workflows:
           publish-command: npm publish --tag beta
           context:
             - publish-npm
-            - publish-gh
           filters:
             branches:
               only:
