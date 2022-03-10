@@ -54,7 +54,5 @@ export class Auth0Plugin {
     } else {
       await proxy.checkSession();
     }
-
-    window.history.replaceState({}, '', '/');
   }
 }
