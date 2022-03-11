@@ -89,7 +89,7 @@ export const createAuth0ClientProxy = (
     },
 
     async logout(options?: LogoutOptions) {
-      return __proxy(() => client.logout(options), options.localOnly);
+      return __proxy(() => client.logout(options), options?.localOnly);
     },
 
     getAccessTokenSilently,
