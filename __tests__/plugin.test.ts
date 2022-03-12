@@ -357,6 +357,18 @@ describe('Auth0Plugin', () => {
     expect(logoutMock).toHaveBeenCalledWith(logoutOptions);
   });
 
+  it('should proxy logout without options', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.logout();
+    expect(logoutMock).toHaveBeenCalledWith(undefined);
+  });
+
   it('should proxy getAccessTokenSilently', async () => {
     const plugin = createAuth0({
       domain: '',
