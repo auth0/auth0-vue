@@ -50,7 +50,12 @@ export class Auth0Plugin {
       search.includes('state=') &&
       !this.pluginOptions?.skipRedirectCallback
     ) {
-      await proxy.handleRedirectCallback();
+      const res = await proxy.handleRedirectCallback();
+      window.history.replaceState(
+        {},
+        document.title,
+        res?.appState?.target || window.location.pathname
+      );
     } else {
       await proxy.checkSession();
     }
