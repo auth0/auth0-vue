@@ -30,7 +30,7 @@ Move into the application directory (`my-app` if you used the commands above) to
 
 ### Install the SDK
 
-After creating a new Vue app using the CLI, install the [Auth0 Client SDK](https://github.com/auth0/auth0-spa-js):
+After creating a new Vue app using the CLI, install the [Auth0 SPA SDK](https://github.com/auth0/auth0-spa-js):
 
 ```bash
 npm install @auth0/auth0-spa-js
