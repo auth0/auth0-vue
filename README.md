@@ -2,7 +2,7 @@
 
 Auth0 SDK for Vue 3 Applications using [Authorization Code Grant Flow with PKCE](https://auth0.com/docs/api-auth/tutorials/authorization-code-grant-pkce).
 
-> ⚠️ For integrating Auth0 with a Vue 2 application, please read [the Vue 2 Tutorial](tutorial/vue2-login.md).
+> ⚠️ For integrating Auth0 with a Vue 2 application, please read [the Vue 2 Tutorial](https://github.com/auth0/auth0-vue/blob/main/tutorial/vue2-login.md).
 
 ![Stage: Stable Release](https://img.shields.io/badge/stage-stable-green)
 [![CircleCI](https://img.shields.io/circleci/build/github/auth0/auth0-vue)](https://circleci.com/gh/auth0/auth0-vue)
@@ -505,7 +505,7 @@ app.mount('#app');
 
 Applying the guard to a route, as shown above, will only allow access to authenticated users. When a non-authenticated user tries to access a protected route, the SDK will redirect the user to Auth0 and redirect them back to your application's `redirect_uri` (which is configured in `createAuth0`, see [Configuring the plugin](#configuring-the-plugin)). Once the SDK is done processing the response from Auth0 and exchanging it for tokens, the SDK will redirect the user back to the protected route they were trying to access initially.
 
-> ⚠️ If you are using multiple Vue applications with our SDK on a single page, using the above guard does not support a situation where the Auth0 Domain and ClientID would be different. In that case, read [our guide on protecting a route when using multiple Vue applications](EXAMPLES.md#1-protecting-a-route-when-using-multiple-vue-applications).
+> ⚠️ If you are using multiple Vue applications with our SDK on a single page, using the above guard does not support a situation where the Auth0 Domain and ClientID would be different. In that case, read [our guide on protecting a route when using multiple Vue applications](https://github.com/auth0/auth0-vue/blob/main/EXAMPLES.md#1-protecting-a-route-when-using-multiple-vue-applications).
 
 ## Contributing
 
@@ -513,7 +513,7 @@ We appreciate feedback and contribution to this repo! Before you get started, pl
 
 - [Auth0's general contribution guidelines](https://github.com/auth0/open-source-template/blob/master/GENERAL-CONTRIBUTING.md)
 - [Auth0's code of conduct guidelines](https://github.com/auth0/open-source-template/blob/master/CODE-OF-CONDUCT.md)
-- [This repo's contribution guide](CONTRIBUTING.md)
+- [This repo's contribution guide](https://github.com/auth0/auth0-vue/blob/main/CONTRIBUTING.md)
 
 ## Support + Feedback
 
@@ -521,7 +521,7 @@ For support or to provide feedback, please [raise an issue on our issue tracker]
 
 ## Frequently Asked Questions
 
-For a rundown of common issues you might encounter when using the SDK, please check out [the FAQ](FAQ.md).
+For a rundown of common issues you might encounter when using the SDK, please check out [the FAQ](https://github.com/auth0/auth0-vue/blob/main/FAQ.md).
 
 ## Vulnerability Reporting
 
