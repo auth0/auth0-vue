@@ -73,14 +73,15 @@ describe('Smoke tests', () => {
   });
 
   it('redirect to login when accessing a protected route', () => {
-    cy.visit('/#/profile');
+    cy.visit('/');
+    cy.get('[data-cy=profile-menu]').should('be.visible').click();
 
-    cy.url().should('not.contain', 'http://127.0.0.1:3000/#/profile');
+    cy.url().should('not.contain', 'http://127.0.0.1:3000/profile');
     cy.url().should('include', 'http://127.0.0.1:3000');
 
     login();
 
-    cy.url().should('include', 'http://127.0.0.1:3000/#/profile');
+    cy.url().should('include', 'http://127.0.0.1:3000/profile');
     cy.get('.profile-header').contains(EMAIL);
 
     cy.get('[data-cy=home-menu]').should('be.visible').click();
@@ -98,7 +99,7 @@ describe('Smoke tests', () => {
 
     cy.get('[data-cy=profile-menu]').should('be.visible').click();
 
-    cy.url().should('include', 'http://127.0.0.1:3000/#/profile');
+    cy.url().should('include', 'http://127.0.0.1:3000/profile');
     cy.get('.profile-header').contains(EMAIL);
 
     cy.get('[data-cy=home-menu]').should('be.visible').click();
