@@ -21,8 +21,7 @@ import { Auth0VueClient, AppState } from './interfaces';
  * @ignore
  */
 export const createAuth0ClientProxy = (
-  options: Auth0ClientOptions,
-  globalProperties?: Record<string, any>
+  options: Auth0ClientOptions
 ): Auth0VueClient => {
   const client = new SpaAuth0Client(options);
   const isLoading: Ref<boolean> = ref(true);
@@ -89,7 +88,7 @@ export const createAuth0ClientProxy = (
     },
 
     async logout(options?: LogoutOptions) {
-      return __proxy(() => client.logout(options), options.localOnly);
+      return __proxy(() => client.logout(options), options?.localOnly);
     },
 
     getAccessTokenSilently,
@@ -108,20 +107,7 @@ export const createAuth0ClientProxy = (
     async handleRedirectCallback(
       url?: string
     ): Promise<RedirectLoginResult<AppState>> {
-      const result = await __proxy(() =>
-        client.handleRedirectCallback<AppState>(url)
-      );
-
-      const appState = result?.appState;
-      const target = appState?.target ?? '/';
-
-      const router = globalProperties.$router as Router;
-
-      if (router && router.push) {
-        router.push(target);
-      }
-
-      return result;
+      return __proxy(() => client.handleRedirectCallback<AppState>(url));
     },
 
     async buildAuthorizeUrl(options?: RedirectLoginOptions) {

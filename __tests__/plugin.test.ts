@@ -201,7 +201,7 @@ describe('Auth0Plugin', () => {
     expect(handleRedirectCallbackMock).not.toHaveBeenCalled();
 
     return flushPromises().then(() => {
-      expect(replaceStateMock).toHaveBeenCalled();
+      expect(replaceStateMock).not.toHaveBeenCalled();
     });
   });
 
@@ -225,7 +225,7 @@ describe('Auth0Plugin', () => {
     expect(handleRedirectCallbackMock).not.toHaveBeenCalled();
 
     return flushPromises().then(() => {
-      expect(replaceStateMock).toHaveBeenCalled();
+      expect(replaceStateMock).not.toHaveBeenCalled();
     });
   });
 
@@ -271,11 +271,20 @@ describe('Auth0Plugin', () => {
       }
     });
 
+    const urlParams = new URLSearchParams(window.location.search);
+
+    urlParams.set('code', '123');
+    urlParams.set('state', 'xyz');
+
+    window.location.search = urlParams as any;
+
     plugin.install(appMock);
 
-    await appMock.config.globalProperties.$auth0.handleRedirectCallback();
+    expect.assertions(1);
 
-    expect(routerPushMock).toHaveBeenCalledWith('abc');
+    return flushPromises().then(() => {
+      expect(routerPushMock).toHaveBeenCalledWith('abc');
+    });
   });
 
   it('should call the router, if provided, with the default path when no target provided', async () => {
@@ -293,11 +302,18 @@ describe('Auth0Plugin', () => {
       appState: {}
     });
 
+    const urlParams = new URLSearchParams(window.location.search);
+
+    urlParams.set('code', '123');
+    urlParams.set('state', 'xyz');
+
+    window.location.search = urlParams as any;
+
     plugin.install(appMock);
 
-    await appMock.config.globalProperties.$auth0.handleRedirectCallback();
-
-    expect(routerPushMock).toHaveBeenCalledWith('/');
+    return flushPromises().then(() => {
+      expect(routerPushMock).toHaveBeenCalledWith('/');
+    });
   });
 
   it('should proxy loginWithRedirect', async () => {
@@ -355,6 +371,18 @@ describe('Auth0Plugin', () => {
 
     await appMock.config.globalProperties.$auth0.logout(logoutOptions);
     expect(logoutMock).toHaveBeenCalledWith(logoutOptions);
+  });
+
+  it('should proxy logout without options', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.logout();
+    expect(logoutMock).toHaveBeenCalledWith(undefined);
   });
 
   it('should proxy getAccessTokenSilently', async () => {

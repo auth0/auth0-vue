@@ -1,8 +1,4 @@
-import { App } from 'vue';
-import {
-  createRouter as createVueRouter,
-  createWebHashHistory
-} from 'vue-router';
+import { createRouter as createVueRouter, createWebHistory } from 'vue-router';
 import { authGuard } from '../src/guard';
 // Fix for https://github.com/ezolenko/rollup-plugin-typescript2/issues/129#issuecomment-454558185
 // @ts-ignore
@@ -32,6 +28,6 @@ export function createRouter({ client_id, domain, audience }: any) {
         beforeEnter: authGuard
       }
     ],
-    history: createWebHashHistory()
+    history: createWebHistory()
   });
 }
