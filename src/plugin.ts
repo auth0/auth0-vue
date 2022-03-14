@@ -1,4 +1,5 @@
 import { App, Ref, ref } from 'vue';
+import { Router } from 'vue-router';
 import { createAuth0ClientProxy } from './client.proxy';
 import {
   Auth0PluginOptions,
@@ -23,18 +24,15 @@ export class Auth0Plugin {
   ) {}
 
   install(app: App) {
-    const proxy = createAuth0ClientProxy(
-      {
-        ...this.clientOptions,
-        auth0Client: {
-          name: 'auth0-vue',
-          version: version
-        }
-      },
-      app.config.globalProperties
-    );
+    const proxy = createAuth0ClientProxy({
+      ...this.clientOptions,
+      auth0Client: {
+        name: 'auth0-vue',
+        version: version
+      }
+    });
 
-    this.__checkSession(proxy);
+    this.__checkSession(proxy, app.config.globalProperties.$router);
 
     app.config.globalProperties[AUTH0_TOKEN] = proxy;
     app.provide(AUTH0_INJECTION_KEY, proxy);
@@ -42,7 +40,7 @@ export class Auth0Plugin {
     client.value = proxy;
   }
 
-  private async __checkSession(proxy: Auth0VueClient) {
+  private async __checkSession(proxy: Auth0VueClient, router?: Router) {
     const search = window.location.search;
 
     if (
@@ -50,12 +48,17 @@ export class Auth0Plugin {
       search.includes('state=') &&
       !this.pluginOptions?.skipRedirectCallback
     ) {
-      const res = await proxy.handleRedirectCallback();
-      window.history.replaceState(
-        {},
-        document.title,
-        res?.appState?.target || window.location.pathname
-      );
+      const result = await proxy.handleRedirectCallback();
+      const appState = result?.appState;
+      const target = appState?.target ?? '/';
+
+      window.history.replaceState({}, '', '/');
+
+      if (router) {
+        router.push(target);
+      }
+
+      return result;
     } else {
       await proxy.checkSession();
     }
