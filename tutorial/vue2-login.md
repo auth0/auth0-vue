@@ -445,3 +445,7 @@ const router = new VueRouter({
 Start the application and make sure you are logged out. Now, modify the URL in your browser's navigation bar to include the `/profile` path on the end. This should cause the application to ask you to authenticate. Once you have logged in, the profile page should be visible without you having to navigate there manually.
 
 > For a deep dive into implementing user authentication in Vue, visit the [Complete Guide to Vue User Authentication with Auth0](https://auth0.com/blog/complete-guide-to-vue-user-authentication/). This guide provides you with additional details, such as creating a signup button.
+
+## Next Steps
+
+Learn how to [call APIs](vue2-api.md) using Vue 2 and the Auth0 SPA SDK wrapper we created in this tutorial.
