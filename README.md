@@ -477,7 +477,7 @@ Once setup returns the SDK's `error` property, you can access that property from
 
 If you are using our Auth0-Vue SDK with [Vue-Router](https://next.router.vuejs.org/), you can protect a route by using the [Navigation Guard](https://next.router.vuejs.org/guide/advanced/navigation-guards.html) provided by the SDK.
 
-> ⚠️ Be aware that the order in which the Router and Auth0 SDK are registered is important, not registering the Router before the Auth0 SDK might result in unexpected behavior.
+> ⚠️ **Note**: the order in which the Router and Auth0 Vue plugin are registered is important. You must register the Router before the Auth0 SDK or you might see unexpected behavior.
 
 ```ts
 import { createApp } from 'vue';
