@@ -63,6 +63,8 @@ export class Auth0Plugin implements Auth0VueClient {
 
     app.config.globalProperties[AUTH0_TOKEN] = this;
     app.provide(AUTH0_INJECTION_KEY, this);
+
+    client.value = this;
   }
 
   async loginWithRedirect(options?: RedirectLoginOptions<AppState>) {
