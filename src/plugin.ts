@@ -175,7 +175,7 @@ export class Auth0Plugin implements Auth0VueClient {
   private async __proxy<T>(cb: () => T, refreshState = true) {
     let result;
     try {
-      result = await cb.call(this);
+      result = await cb();
       this._error.value = null;
     } catch (e) {
       this._error.value = e;
