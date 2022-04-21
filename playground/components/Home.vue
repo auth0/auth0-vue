@@ -97,6 +97,19 @@
             >
               Get access token with a popup
             </button>
+
+            <button
+              @click="
+                getTokenOutsideComponent(
+                  current.audience,
+                  current.scope,
+                  current.access_tokens
+                )
+              "
+              class="btn btn-outline-info"
+            >
+              Get access token from outside component
+            </button>
           </div>
 
           <div class="card mb-0 mt-3" v-if="current.access_tokens.length > 0">
@@ -158,6 +171,7 @@
 <script lang="ts">
 import { ref, computed } from 'vue';
 import { useAuth0 } from '../../src';
+import { getAccessTokenSilentlyOutsideComponent } from '../api';
 
 const obfuscateToken = function (value: string) {
   if (value && value.length > 35) {
@@ -244,6 +258,22 @@ export default {
         auth0.logout({
           returnTo: window.location.origin,
           localOnly: true
+        });
+      },
+
+      getTokenOutsideComponent(
+        audience: string,
+        scope: string,
+        access_tokens: any[]
+      ) {
+        getAccessTokenSilentlyOutsideComponent({
+          audience: audience,
+          scope: scope
+        }).then(function (token: string) {
+          access_tokens.push({
+            token: obfuscateToken(token),
+            __raw: token
+          });
         });
       },
 
