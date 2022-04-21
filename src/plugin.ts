@@ -48,7 +48,24 @@ export class Auth0Plugin implements Auth0VueClient {
   constructor(
     private clientOptions: Auth0VueClientOptions,
     private pluginOptions?: Auth0PluginOptions
-  ) {}
+  ) {
+    const plugin = this;
+
+    // Vue Plugins can have issues when passing around the instance to `provide`
+    // Therefor we need to bind all methods correctly to `this`.
+    this.loginWithRedirect = this.loginWithRedirect.bind(plugin);
+    this.loginWithPopup = this.loginWithPopup.bind(plugin);
+    this.logout = this.logout.bind(plugin);
+    this.getAccessTokenSilently = this.getAccessTokenSilently.bind(plugin);
+    this.getAccessTokenWithPopup = this.getAccessTokenWithPopup.bind(plugin);
+    this.checkSession = this.checkSession.bind(plugin);
+    this.handleRedirectCallback = this.handleRedirectCallback.bind(plugin);
+    this.buildAuthorizeUrl = this.buildAuthorizeUrl.bind(plugin);
+    this.buildLogoutUrl = this.buildLogoutUrl.bind(plugin);
+    this.__checkSession = this.__checkSession.bind(plugin);
+    this.__refreshState = this.__refreshState.bind(plugin);
+    this.__proxy = this.__proxy.bind(plugin);
+  }
 
   install(app: App) {
     this._client = new Auth0Client({
@@ -148,7 +165,7 @@ export class Auth0Plugin implements Auth0VueClient {
     }
   }
 
-  async __refreshState() {
+  private async __refreshState() {
     this._isAuthenticated.value = await this._client.isAuthenticated();
     this._user.value = await this._client.getUser();
     this._idTokenClaims.value = await this._client.getIdTokenClaims();
@@ -158,7 +175,7 @@ export class Auth0Plugin implements Auth0VueClient {
   private async __proxy<T>(cb: () => T, refreshState = true) {
     let result;
     try {
-      result = await cb();
+      result = await cb.call(this);
       this._error.value = null;
     } catch (e) {
       this._error.value = e;
