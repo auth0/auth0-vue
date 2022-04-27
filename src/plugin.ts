@@ -22,6 +22,7 @@ import {
   RedirectLoginResult,
   User
 } from '@auth0/auth0-spa-js';
+import { bindPluginMethods } from './utils';
 
 /**
  * @ignore
@@ -49,22 +50,9 @@ export class Auth0Plugin implements Auth0VueClient {
     private clientOptions: Auth0VueClientOptions,
     private pluginOptions?: Auth0PluginOptions
   ) {
-    const plugin = this;
-
     // Vue Plugins can have issues when passing around the instance to `provide`
     // Therefor we need to bind all methods correctly to `this`.
-    this.loginWithRedirect = this.loginWithRedirect.bind(plugin);
-    this.loginWithPopup = this.loginWithPopup.bind(plugin);
-    this.logout = this.logout.bind(plugin);
-    this.getAccessTokenSilently = this.getAccessTokenSilently.bind(plugin);
-    this.getAccessTokenWithPopup = this.getAccessTokenWithPopup.bind(plugin);
-    this.checkSession = this.checkSession.bind(plugin);
-    this.handleRedirectCallback = this.handleRedirectCallback.bind(plugin);
-    this.buildAuthorizeUrl = this.buildAuthorizeUrl.bind(plugin);
-    this.buildLogoutUrl = this.buildLogoutUrl.bind(plugin);
-    this.__checkSession = this.__checkSession.bind(plugin);
-    this.__refreshState = this.__refreshState.bind(plugin);
-    this.__proxy = this.__proxy.bind(plugin);
+    bindPluginMethods(this, ['constructor']);
   }
 
   install(app: App) {
