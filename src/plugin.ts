@@ -22,6 +22,7 @@ import {
   RedirectLoginResult,
   User
 } from '@auth0/auth0-spa-js';
+import { bindPluginMethods } from './utils';
 
 /**
  * @ignore
@@ -48,7 +49,11 @@ export class Auth0Plugin implements Auth0VueClient {
   constructor(
     private clientOptions: Auth0VueClientOptions,
     private pluginOptions?: Auth0PluginOptions
-  ) {}
+  ) {
+    // Vue Plugins can have issues when passing around the instance to `provide`
+    // Therefor we need to bind all methods correctly to `this`.
+    bindPluginMethods(this, ['constructor']);
+  }
 
   install(app: App) {
     this._client = new Auth0Client({
@@ -148,7 +153,7 @@ export class Auth0Plugin implements Auth0VueClient {
     }
   }
 
-  async __refreshState() {
+  private async __refreshState() {
     this._isAuthenticated.value = await this._client.isAuthenticated();
     this._user.value = await this._client.getUser();
     this._idTokenClaims.value = await this._client.getIdTokenClaims();
