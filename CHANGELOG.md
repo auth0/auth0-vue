@@ -1,5 +1,14 @@
 # Change Log
 
+## [v1.0.1](https://github.com/auth0/auth0-vue/tree/v1.0.1) (2022-05-02)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.0...v1.0.1)
+
+**Changed**
+- Merge plugin and proxy class to allow usage outside components [\#106](https://github.com/auth0/auth0-vue/pull/106) ([frederikprijck](https://github.com/frederikprijck))
+
+**Fixed**
+- Bind all methods of Auth0VueClient to this [\#110](https://github.com/auth0/auth0-vue/pull/110) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v1.0.0](https://github.com/auth0/auth0-vue/tree/v1.0.0) (2022-03-14)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.0-beta.2...v1.0.0)
 
