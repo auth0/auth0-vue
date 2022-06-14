@@ -78,7 +78,7 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.21.1",
-    "vue": "^3.2.34"
+    "vue": "^3.2.35"
   },
   "peerDependencies": {
     "vue-router": "^4.0.12"
