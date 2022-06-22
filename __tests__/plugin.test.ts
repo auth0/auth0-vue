@@ -85,6 +85,8 @@ describe('Auth0Plugin', () => {
     } as any;
 
     isAuthenticatedMock.mockResolvedValue(false);
+    getUserMock.mockResolvedValue(null);
+    getIdTokenClaimsMock.mockResolvedValue(null);
     loginWithRedirectMock.mockResolvedValue(null);
     loginWithPopupMock.mockResolvedValue(null);
     checkSessionMock.mockResolvedValue(null);
@@ -383,6 +385,50 @@ describe('Auth0Plugin', () => {
 
     await appMock.config.globalProperties.$auth0.logout();
     expect(logoutMock).toHaveBeenCalledWith(undefined);
+  });
+
+  it('should update state after localOnly logout', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    const logoutOptions = {
+      localOnly: true
+    };
+
+    plugin.install(appMock);
+
+    expect.assertions(4);
+    await flushPromises();
+    jest.clearAllMocks();
+
+    await appMock.config.globalProperties.$auth0.logout(logoutOptions);
+
+    expect(logoutMock).toHaveBeenCalledTimes(1);
+    expect(getUserMock).toHaveBeenCalledTimes(1);
+    expect(getIdTokenClaimsMock).toHaveBeenCalledTimes(1);
+    expect(isAuthenticatedMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not update state after logout', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      client_id: ''
+    });
+
+    plugin.install(appMock);
+
+    expect.assertions(4);
+    await flushPromises();
+    jest.clearAllMocks();
+
+    await appMock.config.globalProperties.$auth0.logout();
+
+    expect(logoutMock).toHaveBeenCalledTimes(1);
+    expect(getUserMock).not.toHaveBeenCalled();
+    expect(getIdTokenClaimsMock).not.toHaveBeenCalled();
+    expect(isAuthenticatedMock).not.toHaveBeenCalled();
   });
 
   it('should proxy getAccessTokenSilently', async () => {
