@@ -84,7 +84,11 @@ export class Auth0Plugin implements Auth0VueClient {
   }
 
   async logout(options?: LogoutOptions) {
-    return this.__proxy(() => this._client.logout(options), options?.localOnly);
+    if (options?.localOnly) {
+      return this.__proxy(() => this._client.logout(options));
+    }
+
+    return this._client.logout(options);
   }
 
   /* istanbul ignore next */
