@@ -1,5 +1,11 @@
 # Change Log
 
+## [v1.0.2](https://github.com/auth0/auth0-vue/tree/v1.0.2) (2022-06-22)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.1...v1.0.2)
+
+**Fixed**
+- Do not refreshState when logging out using redirect [\#128](https://github.com/auth0/auth0-vue/pull/128) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v1.0.1](https://github.com/auth0/auth0-vue/tree/v1.0.1) (2022-05-02)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.0...v1.0.1)
 
