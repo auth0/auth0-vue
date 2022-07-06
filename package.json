@@ -40,7 +40,6 @@
     "@typescript-eslint/parser": "^5.8.0",
     "browserstack-cypress-cli": "1.8.1",
     "cli-table": "^0.3.11",
-    "codecov": "^3.8.3",
     "concurrently": "^6.5.1",
     "cypress": "^9.2.0",
     "es-check": "^6.1.1",
