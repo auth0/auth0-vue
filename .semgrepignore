@@ -1,0 +1,8 @@
+docs/
+__tests__/
+playground/
+tutorial/
+static/
+CHANGELOG.md
+README.md
+EXAMPLES.md
