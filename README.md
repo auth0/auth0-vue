@@ -81,6 +81,61 @@ app.use(
 app.mount('#app');
 ```
 
+### Add login to your application
+
+In order to add login to your application you can use the `loginWithRedirect` function that is exposed on the return value of `useAuth0`, which you can access in your component's `setup` function.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { loginWithRedirect } = useAuth0();
+
+      return {
+        login: () => {
+          loginWithRedirect();
+        }
+      };
+    }
+  };
+</script>
+```
+
+Once setup returns the correct method, you can call that method from your component's HTML.
+
+```html
+<template>
+  <div>
+    <button @click="login">Log in</button>
+  </div>
+</template>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<template>
+  <div>
+    <button @click="login">Log in</button>
+  </div>
+</template>
+
+<script>
+  export default {
+    methods: {
+      login() {
+        this.$auth0.loginWithRedirect();
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
 For more code samples on how to integrate the **auth0-vue** SDK in your **Vue 3** application, have a look at our [examples](./EXAMPLES.md).
 
 ## Feedback
