@@ -39,8 +39,6 @@ Using [yarn](https://yarnpkg.com):
 yarn add @auth0/auth0-vue
 ```
 
-## Getting Started
-
 ### Configure Auth0
 
 Create a **Single Page Application** in the [Auth0 Dashboard](https://manage.auth0.com/#/applications).
