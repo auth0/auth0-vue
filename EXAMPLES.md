@@ -262,7 +262,7 @@ Retrieving an Access Token can be done by using the `getAccessTokenSilently` fun
 
 </details>
 
-## Accessing ID Token claims
+## Accessing ID token claims
 
 To get access to the user's claims, you can use the reactive `idTokenClaims` property exposed by the return value of `useAuth0`, which you can access in your component's `setup` function.
 
@@ -330,7 +330,7 @@ Once setup returns the SDK's reactive property, you can access that property fro
 
 </details>
 
-## Error Handling
+## Error handling
 
 When using this SDK, it could be the case that it is unable to correctly handle the authentication flow for a variety of reasons (e.g. an expired session with Auth0 when trying to get a token silently). In these situations, calling the actual methods will result in an exception being thrown (e.g. `login_required`). On top of that, these errors are made available through the SDK's reactive `error` property:
 
