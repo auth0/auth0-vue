@@ -8,7 +8,7 @@ Auth0 SDK for Vue 3 Applications using [Authorization Code Grant Flow with PKCE]
 [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 [![CircleCI](https://img.shields.io/circleci/build/github/auth0/auth0-vue)](https://circleci.com/gh/auth0/auth0-vue)
 
-:books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :computer: [API Reference](https://auth0.github.io/auth0-vue) - :speech_balloon: [Feedback](#feedback)
+:books: [Documentation](#documentation) - :rocket: [Getting Started](#getting-started) - :computer: [API Reference](#api-reference) - :speech_balloon: [Feedback](#feedback)
 
 ## Documentation
 
@@ -137,6 +137,17 @@ Once setup returns the correct method, you can call that method from your compon
 </details>
 
 For more code samples on how to integrate the **auth0-vue** SDK in your **Vue 3** application, have a look at our [examples](./EXAMPLES.md).
+
+## API reference
+
+Explore public API's available in auth0-vue.
+
+- [createAuth0](https://auth0.github.io/auth0-vue/modules.html#createAuth0)
+- [createAuthGuard](https://auth0.github.io/auth0-vue/modules.html#createAuthGuard)
+- [useAuth0](https://auth0.github.io/auth0-vue/modules.html#useAuth0)
+- [Auth0PluginOptions](https://auth0.github.io/auth0-vue/interfaces/Auth0PluginOptions.html)
+- [Auth0VueClientOptions](https://auth0.github.io/auth0-vue/interfaces/Auth0VueClientOptions.html)
+- [Auth0VueClient](https://auth0.github.io/auth0-vue/interfaces/Auth0VueClient.html)
 
 ## Feedback
 
