@@ -6,7 +6,7 @@
 - [Calling an API](#calling-an-api)
 - [Accessing ID Token claims](#accessing-id-token-claims)
 - [Error Handling](#error-handling)
-- [Protecting a route](#protect-a-route)
+- [Protecting a route](#protecting-a-route)
 - [Protecting a route when using multiple Vue applications](#protecting-a-route-when-using-multiple-vue-applications)
 
 ## Add login to your application
