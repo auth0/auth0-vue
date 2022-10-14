@@ -2,7 +2,7 @@
 
 Auth0 SDK for Vue 3 Applications using [Authorization Code Grant Flow with PKCE](https://auth0.com/docs/api-auth/tutorials/authorization-code-grant-pkce).
 
-![Release](https://img.shields.io/github/v/release/auth0/auth0-vue)
+![Release](https://img.shields.io/npm/v/@auth0/auth0-vue)
 [![Codecov](https://codecov.io/gh/auth0/auth0-vue/branch/main/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-vue)
 ![Downloads](https://img.shields.io/npm/dw/@auth0/auth0-vue)
 [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
