@@ -11,6 +11,7 @@
     "dev": "rimraf dist && rollup -c --watch",
     "start": "npm run dev",
     "docs": "typedoc --options ./typedoc.js src",
+    "postdocs": "cp ./banner.png docs && cp ./auth0_dark_mode.png docs && cp ./auth0_light_mode.png docs",
     "build": "rimraf dist && rollup -m -c --environment NODE_ENV:production && npm run test:es-check",
     "build:stats": "npm run build -- --environment WITH_STATS:true && open stats.html",
     "lint:security": "eslint ./src --ext ts --no-eslintrc --config ./.eslintrc.security",
