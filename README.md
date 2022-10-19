@@ -12,8 +12,8 @@
 
 - [Quickstart](https://auth0.com/docs/quickstart/spa/vuejs) - our interactive guide for quickly adding login, logout and user information to a Vue 3 app using Auth0.
 - [Sample App](https://github.com/auth0-samples/auth0-vue-samples/tree/master/01-Login) - a full-fledged Vue 3 application integrated with Auth0.
-- [FAQs](./FAQ.md) - frequently asked questions about the auth0-vue SDK.
-- [Examples](./EXAMPLES.md) - code samples for common Vue 3 authentication scenario's.
+- [FAQs](https://github.com/auth0/auth0-vue/tree/main/FAQ.md) - frequently asked questions about the auth0-vue SDK.
+- [Examples](https://github.com/auth0/auth0-vue/tree/main/EXAMPLES.md) - code samples for common Vue 3 authentication scenario's.
 - [Docs site](https://www.auth0.com/docs) - explore our docs site and learn more about Auth0.
 
 ## Getting started
@@ -134,7 +134,7 @@ Once setup returns the correct method, you can call that method from your compon
 
 </details>
 
-For more code samples on how to integrate the **auth0-vue** SDK in your **Vue 3** application, have a look at our [examples](./EXAMPLES.md).
+For more code samples on how to integrate the **auth0-vue** SDK in your **Vue 3** application, have a look at our [examples](https://github.com/auth0/auth0-vue/tree/main/EXAMPLES.md).
 
 ## API reference
 
