@@ -1,4 +1,4 @@
-![Release](./banner.png)
+![Release](https://cdn.auth0.com/website/sdks/banners/auth0-vue-banner.png)
 
 ![Release](https://img.shields.io/npm/v/@auth0/auth0-vue)
 [![Codecov](https://codecov.io/gh/auth0/auth0-vue/branch/main/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-vue)
