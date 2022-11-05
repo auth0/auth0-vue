@@ -1,4 +1,4 @@
-import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
+import type { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 
 /**
  * Configuration for the Auth0 Vue Client

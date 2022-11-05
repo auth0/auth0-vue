@@ -1,4 +1,4 @@
-import {
+import type {
   User,
   IdToken,
   RedirectLoginOptions,
@@ -11,8 +11,8 @@ import {
   LogoutUrlOptions,
   LogoutOptions
 } from '@auth0/auth0-spa-js';
-import { Ref } from 'vue';
-import { AppState } from './app-state';
+import type { Ref } from 'vue';
+import type { AppState } from './app-state';
 
 export interface Auth0VueClient {
   /**

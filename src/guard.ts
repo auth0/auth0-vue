@@ -1,9 +1,10 @@
-import { RouteLocation } from 'vue-router';
+import type { RouteLocation } from 'vue-router';
 import { watchEffectOnceAsync } from './utils';
 import { client as auth0Client } from './plugin';
 import { AUTH0_TOKEN } from './token';
-import { Auth0VueClient } from './interfaces';
-import { App, unref } from 'vue';
+import type { Auth0VueClient } from './interfaces';
+import type { App } from 'vue';
+import { unref } from 'vue';
 
 async function createGuardHandler(client: Auth0VueClient, to: RouteLocation) {
   const fn = async () => {
