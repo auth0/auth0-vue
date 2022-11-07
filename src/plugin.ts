@@ -1,6 +1,7 @@
-import { App, readonly, Ref, ref } from 'vue';
-import { Router } from 'vue-router';
-import {
+import type { App, Ref } from 'vue';
+import { readonly, ref } from 'vue';
+import type { Router } from 'vue-router';
+import type {
   AppState,
   Auth0PluginOptions,
   Auth0VueClient,
@@ -8,8 +9,7 @@ import {
 } from './interfaces';
 import { AUTH0_INJECTION_KEY, AUTH0_TOKEN } from './token';
 import version from './version';
-import {
-  Auth0Client,
+import type {
   GetTokenSilentlyOptions,
   GetTokenSilentlyVerboseResponse,
   GetTokenWithPopupOptions,
@@ -20,6 +20,9 @@ import {
   PopupLoginOptions,
   RedirectLoginOptions,
   RedirectLoginResult,
+} from '@auth0/auth0-spa-js';
+import {
+  Auth0Client,
   User
 } from '@auth0/auth0-spa-js';
 import { bindPluginMethods } from './utils';
