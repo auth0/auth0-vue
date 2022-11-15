@@ -151,7 +151,6 @@ export const useAuth0 = ({
       // Create a new instance of the SDK client using members of the given options object
       this.auth0Client = await createAuth0Client({
         ...options,
-        client_id: options.clientId,
         authorizationParams: {
           redirect_uri: redirectUri
         }
