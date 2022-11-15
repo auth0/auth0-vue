@@ -15,7 +15,6 @@ import type {
   GetTokenWithPopupOptions,
   IdToken,
   LogoutOptions,
-  LogoutUrlOptions,
   PopupConfigOptions,
   PopupLoginOptions,
   RedirectLoginOptions,
@@ -88,7 +87,7 @@ export class Auth0Plugin implements Auth0VueClient {
   }
 
   async logout(options?: LogoutOptions) {
-    if (options?.localOnly) {
+    if (options?.onRedirect) {
       return this.__proxy(() => this._client.logout(options));
     }
 
@@ -127,14 +126,6 @@ export class Auth0Plugin implements Auth0VueClient {
     return this.__proxy(() =>
       this._client.handleRedirectCallback<AppState>(url)
     );
-  }
-
-  async buildAuthorizeUrl(options?: RedirectLoginOptions) {
-    return this._client.buildAuthorizeUrl(options);
-  }
-
-  buildLogoutUrl(options?: LogoutUrlOptions) {
-    return this._client.buildLogoutUrl(options);
   }
 
   private async __checkSession(router?: Router) {
