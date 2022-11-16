@@ -33,8 +33,8 @@
   },
   "devDependencies": {
     "@auth0/component-cdn-uploader": "github:auth0/component-cdn-uploader#v2.2.2",
+    "@jest/globals": "^29.3.1",
     "@rollup/plugin-replace": "^3.0.0",
-    "@types/jest": "^29.2.3",
     "@typescript-eslint/parser": "^5.8.0",
     "browserstack-cypress-cli": "1.19.0",
     "cli-table": "^0.3.11",

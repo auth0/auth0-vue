@@ -2,6 +2,7 @@ import { App, ref } from 'vue';
 import { Auth0VueClient, authGuard, createAuthGuard } from '../src/index';
 import { AUTH0_TOKEN } from '../src/token';
 import { client } from './../src/plugin';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 let watchEffectMock;
 
@@ -19,7 +20,7 @@ jest.mock('./../src/plugin', () => {
   return {
     ...(jest.requireActual('./../src/plugin') as any),
     client: ref({
-      loginWithRedirect: jest.fn().mockResolvedValue({}),
+      loginWithRedirect: jest.fn<any>().mockResolvedValue({}),
       isAuthenticated: ref(false),
       isLoading: ref(false)
     })
@@ -29,7 +30,7 @@ jest.mock('./../src/plugin', () => {
 describe('createAuthGuard', () => {
   let appMock: App<any>;
   let auth0Mock: Partial<Auth0VueClient> = {
-    loginWithRedirect: jest.fn().mockResolvedValue({}),
+    loginWithRedirect: jest.fn<any>().mockResolvedValue({}),
     isAuthenticated: ref(false),
     isLoading: ref(false)
   };
