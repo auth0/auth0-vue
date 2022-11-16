@@ -1,6 +1,6 @@
-import { defineConfig } from 'cypress'
+const { defineConfig } = require('cypress');
 
-export default defineConfig({
+const config = defineConfig({
   chromeWebSecurity: false,
   viewportWidth: 1000,
   viewportHeight: 1000,
@@ -13,3 +13,5 @@ export default defineConfig({
     baseUrl: 'http://127.0.0.1:3000',
   },
 })
+
+module.exports = config;
