@@ -30,6 +30,7 @@ async function createGuardHandler(client: Auth0VueClient, to: RouteLocation) {
 
 export function createAuthGuard(app: App) {
   return async (to: RouteLocation) => {
+    // eslint-disable-next-line security/detect-object-injection
     const auth0 = app.config.globalProperties[AUTH0_TOKEN] as Auth0VueClient;
 
     return createGuardHandler(auth0, to);
