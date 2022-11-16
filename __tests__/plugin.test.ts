@@ -687,7 +687,7 @@ describe('Auth0Plugin', () => {
     getTokenWithPopupMock.mockRejectedValue('Some Error');
 
     try {
-      await appMock.config.globalProperties.$auth0.getAccessTokenWithPopup({});
+      await appMock.config.globalProperties.$auth0.getAccessTokenWithPopup();
     } catch (e) {}
 
     expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
