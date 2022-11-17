@@ -69,6 +69,7 @@ export class Auth0Plugin implements Auth0VueClient {
 
     this.__checkSession(app.config.globalProperties.$router);
 
+    // eslint-disable-next-line security/detect-object-injection
     app.config.globalProperties[AUTH0_TOKEN] = this;
     app.provide(AUTH0_INJECTION_KEY, this);
 

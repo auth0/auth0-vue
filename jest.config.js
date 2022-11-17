@@ -15,11 +15,14 @@ module.exports = {
     ['jest-junit', { outputDirectory: 'test-results/jest' }]
   ],
   coverageReporters: ['lcov', 'text', 'text-summary'],
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-legacy',
   setupFiles: [],
-  globals: {
-    'ts-jest': {
-      tsconfig: './tsconfig.test.json'
-    }
-  }
+  transform: {
+    '.*\\.test\\.ts': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.test.json'
+      }
+    ],
+},
 };

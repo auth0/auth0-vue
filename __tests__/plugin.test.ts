@@ -2,26 +2,27 @@ import { Auth0Client } from '@auth0/auth0-spa-js';
 import { App, inject } from 'vue';
 import { Router } from 'vue-router';
 import { AUTH0_INJECTION_KEY, createAuth0, useAuth0 } from '../src/index';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-const loginWithRedirectMock = jest.fn().mockResolvedValue(null);
-const loginWithPopupMock = jest.fn().mockResolvedValue(null);
-const logoutMock = jest.fn();
-const checkSessionMock = jest.fn().mockResolvedValue(null);
-const handleRedirectCallbackMock = jest.fn().mockResolvedValue(null);
-const isAuthenticatedMock = jest.fn().mockResolvedValue(false);
-const getUserMock = jest.fn().mockResolvedValue(null);
-const getIdTokenClaimsMock = jest.fn().mockResolvedValue(null);
-const buildAuthorizeUrlMock = jest.fn().mockResolvedValue(null);
-const buildLogoutUrlMock = jest.fn().mockResolvedValue(null);
-const getTokenSilentlyMock = jest.fn().mockResolvedValue(null);
-const getTokenWithPopupMock = jest.fn().mockResolvedValue(null);
+const loginWithRedirectMock = jest.fn<any>().mockResolvedValue(null);
+const loginWithPopupMock = jest.fn<any>().mockResolvedValue(null);
+const logoutMock = jest.fn<any>();
+const checkSessionMock = jest.fn<any>().mockResolvedValue(null);
+const handleRedirectCallbackMock = jest.fn<any>().mockResolvedValue(null);
+const isAuthenticatedMock = jest.fn<any>().mockResolvedValue(false);
+const getUserMock = jest.fn<any>().mockResolvedValue(null);
+const getIdTokenClaimsMock = jest.fn<any>().mockResolvedValue(null);
+const buildAuthorizeUrlMock = jest.fn<any>().mockResolvedValue(null);
+const buildLogoutUrlMock = jest.fn<any>().mockResolvedValue(null);
+const getTokenSilentlyMock = jest.fn<any>().mockResolvedValue(null);
+const getTokenWithPopupMock = jest.fn<any>().mockResolvedValue(null);
 
 jest.mock('vue', () => {
   const originalModule = jest.requireActual('vue');
   return {
     __esModule: true,
-    ...originalModule,
-    inject: jest.fn().mockResolvedValue(null)
+    ...originalModule as any,
+    inject: jest.fn()
   };
 });
 
