@@ -31,6 +31,7 @@ export function watchEffectOnce<T>(watcher: () => T, fn: Function) {
  */
 export function bindPluginMethods(plugin: any, exclude: string[]) {
   Object.getOwnPropertyNames(Object.getPrototypeOf(plugin))
-    .filter(method => !exclude.includes(method))
-    .forEach(method => (plugin[method] = plugin[method].bind(plugin)));
+    .filter(method => !exclude.includes(method)) 
+    // eslint-disable-next-line security/detect-object-injection
+    .forEach(method => (plugin[method] = plugin[method].bind(plugin))); 
 }
