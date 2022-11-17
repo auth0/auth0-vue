@@ -333,7 +333,9 @@ describe('Auth0Plugin', () => {
     });
 
     const loginOptions = {
-      audience: 'audience 123'
+      authorizationParams: {
+        audience: 'audience 123'
+      }
     };
 
     plugin.install(appMock);
@@ -351,7 +353,9 @@ describe('Auth0Plugin', () => {
     });
 
     const loginOptions = {
-      audience: 'audience 123'
+      authorizationParams: {
+        audience: 'audience 123'
+      }
     };
     const popupOptions = {
       timeoutInSeconds: 60
@@ -373,8 +377,10 @@ describe('Auth0Plugin', () => {
     });
 
     const logoutOptions = {
-      localOnly: true,
-      federated: true
+      logoutParams: {
+        localOnly: true,
+        federated: true
+      }
     };
 
     plugin.install(appMock);
@@ -453,7 +459,9 @@ describe('Auth0Plugin', () => {
     } as any as App<any>;
 
     const getTokenOptions = {
-      scope: 'a b c'
+      authorizationParams: {
+        scope: 'a b c'
+      }
     };
 
     plugin.install(appMock);
@@ -477,7 +485,11 @@ describe('Auth0Plugin', () => {
       provide: jest.fn()
     } as any as App<any>;
 
-    const getTokenOptions = { scope: 'a b c' };
+    const getTokenOptions = { 
+      authorizationParams: {
+        scope: 'a b c'
+      }
+    };
     const popupOptions = { timeoutInSeconds: 20 };
 
     plugin.install(appMock);
