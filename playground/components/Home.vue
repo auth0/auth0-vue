@@ -240,7 +240,9 @@ export default {
 
       loginRedirect: function () {
         auth0.loginWithRedirect({
-          redirect_uri: window.location.origin
+          authorizationParams: {
+            redirect_uri: window.location.origin
+          }
         });
       },
 
@@ -250,14 +252,18 @@ export default {
 
       logout: function () {
         auth0.logout({
-          returnTo: window.location.origin
+          logoutParams: {
+            returnTo: window.location.origin
+          }
         });
       },
 
       logoutLocal: function () {
         auth0.logout({
-          returnTo: window.location.origin,
-          localOnly: true
+          onRedirect: async () => {},
+          logoutParams: {
+            returnTo: window.location.origin,
+          }
         });
       },
 
@@ -267,8 +273,10 @@ export default {
         access_tokens: any[]
       ) {
         getAccessTokenSilentlyOutsideComponent({
-          audience: audience,
-          scope: scope
+          authorizationParams: {
+            audience,
+            scope,
+          },
         }).then(function (token: string) {
           access_tokens.push({
             token: obfuscateToken(token),
@@ -284,8 +292,10 @@ export default {
       ) {
         auth0
           .getAccessTokenSilently({
-            audience: audience,
-            scope: scope
+            authorizationParams: {
+              audience,
+              scope,
+            },
           })
           .then(function (token: string) {
             access_tokens.push({
@@ -300,7 +310,12 @@ export default {
         access_tokens: any[]
       ) {
         auth0
-          .getAccessTokenWithPopup({ audience: audience, scope: scope })
+          .getAccessTokenWithPopup({ 
+            authorizationParams: {
+              audience,
+              scope,
+            },
+          })
           .then(function (token: string) {
             access_tokens.push({
               token: obfuscateToken(token),
