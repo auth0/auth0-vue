@@ -71,8 +71,10 @@ const app = createApp(App);
 app.use(
   createAuth0({
     domain: '<AUTH0_DOMAIN>',
-    client_id: '<AUTH0_CLIENT_ID>',
-    redirect_uri: '<MY_CALLBACK_URL>'
+    clientId: '<AUTH0_CLIENT_ID>',
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>'
+    }
   })
 );
 

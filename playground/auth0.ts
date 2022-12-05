@@ -6,13 +6,15 @@ const defaultAudience = 'Test';
 
 const res = JSON.parse(localStorage.getItem('vue-playground-data'));
 const domain = res?.domain || defaultDomain;
-const client_id = res?.client_id || defaultClientId;
+const clientId = res?.client_id || defaultClientId;
 const audience = res?.audience || defaultAudience;
 
 export const auth0 = createAuth0({
   domain,
-  client_id,
-  audience,
+  clientId,
+  authorizationParams: {
+    audience,
+    redirect_uri: window.location.origin,
+  },
   useFormData: res?.useFormData || true,
-  redirect_uri: window.location.origin
 });

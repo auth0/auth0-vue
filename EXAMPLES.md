@@ -150,7 +150,7 @@ Adding logout to your application you be done by using the `logout` function tha
 
       return {
         logout: () => {
-          logout({ returnTo: window.location.origin });
+          logout({ logoutParams: { returnTo: window.location.origin } });
         }
       };
     }
@@ -182,7 +182,9 @@ Once setup returns the correct method, you can call that method from your compon
   export default {
     methods: {
       logout() {
-        this.$auth0.logout({ returnTo: window.location.origin });
+        this.$auth0.logout({
+          logoutParams: { returnTo: window.location.origin }
+        });
       }
     }
   };
@@ -203,9 +205,11 @@ const app = createApp(App);
 app.use(
   createAuth0({
     domain: '<AUTH0_DOMAIN>',
-    client_id: '<AUTH0_CLIENT_ID>',
-    redirect_uri: '<MY_CALLBACK_URL>',
-    audience: '<AUTH0_AUDIENCE>'
+    clientId: '<AUTH0_CLIENT_ID>',
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      audience: '<AUTH0_AUDIENCE>'
+    }
   })
 );
 
@@ -460,7 +464,7 @@ app.use(
 app.use(
   createAuth0({
     domain,
-    client_id
+    clientId
   })
 );
 app.mount('#app');
