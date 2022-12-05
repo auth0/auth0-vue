@@ -51,7 +51,7 @@ describe('createAuth0', () => {
   it('should create a plugin', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
     expect(plugin.install).toBeTruthy();
   });
@@ -110,8 +110,10 @@ describe('Auth0Plugin', () => {
   it('should create a proxy on installation', async () => {
     const plugin = createAuth0({
       domain: 'domain 123',
-      client_id: 'client id 123',
-      foo: 'bar'
+      clientId: 'client id 123',
+      authorizationParams: {
+        foo: 'bar'
+      }
     });
 
     plugin.install(appMock);
@@ -124,8 +126,10 @@ describe('Auth0Plugin', () => {
     expect(Auth0Client).toHaveBeenCalledWith(
       expect.objectContaining({
         domain: 'domain 123',
-        client_id: 'client id 123',
-        foo: 'bar'
+        clientId: 'client id 123',
+        authorizationParams: {
+          foo: 'bar'
+        }
       })
     );
   });
@@ -133,7 +137,7 @@ describe('Auth0Plugin', () => {
   it('should call checkSession on installation', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const appMock: App<any> = {
@@ -156,7 +160,9 @@ describe('Auth0Plugin', () => {
   it('should call handleRedirect callback on installation with code', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: '',
+      clientId: ''
+    },
+    {
       skipRedirectCallback: false
     });
 
@@ -183,7 +189,7 @@ describe('Auth0Plugin', () => {
     const plugin = createAuth0(
       {
         domain: '',
-        client_id: ''
+        clientId: ''
       },
       {
         skipRedirectCallback: true
@@ -212,7 +218,7 @@ describe('Auth0Plugin', () => {
   it('should not call handleRedirect callback on installation when no state', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -236,7 +242,7 @@ describe('Auth0Plugin', () => {
   it('should call handleRedirect callback on installation when error', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -262,7 +268,7 @@ describe('Auth0Plugin', () => {
     const routerPushMock = jest.fn();
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     appMock.config.globalProperties['$router'] = {
@@ -295,7 +301,7 @@ describe('Auth0Plugin', () => {
     const routerPushMock = jest.fn();
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     appMock.config.globalProperties['$router'] = {
@@ -323,11 +329,13 @@ describe('Auth0Plugin', () => {
   it('should proxy loginWithRedirect', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const loginOptions = {
-      audience: 'audience 123'
+      authorizationParams: {
+        audience: 'audience 123'
+      }
     };
 
     plugin.install(appMock);
@@ -341,11 +349,13 @@ describe('Auth0Plugin', () => {
   it('should proxy loginWithPopup', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const loginOptions = {
-      audience: 'audience 123'
+      authorizationParams: {
+        audience: 'audience 123'
+      }
     };
     const popupOptions = {
       timeoutInSeconds: 60
@@ -363,12 +373,14 @@ describe('Auth0Plugin', () => {
   it('should proxy logout', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const logoutOptions = {
-      localOnly: true,
-      federated: true
+      logoutParams: {
+        localOnly: true,
+        federated: true
+      }
     };
 
     plugin.install(appMock);
@@ -380,7 +392,7 @@ describe('Auth0Plugin', () => {
   it('should proxy logout without options', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -389,14 +401,14 @@ describe('Auth0Plugin', () => {
     expect(logoutMock).toHaveBeenCalledWith(undefined);
   });
 
-  it('should update state after localOnly logout', async () => {
+  it('should update state after localOnly logout', async () => { // TODO
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const logoutOptions = {
-      localOnly: true
+      async onRedirect() {}
     };
 
     plugin.install(appMock);
@@ -416,7 +428,7 @@ describe('Auth0Plugin', () => {
   it('should not update state after logout', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -436,7 +448,7 @@ describe('Auth0Plugin', () => {
   it('should proxy getAccessTokenSilently', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const appMock: App<any> = {
@@ -447,7 +459,9 @@ describe('Auth0Plugin', () => {
     } as any as App<any>;
 
     const getTokenOptions = {
-      scope: 'a b c'
+      authorizationParams: {
+        scope: 'a b c'
+      }
     };
 
     plugin.install(appMock);
@@ -461,7 +475,7 @@ describe('Auth0Plugin', () => {
   it('should proxy getAccessTokenWithPopup', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const appMock: App<any> = {
@@ -471,7 +485,11 @@ describe('Auth0Plugin', () => {
       provide: jest.fn()
     } as any as App<any>;
 
-    const getTokenOptions = { scope: 'a b c' };
+    const getTokenOptions = { 
+      authorizationParams: {
+        scope: 'a b c'
+      }
+    };
     const popupOptions = { timeoutInSeconds: 20 };
 
     plugin.install(appMock);
@@ -486,48 +504,10 @@ describe('Auth0Plugin', () => {
     );
   });
 
-  it('should proxy buildAuthorizeUrl', async () => {
-    const plugin = createAuth0({
-      domain: '',
-      client_id: ''
-    });
-
-    const loginOptions = {
-      localOnly: true,
-      federated: true
-    };
-
-    plugin.install(appMock);
-
-    await appMock.config.globalProperties.$auth0.buildAuthorizeUrl(
-      loginOptions
-    );
-    expect(buildAuthorizeUrlMock).toHaveBeenCalledWith(loginOptions);
-  });
-
-  it('should proxy buildLogoutUrl', async () => {
-    const plugin = createAuth0({
-      domain: '',
-      client_id: ''
-    });
-
-    const logoutUrlOptions = {
-      localOnly: true,
-      federated: true
-    };
-
-    plugin.install(appMock);
-
-    await appMock.config.globalProperties.$auth0.buildLogoutUrl(
-      logoutUrlOptions
-    );
-    expect(buildLogoutUrlMock).toHaveBeenCalledWith(logoutUrlOptions);
-  });
-
   it('should be loading by default', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -538,7 +518,7 @@ describe('Auth0Plugin', () => {
   it('should not be loading once the SDK is finished', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -555,7 +535,7 @@ describe('Auth0Plugin', () => {
   it('should set isAuthenticated to false when not authenticated', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -572,7 +552,7 @@ describe('Auth0Plugin', () => {
   it('should set isAuthenticated to true when authenticated', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     isAuthenticatedMock.mockResolvedValue(true);
@@ -591,7 +571,7 @@ describe('Auth0Plugin', () => {
   it('should set user to null when not authenticated', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     isAuthenticatedMock.mockResolvedValue(true);
@@ -608,7 +588,7 @@ describe('Auth0Plugin', () => {
   it('should set user when authenticated', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const userMock = { name: 'john' };
@@ -630,7 +610,7 @@ describe('Auth0Plugin', () => {
   it('should set idTokenClaims to null when not authenticated', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     isAuthenticatedMock.mockResolvedValue(true);
@@ -649,7 +629,7 @@ describe('Auth0Plugin', () => {
   it('should set idTokenClaims when authenticated', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     const idTokenClaims = { name: 'john' };
@@ -671,7 +651,7 @@ describe('Auth0Plugin', () => {
   it('should track errors when loginWithPopup throws', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -690,7 +670,7 @@ describe('Auth0Plugin', () => {
   it('should track errors when logout throws', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -699,7 +679,7 @@ describe('Auth0Plugin', () => {
 
     try {
       await appMock.config.globalProperties.$auth0.logout({
-        localOnly: true
+        async onRedirect() {}
       });
     } catch (e) {}
 
@@ -711,7 +691,7 @@ describe('Auth0Plugin', () => {
   it('should track errors when getAccessTokenWithPopup throws', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -730,7 +710,7 @@ describe('Auth0Plugin', () => {
   it('should track errors when getAccessTokenSilently throws', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -749,7 +729,7 @@ describe('Auth0Plugin', () => {
   it('should track errors when checkSession throws', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     try {
@@ -768,7 +748,7 @@ describe('Auth0Plugin', () => {
   it('should track errors when handleRedirectCallback throws', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);
@@ -787,7 +767,7 @@ describe('Auth0Plugin', () => {
   it('should clear errors when successful', async () => {
     const plugin = createAuth0({
       domain: '',
-      client_id: ''
+      clientId: ''
     });
 
     plugin.install(appMock);

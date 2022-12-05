@@ -8,7 +8,6 @@ import type {
   GetTokenSilentlyOptions,
   GetTokenSilentlyVerboseResponse,
   GetTokenWithPopupOptions,
-  LogoutUrlOptions,
   LogoutOptions
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
@@ -39,19 +38,6 @@ export interface Auth0VueClient {
    * Contains an error that occured in the SDK
    */
   error: Ref<any>;
-
-  /**
-   * ```js
-   * await buildAuthorizeUrl(options);
-   * ```
-   *
-   * Builds an `/authorize` URL for loginWithRedirect using the parameters
-   * provided as arguments. Random and secure `state` and `nonce`
-   * parameters will be auto-generated.
-   *
-   * @param options
-   */
-  buildAuthorizeUrl(options?: RedirectLoginOptions): Promise<string>;
 
   /**
    * ```js
@@ -153,17 +139,8 @@ export interface Auth0VueClient {
   getAccessTokenWithPopup(
     options?: GetTokenWithPopupOptions,
     config?: PopupConfigOptions
-  ): Promise<string>;
+  ): Promise<string|undefined>;
 
-  /**
-   * ```js
-   * await buildLogoutUrl(options);
-   * ```
-   *
-   * Builds a URL to the logout endpoint using the parameters provided as arguments.
-   * @param options
-   */
-  buildLogoutUrl(options?: LogoutUrlOptions): string;
   /**
    * ```js
    * logout();
@@ -182,5 +159,5 @@ export interface Auth0VueClient {
    *
    * @param options
    */
-  logout(options?: LogoutOptions): Promise<void> | void;
+  logout(options?: LogoutOptions): Promise<void>;
 }
