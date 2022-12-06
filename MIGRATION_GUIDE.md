@@ -11,7 +11,7 @@ Please review this guide thoroughly to understand the changes required to migrat
   - [`buildAuthorizeUrl` has been removed](#buildauthorizeurl-has-been-removed)
   - [`buildLogoutUrl` has been removed](#buildlogouturl-has-been-removed)
   - [`redirectMethod` has been removed from `loginWithRedirect`](#redirectmethod-has-been-removed-from-loginwithredirect)
-  - [`localOnly` logout has been removed, and replaced by `onRedirect`](#localonly-logout-has-been-removed-and-replaced-by-onredirect)
+  - [`localOnly` logout has been removed, and replaced by `openUrl`](#localonly-logout-has-been-removed-and-replaced-by-openUrl)
   - [`ignoreCache` on `getAccessTokenSilently` has been removed and replace with `cacheMode`](#ignorecache-on-getaccesstokensilently-has-been-removed-and-replace-with-cachemode)
   - [`application/x-www-form-urlencoded` used by default instead of `application/json`](#applicationx-www-form-urlencoded-used-by-default-instead-of-applicationjson)
   - [No more iframe fallback by default when using refresh tokens](#no-more-iframe-fallback-by-default-when-using-refresh-tokens)
@@ -24,7 +24,7 @@ As [Microsoft has dropped support for IE11](https://blogs.windows.com/windowsexp
 
 > :information_source: As this SDK only supports Vue 3, and Vue dropped support for IE11 in the Vue 3 release, IE11 removal should not cause any issues.
 
-This following is the list of polyfills that were removed. If your applications requires any of these, you will need to include them in your application:
+The following is a list of polyfills that were removed. If your applications requires any of these, you will need to include them in your application:
 
 - [AbortController](https://www.npmjs.com/package/abortcontroller-polyfill): Used to polyfill [AbortController on IE11, Opera Mini, and some mobile-specific browsers](https://caniuse.com/?search=abortcontroller).
 - [Promise](https://www.npmjs.com/package/promise-polyfill): Used to polyfill [Promise on IE11 and Opera Mini](https://caniuse.com/promises)
@@ -110,13 +110,13 @@ const url = buildAuthorizeUrl();
 await Browser.open({ url });
 ```
 
-With v2, we have removed `buildAuthorizeUrl`. This means that the snippet above will no longer work, and you should update your code by using `onRedirect` instead.
+With v2, we have removed `buildAuthorizeUrl`. This means that the snippet above will no longer work, and you should update your code by using `openUrl` instead.
 
 ```ts
 const { loginWithRedirect } = useAuth0();
 
 await loginWithRedirect({
-  async onRedirect(url) {
+  async openUrl(url) {
     await Browser.open({ url });
   }
 });
@@ -134,13 +134,13 @@ const url = buildLogoutUrl();
 await Browser.open({ url });
 ```
 
-With v2, `buildLogoutUrl` has been removed and you should update any code that is not able to rely on `window.location.assign` to use `onRedirect` when calling `logout`:
+With v2, `buildLogoutUrl` has been removed and you should update any code that is not able to rely on `window.location.assign` to use `openUrl` when calling `logout`:
 
 ```ts
 const { logout } = useAuth0();
 
 client.logout({
-  async onRedirect(url) {
+  async openUrl(url) {
     await Browser.open({ url });
   }
 });
@@ -159,26 +159,27 @@ await loginWithRedirect({
 });
 ```
 
-With the release of v2, we have removed `redirectMethod`. If you want to use anything but `window.location.assign` to handle the redirect to Auth0, you should implement `onRedirect`:
+With the release of v2, we have removed `redirectMethod`. If you want to use anything but `window.location.assign` to handle the redirect to Auth0, you should implement `openUrl`:
 
 ```ts
 const { loginWithRedirect } = useAuth0();
 await loginWithRedirect({
-  async onRedirect(url) {
+  async openUrl(url) {
     window.location.replace(url);
   }
 });
 ```
 
-### `localOnly` logout has been removed, and replaced by `onRedirect`
+### `localOnly` logout has been removed, and replaced by `openUrl`
 
 When calling the SDK's `logout` method, v1 supports the ability to specify `localOnly: true`, ensuring our SDK does not redirect to Auth0 but only clears the user state from the application.
 
-With v2, we have removed `localOnly`, but instead provided a way for developers to take control of the redirect behavior by setting `onRedirect`. In order to achieve localOnly logout with v2, you should set `onRedirect` to a noop function.
+With v2, we have removed `localOnly`, but instead provided a way for developers to take control of the redirect behavior by setting `openUrl`. In order to achieve localOnly logout with v2, you should set `openUrl` to `false`.
 
 ```ts
-client.logout({
-  async onRedirect() {}
+const { logout } = useAuth0();
+await logout({
+  openUrl: false
 });
 ```
 
