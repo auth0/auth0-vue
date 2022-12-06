@@ -54,7 +54,7 @@ In v1, objects passed to our methods are always a mix of properties used for con
 app.use(
   createAuth0({
     domain: '<AUTH0_DOMAIN>',
-    clientId: '<AUTH0_CLIENT_ID>',
+    client_id: '<AUTH0_CLIENT_ID>',
     redirect_uri: '<MY_CALLBACK_URL>'
   })
 );
@@ -201,7 +201,7 @@ Any code that was previously using `ignoreCache: true` should be changed to use 
 
 ```ts
 const { getAccessTokenSilently } = useAuth0();
-const token = await getTokenSilently({ cacheMode: 'off' });
+const token = await getAccessTokenSilently({ cacheMode: 'off' });
 ```
 
 ### `application/x-www-form-urlencoded` used by default instead of `application/json`
