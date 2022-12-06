@@ -1,5 +1,7 @@
 ![Auth0 SDK for Vue 3 Single Page Applications](https://cdn.auth0.com/website/sdks/banners/auth0-vue-banner.png)
 
+> :warning: Please be aware that v2 is currently in [**Beta**](https://auth0.com/docs/troubleshoot/product-lifecycle/product-release-stages). Whilst we encourage you to test the update within your applications, we do no recommend using this version in production yet. Please follow the [migration guide](./MIGRATION_GUIDE.md) when updating your application.
+
 ![Release](https://img.shields.io/npm/v/@auth0/auth0-vue)
 [![Codecov](https://codecov.io/gh/auth0/auth0-vue/branch/main/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-vue)
 ![Downloads](https://img.shields.io/npm/dw/@auth0/auth0-vue)
@@ -28,13 +30,13 @@ For integrating Auth0 with a Vue 2 application, please read [the Vue 2 Tutorial]
 Using [npm](https://npmjs.org):
 
 ```sh
-npm install @auth0/auth0-vue
+npm install @auth0/auth0-vue@beta
 ```
 
 Using [yarn](https://yarnpkg.com):
 
 ```sh
-yarn add @auth0/auth0-vue
+yarn add @auth0/auth0-vue@beta
 ```
 
 ### Configure Auth0
