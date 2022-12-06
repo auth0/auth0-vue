@@ -6,6 +6,7 @@ Please review this guide thoroughly to understand the changes required to migrat
 
 - [Polyfills and supported browsers](#polyfills-and-supported-browsers)
 - [Public API Changes](#public-api-changes)
+  - [`client_id` has been renamed to `clientId`](#client_id-has-been-renamed-to-clientid)
   - [Introduction of `authorizationParams`](#introduction-of-authorizationparams)
   - [Introduction of `logoutParams`](#introduction-of-logoutparams)
   - [`buildAuthorizeUrl` has been removed](#buildauthorizeurl-has-been-removed)
@@ -43,6 +44,30 @@ By removing these polyfills, the bundle size for Auth0-SPA-JS has dropped 60%. A
 ## Public API Changes
 
 With the release of this new major version, some changes were made that impact the public API of Auth0-Vue. If you are using TypeScript, these should be flagged for you. However we still recommend reviewing this list thoroughly as some changes are changes in behavior.
+
+### `client_id` has been renamed to `clientId`
+
+A breaking change that will affect everyone is the renaming of `client_id` to `clientId` in pretty much every method that accepts a client identifier. As an example, providing the client id in v1 can be done by setting `client_id`:
+
+```ts
+app.use(
+  createAuth0({
+    client_id: '<AUTH0_CLIENT_ID>'
+  })
+);
+```
+
+While with v2, you need to set `clientId` instead.
+
+```ts
+app.use(
+  createAuth0({
+    clientId: '<AUTH0_CLIENT_ID>',
+  })
+);
+```
+
+This change needs to occur with every method that takes a client id.
 
 ### Introduction of `authorizationParams`
 
@@ -85,7 +110,7 @@ The above changes affect the following methods:
 
 In v1, `logout` can be called with an object containing a number of properties, both a mix between properties used to configure the SDK as well as those used to pass through to Auth0.
 
-With v2, logout now takes an object that can only contain two properties, `clientId` and `logoutParams`.
+With v2, logout now takes an object that can contains `clientId`, `openUrl`, and `logoutParams`.
 
 Any property, apart from clientId, that you used to set on the root of the object passed to `logout` should now be set on `logoutParams` instead.
 
