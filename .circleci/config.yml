@@ -37,7 +37,7 @@ jobs:
       - run: npm ci
       - restore_cache:
           key: spa-dist-{{ .Revision }}
-      - run: npx concurrently --raw --kill-others --success first "npm:dev" "wait-on http://127.0.0.1:3000/ && browserstack-cypress run --sync --no-wrap --cli-debug --build-name $CIRCLE_BRANCH"
+      - run: npx concurrently --raw --kill-others --success first "npm:dev" "wait-on http://127.0.0.1:3000/ && browserstack-cypress run --sync --no-wrap --build-name $CIRCLE_BRANCH"
 
 workflows:
   build_and_test:
