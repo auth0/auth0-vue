@@ -1,5 +1,6 @@
 import { Auth0Client } from '@auth0/auth0-spa-js';
 import { App, inject } from 'vue';
+import { Router } from 'vue-router';
 import { AUTH0_INJECTION_KEY, createAuth0, useAuth0 } from '../src/index';
 
 const loginWithRedirectMock = jest.fn().mockResolvedValue(null);
@@ -265,7 +266,7 @@ describe('Auth0Plugin', () => {
 
     appMock.config.globalProperties['$router'] = {
       push: routerPushMock
-    };
+    } as unknown as Router;
 
     handleRedirectCallbackMock.mockResolvedValue({
       appState: {
@@ -298,7 +299,7 @@ describe('Auth0Plugin', () => {
 
     appMock.config.globalProperties['$router'] = {
       push: routerPushMock
-    };
+    } as unknown as Router;
 
     handleRedirectCallbackMock.mockResolvedValue({
       appState: {}
