@@ -1,5 +1,4 @@
 import { inject } from 'vue';
-import { Router } from 'vue-router';
 import './global';
 import {
   Auth0VueClient,
