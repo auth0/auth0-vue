@@ -12,5 +12,10 @@ module.exports = {
   ],
   excludeExternals: false,
   excludePrivate: true,
-  hideGenerator: true
+  hideGenerator: true,
+  visibilityFilters: {
+    protected: false,
+    inherited: true,
+    external: true,
+  }
 };
