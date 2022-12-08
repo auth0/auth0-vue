@@ -5,7 +5,9 @@ import type {
   AppState,
   Auth0PluginOptions,
   Auth0VueClient,
-  Auth0VueClientOptions
+  Auth0VueClientOptions,
+  LogoutOptions,
+  RedirectLoginOptions,
 } from './interfaces';
 import { AUTH0_INJECTION_KEY, AUTH0_TOKEN } from './token';
 import version from './version';
@@ -14,10 +16,8 @@ import type {
   GetTokenSilentlyVerboseResponse,
   GetTokenWithPopupOptions,
   IdToken,
-  LogoutOptions,
   PopupConfigOptions,
   PopupLoginOptions,
-  RedirectLoginOptions,
   RedirectLoginResult,
 } from '@auth0/auth0-spa-js';
 import {
@@ -87,7 +87,7 @@ export class Auth0Plugin implements Auth0VueClient {
   }
 
   async logout(options?: LogoutOptions) {
-    if (options?.onRedirect) {
+    if (options?.openUrl || options?.openUrl === false) {
       return this.__proxy(() => this._client.logout(options));
     }
 
