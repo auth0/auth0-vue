@@ -260,7 +260,7 @@ export default {
 
       logoutLocal: function () {
         auth0.logout({
-          onRedirect: async () => {},
+          openUrl: false,
           logoutParams: {
             returnTo: window.location.origin,
           }

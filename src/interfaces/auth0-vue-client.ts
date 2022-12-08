@@ -1,17 +1,16 @@
 import type {
   User,
   IdToken,
-  RedirectLoginOptions,
   PopupLoginOptions,
   PopupConfigOptions,
   RedirectLoginResult,
   GetTokenSilentlyOptions,
   GetTokenSilentlyVerboseResponse,
-  GetTokenWithPopupOptions,
-  LogoutOptions
+  GetTokenWithPopupOptions
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
+import { LogoutOptions, RedirectLoginOptions } from './auth0-vue-client-options';
 
 export interface Auth0VueClient {
   /**

@@ -408,7 +408,7 @@ describe('Auth0Plugin', () => {
     });
 
     const logoutOptions = {
-      async onRedirect() {}
+      openUrl: false as const
     };
 
     plugin.install(appMock);
@@ -679,7 +679,7 @@ describe('Auth0Plugin', () => {
 
     try {
       await appMock.config.globalProperties.$auth0.logout({
-        async onRedirect() {}
+        async openUrl() {}
       });
     } catch (e) {}
 
