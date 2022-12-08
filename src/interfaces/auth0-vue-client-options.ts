@@ -3,6 +3,7 @@ import type {
   LogoutOptions as SPALogoutOptions,
   RedirectLoginOptions as SPARedirectLoginOptions
 } from '@auth0/auth0-spa-js';
+import { AppState } from './app-state';
 
 /**
  * Configuration for the Auth0 Vue Client
@@ -10,5 +11,4 @@ import type {
 export interface Auth0VueClientOptions extends Auth0ClientOptions {}
 
 export interface LogoutOptions extends Omit<SPALogoutOptions, 'onRedirect'> {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface RedirectLoginOptions<TAppState = any> extends Omit<SPARedirectLoginOptions<TAppState>, 'onRedirect'> {}
+export interface RedirectLoginOptions<TAppState = AppState> extends Omit<SPARedirectLoginOptions<TAppState>, 'onRedirect'> {}
