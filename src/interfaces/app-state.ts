@@ -1,6 +1,3 @@
-/**
- * @ignore
- */
 export interface AppState {
   /**
    * Target path the app gets routed to after
