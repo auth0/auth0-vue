@@ -469,9 +469,7 @@ app.mount('#app');
 Doing the above ensures every guard is connected to the Auth0Plugin that's configured in the same Vue application.
 
 ## Accessing Auth0Client outside of a component
-To be able to access the phone Auth0Client outside of the component, there a re a couple things you need to do.
-
-Note: Be aware that none of the below is specific to our SDK, but would translate to any plugin in Vue.
+To be able to access `Auth0Client` outside of the component, there are a couple of things you need to do.
 
 First of all, start with moving the creation of the plugin to an external file:
 
@@ -497,3 +495,5 @@ export async function getAccessTokenSilentlyOutsideComponent(options) {
 }
 ```
 This would allow you to interact with our SDK from outside of components, such as Axios interceptors.
+
+**Note**: Be aware that none of the above is specific to our SDK, but would translate to any plugin in Vue.
