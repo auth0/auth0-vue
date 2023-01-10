@@ -8,6 +8,7 @@
 - [Error Handling](#error-handling)
 - [Protecting a route](#protecting-a-route)
 - [Protecting a route when using multiple Vue applications](#protecting-a-route-when-using-multiple-vue-applications)
+- [Accessing Auth0Client outside of a component](#accessing-auth0client-outside-of-a-component)
 
 ## Add login to your application
 
@@ -466,3 +467,33 @@ app.mount('#app');
 ```
 
 Doing the above ensures every guard is connected to the Auth0Plugin that's configured in the same Vue application.
+
+## Accessing Auth0Client outside of a component
+To be able to access `Auth0Client` outside of the component, there are a couple of things you need to do.
+
+First of all, start with moving the creation of the plugin to an external file:
+
+```ts
+export const auth0 = createAuth0({ ... });
+```
+
+Next, you can import the exported plugin instance when configuring the Vue app.
+```ts
+import { auth0 } from './auth0';
+
+createApp(App)
+  .use(auth0)
+  .mount('#app');
+```
+However, you can now also import the exported plugin instance anywhere else and access it's methods
+
+```ts
+import { auth0 } from './auth0'
+
+export async function getAccessTokenSilentlyOutsideComponent(options) {
+  return auth0.getAccessTokenSilently(options);
+}
+```
+This would allow you to interact with our SDK from outside of components, such as Axios interceptors.
+
+**Note**: Be aware that none of the above is specific to our SDK, but would translate to any plugin in Vue.
