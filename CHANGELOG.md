@@ -1,5 +1,15 @@
 # Change Log
 
+## [v1.0.3](https://github.com/auth0/auth0-vue/tree/v1.0.3) (2023-01-12)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.2...v1.0.3)
+
+**Security**
+- Upgrade @auth0/auth0-spa-js to 1.22.6 [\#191](https://github.com/auth0/auth0-vue/pull/191) ([ewanharris](https://github.com/ewanharris))
+
+This patch release is identical to `1.0.2` but has been released to ensure tooling no longer detects a vulnerable version of jsonwebtoken being used by `@auth0/auth0-spa-js`.
+
+Even though `1.22.5` of `@auth0/auth0-spa-js` was not vulnerable for the related [CVE](https://unit42.paloaltonetworks.com/jsonwebtoken-vulnerability-cve-2022-23529/) because of the fact that `jsonwebtoken` is a devDependency of `@auth0/auth0-spa-js`, we are cutting a release to ensure build tools no longer report our SDK's that use `@auth0/auth0-spa-js` as vulnerable to the mentioned CVE.
+
 ## [v1.0.2](https://github.com/auth0/auth0-vue/tree/v1.0.2) (2022-06-22)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.1...v1.0.2)
 
