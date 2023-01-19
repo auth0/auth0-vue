@@ -1,5 +1,23 @@
 # Change Log
 
+## [v2.0.0](https://github.com/auth0/auth0-vue/tree/v2.0.0-beta.0) (2023-01-19)
+
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.3...v2.0.0)
+
+Auth0-Vue v2 includes many significant changes compared to v1:
+
+- Remove polyfills from bundles
+- Introduce `authorizationParams` and `logoutParams` to hold properties sent to Auth0
+- Remove `buildAuthorizeUrl` and `buildLogoutUrl`
+- Remove `redirectMethod`, and replace by `openUrl`
+- Remove `localOnly` from `logout` in favor of `openUrl`
+- Rework `ignoreCache` to `cacheMode` and introduce `cache-only`
+- Use form-encoded data by default
+- Do not fallback to refreshing tokens via iframe method by default
+- Remove `advancedOptions.defaultScope` and replace with `scope`
+
+As with any major version bump, v2 of Auth0-Vue contains a set of breaking changes. **Please review [the migration guide](./MIGRATION_GUIDE.md) thoroughly to understand the changes required to migrate your application to v2.**
+
 ## [v1.0.3](https://github.com/auth0/auth0-vue/tree/v1.0.3) (2023-01-12)
 
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.2...v1.0.3)
