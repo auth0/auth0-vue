@@ -49,7 +49,7 @@ workflows:
           context:
             - browserstack-env
       - ship/node-publish:
-          publish-command: npm publish --tag beta
+          publish-command: npm publish
           node-version: 16.13.2
           context:
             - publish-npm
