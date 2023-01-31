@@ -108,7 +108,7 @@ The `redirectUri` should always be a **public** route in your application (even 
 
 ## 5. Accessing information outside of the context of a component
 
-As our SDK is build around Vue's reactive API, it works best when used inside of a component.
+As our SDK is build around [Vue's reactive API](https://vuejs.org/api/reactivity-core.html), it works best when used inside of a component.
 If you need to access any of our SDK's properties outside of the context of a component, you will need to ensure you unwrap the values accordingly.
 
 An example would be to access the user's name, you would use [`toRaw`](https://vuejs.org/api/reactivity-advanced.html#toraw), which returns a [`Ref`](https://vuejs.org/api/reactivity-core.html#ref), whose value you can access using `.value`:
