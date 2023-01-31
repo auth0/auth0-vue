@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.0.1](https://github.com/auth0/auth0-vue/tree/v2.0.1) (2023-01-31)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.0...v2.0.1)
+
+**Fixed**
+- Add exports field to package.json [\#201](https://github.com/auth0/auth0-vue/pull/201) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.0.0](https://github.com/auth0/auth0-vue/tree/v2.0.0-beta.0) (2023-01-19)
 
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v1.0.3...v2.0.0)
