@@ -6,6 +6,7 @@
 2. [User is not logged in after successful sign in with redirect](#2-user-is-not-logged-in-after-successful-sign-in-with-redirect)
 3. [User is redirected to `/` after successful sign in with redirect](#3-user-is-redirected-to--after-successful-sign-in-with-redirect)
 4. [Getting an infinite redirect loop between my application and Auth0](#4-getting-an-infinite-redirect-loop-between-my-application-and-auth0)
+5. [Accessing information outside of the context of a component](#5-accessing-information-outside-of-the-context-of-a-component)
 
 ## 1. User is not logged in after page refresh
 
@@ -104,3 +105,15 @@ loginWithRedirect({
 In situations where the `redirectUri` points to a _protected_ route, your application will end up in an infinite redirect loop between your application and Auth0.
 
 The `redirectUri` should always be a **public** route in your application (even if the entire application is secure, our SDK needs a public route to be redirected back to). This is because, when redirecting back to the application, there is no user information available yet. The SDK first needs to process the URL (`code` and `state` query parameters) and call Auth0's endpoints to exchange the code for a token. Once that is successful, the user is considered authenticated.
+
+## 5. Accessing information outside of the context of a component
+
+As our SDK is build around Vue's reactive API, it works best when used inside of a component.
+If you need to access any of our SDK's properties outside of the context of a component, you will need to ensure you unwrap the values accordingly.
+
+An example would be to access the user's name, you would use [`toRaw`](https://vuejs.org/api/reactivity-advanced.html#toraw), which returns a [`Ref`](https://vuejs.org/api/reactivity-core.html#ref), whose value you can access using `.value`:
+
+```
+const user = toRaw(auth0.user).value;
+console.log(user.name);
+```
