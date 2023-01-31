@@ -80,7 +80,8 @@ app.use(
   createAuth0({
     domain: '<AUTH0_DOMAIN>',
     client_id: '<AUTH0_CLIENT_ID>',
-    redirect_uri: '<MY_CALLBACK_URL>'
+    redirect_uri: '<MY_CALLBACK_URL>',
+    audience: '<AUTH0_API_IDENTIFIER>'
   })
 );
 ```
@@ -93,7 +94,8 @@ app.use(
     domain: '<AUTH0_DOMAIN>',
     clientId: '<AUTH0_CLIENT_ID>',
     authorizationParams: {
-      redirect_uri: '<MY_CALLBACK_URL>'
+      redirect_uri: '<MY_CALLBACK_URL>',
+      audience: '<AUTH0_API_IDENTIFIER>'
     }
   })
 );
@@ -105,6 +107,8 @@ The above changes affect the following methods:
 - loginWithPopup
 - getAccessTokenWithPopup
 - getAccessTokenSilently
+
+For a full list of properties supported on `authorizationParams`, please refer to our [API docs](https://auth0.github.io/auth0-vue/interfaces/AuthorizationParams.html).
 
 ### Introduction of `logoutParams`
 
