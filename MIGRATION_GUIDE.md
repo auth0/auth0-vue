@@ -108,6 +108,8 @@ The above changes affect the following methods:
 - getAccessTokenWithPopup
 - getAccessTokenSilently
 
+For a full list of properties supported on `authorizationParams`, please refer to our [API docs](https://auth0.github.io/auth0-vue/interfaces/AuthorizationParams.html).
+
 ### Introduction of `logoutParams`
 
 In v1, `logout` can be called with an object containing a number of properties, both a mix between properties used to configure the SDK as well as those used to pass through to Auth0.
