@@ -7,6 +7,13 @@
   "main": "dist/lib/auth0-vue.cjs.js",
   "types": "dist/typings/index.d.ts",
   "module": "dist/auth0-vue.production.esm.js",
+  "exports": {
+    ".": {
+      "require": "./dist/lib/auth0-vue.cjs.js",
+      "import": "./dist/auth0-vue.production.esm.js",
+      "types": "./dist/typings/index.d.ts"
+    }
+  },
   "scripts": {
     "dev": "rimraf dist && rollup -c --watch",
     "start": "npm run dev",
