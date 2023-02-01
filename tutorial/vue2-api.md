@@ -24,7 +24,9 @@ Following on from the [previous tutorial](vue2-login.md), add your API Identifie
 {
   "domain": "<YOUR AUTH0 DOMAIN>",
   "clientId": "<YOUR AUTH0 CLIENT ID>",
-  "audience": "<YOUR AUTH0 API IDENTIFIER>"
+  "authorizationParams": {
+    "audience": "<YOUR AUTH0 API IDENTIFIER>"
+  }
 }
 ```
 
@@ -34,14 +36,14 @@ Finally, open `main.js` and configure the Auth0 plugin with this audience value:
 // .. other imports
 
 // NEW - import the audience
-import { domain, clientId, audience } from '../auth_config.json';
+import { domain, clientId, authorizationParams } from '../auth_config.json';
 
 // ..
 
 Vue.use(Auth0Plugin, {
   domain,
   clientId,
-  audience, // NEW - configure the plugin with the audience value
+  authorizationParams, // NEW - configure the plugin with the authorizationParams value
   onRedirectCallback: appState => {
     router.push(
       appState && appState.targetUrl
