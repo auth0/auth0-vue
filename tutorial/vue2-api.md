@@ -30,12 +30,12 @@ Following on from the [previous tutorial](vue2-login.md), add your API Identifie
 }
 ```
 
-Finally, open `main.js` and configure the Auth0 plugin with this audience value:
+Finally, open `main.js` and configure the Auth0 plugin with this authorizationParams value, which includes the audience:
 
 ```js
 // .. other imports
 
-// NEW - import the audience
+// NEW - import the authorizationParams, which includes the audience
 import { domain, clientId, authorizationParams } from '../auth_config.json';
 
 // ..
