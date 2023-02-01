@@ -152,7 +152,8 @@ export const useAuth0 = ({
       this.auth0Client = await createAuth0Client({
         ...options,
         authorizationParams: {
-          redirect_uri: redirectUri
+          redirect_uri: redirectUri,
+          ...options.authorizationParams
         }
       });
 
@@ -286,7 +287,9 @@ export default {
     // Log the user out
     logout() {
       this.$auth.logout({
-        returnTo: window.location.origin
+        logoutParams: {
+          returnTo: window.location.origin
+        }
       });
     }
   }
