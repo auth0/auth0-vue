@@ -5,15 +5,17 @@ import { AUTH0_TOKEN } from './token';
 import type { Auth0VueClient } from './interfaces';
 import type { App } from 'vue';
 import { unref } from 'vue';
+import { AuthorizationParams } from '@auth0/auth0-spa-js';
 
-async function createGuardHandler(client: Auth0VueClient, to: RouteLocation) {
+async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, authorizationParams = {}) {
   const fn = async () => {
     if (unref(client.isAuthenticated)) {
       return true;
     }
 
     await client.loginWithRedirect({
-      appState: { target: to.fullPath }
+      appState: { target: to.fullPath },
+      authorizationParams
     });
 
     return false;
@@ -37,8 +39,8 @@ export function createAuthGuard(app: App) {
   };
 }
 
-export async function authGuard(to: RouteLocation) {
+export async function authGuard(to: RouteLocation, authorizationParams: AuthorizationParams) {
   const auth0 = unref(auth0Client);
 
-  return createGuardHandler(auth0, to);
+  return createGuardHandler(auth0, to, authorizationParams);
 }
