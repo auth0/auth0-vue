@@ -5,18 +5,21 @@ import { AUTH0_TOKEN } from './token';
 import type { Auth0VueClient } from './interfaces';
 import type { App } from 'vue';
 import { unref } from 'vue';
-import { AuthorizationParams } from '@auth0/auth0-spa-js';
+import { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
-async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, authorizationParams = {}) {
+async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, redirectLoginOptions?: RedirectLoginOptions) {
+  const defaultRedirectLoginOptions = { appState: { target: to.fullPath } };
   const fn = async () => {
     if (unref(client.isAuthenticated)) {
       return true;
     }
 
-    await client.loginWithRedirect({
-      appState: { target: to.fullPath },
-      authorizationParams
-    });
+    if (!redirectLoginOptions) {
+        redirectLoginOptions = defaultRedirectLoginOptions;
+    } else if (redirectLoginOptions && !redirectLoginOptions.appState) {
+        redirectLoginOptions.appState = defaultRedirectLoginOptions.appState;
+    }
+    await client.loginWithRedirect(redirectLoginOptions);
 
     return false;
   };
@@ -39,8 +42,8 @@ export function createAuthGuard(app: App) {
   };
 }
 
-export async function authGuard(to: RouteLocation, authorizationParams: AuthorizationParams) {
+export async function authGuard(to: RouteLocation, redirectLoginOptions?: RedirectLoginOptions) {
   const auth0 = unref(auth0Client);
 
-  return createGuardHandler(auth0, to, authorizationParams);
+  return createGuardHandler(auth0, to, redirectLoginOptions);
 }
