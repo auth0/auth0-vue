@@ -3,6 +3,7 @@ import { Auth0VueClient, authGuard, createAuthGuard } from '../src/index';
 import { AUTH0_TOKEN } from '../src/token';
 import { client } from './../src/plugin';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
 let watchEffectMock;
 
@@ -168,6 +169,49 @@ describe('authGuard', () => {
     expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
       expect.objectContaining({
         appState: { target: 'abc' }
+      })
+    );
+  });
+  it('should call loginWithRedirect with RedirectLoginOptions and use default appState value', async () => {
+    const guard = authGuard;
+
+    expect.assertions(1);
+
+    await guard({
+      fullPath: 'abc',
+    } as any, {
+        authorizationParams: {
+        redirect_uri: '/custom_redirect'
+    }} as RedirectLoginOptions);
+
+    expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appState: { target: 'abc' },
+        authorizationParams: {
+            redirect_uri: '/custom_redirect'
+        }
+      })
+    );
+  });
+  it('should call loginWithRedirect with RedirectLoginOptions and use provided appState value', async () => {
+    const guard = authGuard;
+
+    expect.assertions(1);
+
+    await guard({
+      fullPath: 'abc',
+    } as any, {
+        appState: { target: '123' },
+        authorizationParams: {
+        redirect_uri: '/custom_redirect2'
+    }} as RedirectLoginOptions);
+
+    expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appState: { target: '123' },
+        authorizationParams: {
+            redirect_uri: '/custom_redirect2'
+        }
       })
     );
   });
