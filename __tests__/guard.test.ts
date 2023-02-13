@@ -1,3 +1,4 @@
+import type { RouteLocation, NavigationGuardNext } from 'vue-router';
 import { App, ref } from 'vue';
 import { Auth0VueClient, authGuard, createAuthGuard } from '../src/index';
 import { AUTH0_TOKEN } from '../src/token';
@@ -177,18 +178,24 @@ describe('authGuard', () => {
 
     expect.assertions(1);
 
-    await guard({
-      fullPath: 'abc',
-    } as any, {
+    await guard(
+      {
+        fullPath: 'abc'
+      } as RouteLocation,
+      undefined,
+      undefined,
+      {
         authorizationParams: {
-        redirect_uri: '/custom_redirect'
-    }} as RedirectLoginOptions);
+          redirect_uri: '/custom_redirect'
+        }
+      } as RedirectLoginOptions
+    );
 
     expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
       expect.objectContaining({
         appState: { target: 'abc' },
         authorizationParams: {
-            redirect_uri: '/custom_redirect'
+          redirect_uri: '/custom_redirect'
         }
       })
     );
@@ -198,19 +205,25 @@ describe('authGuard', () => {
 
     expect.assertions(1);
 
-    await guard({
-      fullPath: 'abc',
-    } as any, {
+    await guard(
+      {
+        fullPath: 'abc'
+      } as RouteLocation,
+      undefined,
+      undefined,
+      {
         appState: { target: '123' },
         authorizationParams: {
-        redirect_uri: '/custom_redirect2'
-    }} as RedirectLoginOptions);
+          redirect_uri: '/custom_redirect2'
+        }
+      } as RedirectLoginOptions
+    );
 
     expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
       expect.objectContaining({
         appState: { target: '123' },
         authorizationParams: {
-            redirect_uri: '/custom_redirect2'
+          redirect_uri: '/custom_redirect2'
         }
       })
     );

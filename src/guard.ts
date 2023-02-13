@@ -1,4 +1,4 @@
-import type { RouteLocation } from 'vue-router';
+import type { RouteLocation, NavigationGuardNext } from 'vue-router';
 import { watchEffectOnceAsync } from './utils';
 import { client as auth0Client } from './plugin';
 import { AUTH0_TOKEN } from './token';
@@ -7,7 +7,7 @@ import type { App } from 'vue';
 import { unref } from 'vue';
 import { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
-async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, redirectLoginOptions?: RedirectLoginOptions) {
+async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, from?: RouteLocation, next?: NavigationGuardNext, redirectLoginOptions?: RedirectLoginOptions) {
   const fn = async () => {
     if (unref(client.isAuthenticated)) {
       return true;
@@ -39,8 +39,8 @@ export function createAuthGuard(app: App) {
   };
 }
 
-export async function authGuard(to: RouteLocation, redirectLoginOptions?: RedirectLoginOptions) {
+export async function authGuard(to: RouteLocation, from?: RouteLocation, next?: NavigationGuardNext, redirectLoginOptions?: RedirectLoginOptions) {
   const auth0 = unref(auth0Client);
 
-  return createGuardHandler(auth0, to, redirectLoginOptions);
+  return createGuardHandler(auth0, to, from, next, redirectLoginOptions);
 }
