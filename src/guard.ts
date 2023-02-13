@@ -8,18 +8,15 @@ import { unref } from 'vue';
 import { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
 async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, redirectLoginOptions?: RedirectLoginOptions) {
-  const defaultRedirectLoginOptions = { appState: { target: to.fullPath } };
   const fn = async () => {
     if (unref(client.isAuthenticated)) {
       return true;
     }
 
-    if (!redirectLoginOptions) {
-        redirectLoginOptions = defaultRedirectLoginOptions;
-    } else if (redirectLoginOptions && !redirectLoginOptions.appState) {
-        redirectLoginOptions.appState = defaultRedirectLoginOptions.appState;
-    }
-    await client.loginWithRedirect(redirectLoginOptions);
+    await client.loginWithRedirect({
+        appState: { target: to.fullPath },
+        ...redirectLoginOptions
+    });
 
     return false;
   };
