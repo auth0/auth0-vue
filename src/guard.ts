@@ -14,12 +14,10 @@ async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, red
       return true;
     }
 
-    if (!redirectLoginOptions) {
-        redirectLoginOptions = defaultRedirectLoginOptions;
-    } else if (redirectLoginOptions && !redirectLoginOptions.appState) {
-        redirectLoginOptions.appState = defaultRedirectLoginOptions.appState;
-    }
-    await client.loginWithRedirect(redirectLoginOptions);
+    await client.loginWithRedirect({
+      appState: { target: to.fullPath },
+      ...redirectLoginOptions
+    });
 
     return false;
   };
