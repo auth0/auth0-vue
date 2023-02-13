@@ -14,8 +14,8 @@ async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, red
     }
 
     await client.loginWithRedirect({
-        appState: { target: to.fullPath },
-        ...redirectLoginOptions
+      appState: { target: to.fullPath },
+      ...redirectLoginOptions
     });
 
     return false;
