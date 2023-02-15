@@ -7,7 +7,13 @@ import type { App } from 'vue';
 import { unref } from 'vue';
 import { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
-async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, from?: RouteLocation, next?: NavigationGuardNext, redirectLoginOptions?: RedirectLoginOptions) {
+async function createGuardHandler(
+  client: Auth0VueClient,
+  to: RouteLocation,
+  from?: RouteLocation,
+  next?: NavigationGuardNext,
+  redirectLoginOptions?: RedirectLoginOptions
+) {
   const fn = async () => {
     if (unref(client.isAuthenticated)) {
       return true;
@@ -31,7 +37,12 @@ async function createGuardHandler(client: Auth0VueClient, to: RouteLocation, fro
 }
 
 export function createAuthGuard(app: App) {
-  return async (to: RouteLocation, from?: RouteLocation, next?: NavigationGuardNext, redirectLoginOptions?: RedirectLoginOptions) => {
+  return async (
+    to: RouteLocation,
+    from?: RouteLocation,
+    next?: NavigationGuardNext,
+    redirectLoginOptions?: RedirectLoginOptions
+  ) => {
     // eslint-disable-next-line security/detect-object-injection
     const auth0 = app.config.globalProperties[AUTH0_TOKEN] as Auth0VueClient;
 
@@ -39,7 +50,12 @@ export function createAuthGuard(app: App) {
   };
 }
 
-export async function authGuard(to: RouteLocation, from?: RouteLocation, next?: NavigationGuardNext, redirectLoginOptions?: RedirectLoginOptions) {
+export async function authGuard(
+  to: RouteLocation,
+  from?: RouteLocation,
+  next?: NavigationGuardNext,
+  redirectLoginOptions?: RedirectLoginOptions
+) {
   const auth0 = unref(auth0Client);
 
   return createGuardHandler(auth0, to, from, next, redirectLoginOptions);

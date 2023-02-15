@@ -109,6 +109,62 @@ describe('createAuthGuard', () => {
       })
     );
   });
+
+  it('should call loginWithRedirect with RedirectLoginOptions and use default appState value', async () => {
+    const guard = createAuthGuard(appMock);
+
+    expect.assertions(1);
+
+    await guard(
+      {
+        fullPath: 'abc'
+      } as RouteLocation,
+      undefined,
+      undefined,
+      {
+        authorizationParams: {
+          redirect_uri: '/custom_redirect'
+        }
+      } as RedirectLoginOptions
+    );
+
+    expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appState: { target: 'abc' },
+        authorizationParams: {
+          redirect_uri: '/custom_redirect'
+        }
+      })
+    );
+  });
+  it('should call loginWithRedirect with RedirectLoginOptions and use provided appState value', async () => {
+    const guard = createAuthGuard(appMock);
+
+    expect.assertions(1);
+
+    await guard(
+      {
+        fullPath: 'abc'
+      } as RouteLocation,
+      undefined,
+      undefined,
+      {
+        appState: { target: '123' },
+        authorizationParams: {
+          redirect_uri: '/custom_redirect2'
+        }
+      } as RedirectLoginOptions
+    );
+
+    expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appState: { target: '123' },
+        authorizationParams: {
+          redirect_uri: '/custom_redirect2'
+        }
+      })
+    );
+  });
 });
 describe('authGuard', () => {
   let auth0Mock;
