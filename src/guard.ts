@@ -10,8 +10,6 @@ import { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 async function createGuardHandler(
   client: Auth0VueClient,
   to: RouteLocation,
-  from?: RouteLocation,
-  next?: NavigationGuardNext,
   redirectLoginOptions?: RedirectLoginOptions
 ) {
   const fn = async () => {
@@ -46,7 +44,7 @@ export function createAuthGuard(app: App) {
     // eslint-disable-next-line security/detect-object-injection
     const auth0 = app.config.globalProperties[AUTH0_TOKEN] as Auth0VueClient;
 
-    return createGuardHandler(auth0, to, from, next, redirectLoginOptions);
+    return createGuardHandler(auth0, to, redirectLoginOptions);
   };
 }
 
@@ -58,5 +56,5 @@ export async function authGuard(
 ) {
   const auth0 = unref(auth0Client);
 
-  return createGuardHandler(auth0, to, from, next, redirectLoginOptions);
+  return createGuardHandler(auth0, to, redirectLoginOptions);
 }
