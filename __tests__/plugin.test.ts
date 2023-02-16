@@ -2,7 +2,14 @@ import { Auth0Client } from '@auth0/auth0-spa-js';
 import { App, inject } from 'vue';
 import { Router } from 'vue-router';
 import { AUTH0_INJECTION_KEY, createAuth0, useAuth0 } from '../src/index';
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest
+} from '@jest/globals';
 
 const loginWithRedirectMock = jest.fn<any>().mockResolvedValue(null);
 const loginWithPopupMock = jest.fn<any>().mockResolvedValue(null);
@@ -21,7 +28,7 @@ jest.mock('vue', () => {
   const originalModule = jest.requireActual('vue');
   return {
     __esModule: true,
-    ...originalModule as any,
+    ...(originalModule as any),
     inject: jest.fn()
   };
 });
@@ -134,6 +141,32 @@ describe('Auth0Plugin', () => {
     );
   });
 
+  it('should support redirect_uri', async () => {
+    const plugin = createAuth0({
+      domain: 'domain 123',
+      clientId: 'client id 123',
+      // @ts-expect-error
+      redirect_uri: 'bar'
+    });
+
+    plugin.install(appMock);
+
+    expect(appMock.config.globalProperties.$auth0).toBeTruthy();
+    expect(appMock.provide).toHaveBeenCalledWith(
+      AUTH0_INJECTION_KEY,
+      expect.anything()
+    );
+    expect(Auth0Client).toHaveBeenCalledWith(
+      expect.objectContaining({
+        domain: 'domain 123',
+        clientId: 'client id 123',
+        authorizationParams: {
+          redirect_uri: 'bar'
+        }
+      })
+    );
+  });
+
   it('should call checkSession on installation', async () => {
     const plugin = createAuth0({
       domain: '',
@@ -158,13 +191,15 @@ describe('Auth0Plugin', () => {
   }
 
   it('should call handleRedirect callback on installation with code', async () => {
-    const plugin = createAuth0({
-      domain: '',
-      clientId: ''
-    },
-    {
-      skipRedirectCallback: false
-    });
+    const plugin = createAuth0(
+      {
+        domain: '',
+        clientId: ''
+      },
+      {
+        skipRedirectCallback: false
+      }
+    );
 
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -346,6 +381,25 @@ describe('Auth0Plugin', () => {
     expect(loginWithRedirectMock).toHaveBeenCalledWith(loginOptions);
   });
 
+  it('should proxy loginWithRedirect and handle redirect_uri', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.loginWithRedirect({
+      // @ts-expect-error
+      redirect_uri: 'bar'
+    });
+    expect(loginWithRedirectMock).toHaveBeenCalledWith({
+      authorizationParams: {
+        redirect_uri: 'bar'
+      }
+    });
+  });
+
   it('should proxy loginWithPopup', async () => {
     const plugin = createAuth0({
       domain: '',
@@ -368,6 +422,28 @@ describe('Auth0Plugin', () => {
       popupOptions
     );
     expect(loginWithPopupMock).toHaveBeenCalledWith(loginOptions, popupOptions);
+  });
+
+  it('should proxy loginWithPopup and handle redirect_uri', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.loginWithPopup({
+      // @ts-expect-error
+      redirect_uri: 'bar'
+    });
+    expect(loginWithPopupMock).toHaveBeenCalledWith(
+      {
+        authorizationParams: {
+          redirect_uri: 'bar'
+        }
+      },
+      undefined
+    );
   });
 
   it('should proxy logout', async () => {
@@ -401,7 +477,8 @@ describe('Auth0Plugin', () => {
     expect(logoutMock).toHaveBeenCalledWith(undefined);
   });
 
-  it('should update state after localOnly logout', async () => { // TODO
+  it('should update state after localOnly logout', async () => {
+    // TODO
     const plugin = createAuth0({
       domain: '',
       clientId: ''
@@ -472,6 +549,25 @@ describe('Auth0Plugin', () => {
     expect(getTokenSilentlyMock).toHaveBeenCalledWith(getTokenOptions);
   });
 
+  it('should proxy getAccessTokenSilently and handle redirect_uri', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.getAccessTokenSilently({
+      // @ts-expect-error
+      redirect_uri: 'bar'
+    });
+    expect(getTokenSilentlyMock).toHaveBeenCalledWith({
+      authorizationParams: {
+        redirect_uri: 'bar'
+      }
+    });
+  });
+
   it('should proxy getAccessTokenWithPopup', async () => {
     const plugin = createAuth0({
       domain: '',
@@ -485,7 +581,7 @@ describe('Auth0Plugin', () => {
       provide: jest.fn()
     } as any as App<any>;
 
-    const getTokenOptions = { 
+    const getTokenOptions = {
       authorizationParams: {
         scope: 'a b c'
       }
@@ -501,6 +597,35 @@ describe('Auth0Plugin', () => {
     expect(getTokenWithPopupMock).toHaveBeenCalledWith(
       getTokenOptions,
       popupOptions
+    );
+  });
+
+  it('should proxy getAccessTokenWithPopup and handle redirect_uri', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const appMock: App<any> = {
+      config: {
+        globalProperties: {}
+      },
+      provide: jest.fn()
+    } as any as App<any>;
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.getAccessTokenWithPopup({
+      // @ts-expect-error
+      redirect_uri: 'bar'
+    });
+    expect(getTokenWithPopupMock).toHaveBeenCalledWith(
+      {
+        authorizationParams: {
+          redirect_uri: 'bar'
+        }
+      },
+      undefined
     );
   });
 

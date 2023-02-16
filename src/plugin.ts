@@ -7,7 +7,7 @@ import type {
   Auth0VueClient,
   Auth0VueClientOptions,
   LogoutOptions,
-  RedirectLoginOptions,
+  RedirectLoginOptions
 } from './interfaces';
 import { AUTH0_INJECTION_KEY, AUTH0_TOKEN } from './token';
 import version from './version';
@@ -18,13 +18,10 @@ import type {
   IdToken,
   PopupConfigOptions,
   PopupLoginOptions,
-  RedirectLoginResult,
+  RedirectLoginResult
 } from '@auth0/auth0-spa-js';
-import {
-  Auth0Client,
-  User
-} from '@auth0/auth0-spa-js';
-import { bindPluginMethods } from './utils';
+import { Auth0Client, User } from '@auth0/auth0-spa-js';
+import { bindPluginMethods, deprecateRedirectUri } from './utils';
 
 /**
  * @ignore
@@ -76,6 +73,7 @@ export class Auth0Plugin implements Auth0VueClient {
   }
 
   async loginWithRedirect(options?: RedirectLoginOptions<AppState>) {
+    deprecateRedirectUri(options);
     return this._client.loginWithRedirect(options);
   }
 
@@ -83,6 +81,7 @@ export class Auth0Plugin implements Auth0VueClient {
     options?: PopupLoginOptions,
     config?: PopupConfigOptions
   ) {
+    deprecateRedirectUri(options);
     return this.__proxy(() => this._client.loginWithPopup(options, config));
   }
 
@@ -106,6 +105,7 @@ export class Auth0Plugin implements Auth0VueClient {
   async getAccessTokenSilently(
     options: GetTokenSilentlyOptions = {}
   ): Promise<string | GetTokenSilentlyVerboseResponse> {
+    deprecateRedirectUri(options);
     return this.__proxy(() => this._client.getTokenSilently(options));
   }
 
@@ -113,6 +113,7 @@ export class Auth0Plugin implements Auth0VueClient {
     options?: GetTokenWithPopupOptions,
     config?: PopupConfigOptions
   ) {
+    deprecateRedirectUri(options);
     return this.__proxy(() => this._client.getTokenWithPopup(options, config));
   }
 
