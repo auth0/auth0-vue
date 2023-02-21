@@ -34,27 +34,22 @@ async function createGuardHandler(
   return fn();
 }
 
-export function createAuthGuard(app: App) {
-  return async (
-    to: RouteLocation,
-    from?: RouteLocation,
-    next?: NavigationGuardNext,
-    redirectLoginOptions?: RedirectLoginOptions
-  ) => {
+export function createAuthGuard(
+  app?: App,
+  redirectLoginOptions?: RedirectLoginOptions
+) {
+  return async (to: RouteLocation) => {
     // eslint-disable-next-line security/detect-object-injection
-    const auth0 = app.config.globalProperties[AUTH0_TOKEN] as Auth0VueClient;
+    const auth0 = app
+      ? (app.config.globalProperties[AUTH0_TOKEN] as Auth0VueClient)
+      : unref(auth0Client);
 
     return createGuardHandler(auth0, to, redirectLoginOptions);
   };
 }
 
-export async function authGuard(
-  to: RouteLocation,
-  from?: RouteLocation,
-  next?: NavigationGuardNext,
-  redirectLoginOptions?: RedirectLoginOptions
-) {
+export async function authGuard(to: RouteLocation) {
   const auth0 = unref(auth0Client);
 
-  return createGuardHandler(auth0, to, redirectLoginOptions);
+  return createGuardHandler(auth0, to);
 }
