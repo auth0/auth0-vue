@@ -56,6 +56,12 @@ describe('createAuthGuard', () => {
   });
 
   it('should create the guard without app', async () => {
+    const guard = createAuthGuard();
+    expect(guard).toBeDefined();
+    expect(typeof guard).toBe('function');
+  });
+
+  it('should create the guard with empty options', async () => {
     const guard = createAuthGuard({});
     expect(guard).toBeDefined();
     expect(typeof guard).toBe('function');

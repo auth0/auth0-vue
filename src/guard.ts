@@ -66,10 +66,11 @@ export function createAuthGuard(
 ): (to: RouteLocation) => Promise<boolean>;
 
 export function createAuthGuard(
-  appOrOptions: App | AuthGuardOptions
+  appOrOptions?: App | AuthGuardOptions
 ): (to: RouteLocation) => Promise<boolean> {
   const { app, redirectLoginOptions } =
-    'app' in appOrOptions || 'redirectLoginOptions' in appOrOptions
+    appOrOptions &&
+    ('app' in appOrOptions || 'redirectLoginOptions' in appOrOptions)
       ? appOrOptions
       : { app: appOrOptions as App, redirectLoginOptions: undefined };
 
