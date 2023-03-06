@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.0.2](https://github.com/auth0/auth0-vue/tree/v2.0.2) (2023-02-22)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.1...v2.0.2)
+
+**Fixed**
+- Map redirect_uri on config to authorizationParams [\#211](https://github.com/auth0/auth0-vue/pull/211) ([ewanharris](https://github.com/ewanharris))
+
 ## [v2.0.1](https://github.com/auth0/auth0-vue/tree/v2.0.1) (2023-01-31)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.0...v2.0.1)
 

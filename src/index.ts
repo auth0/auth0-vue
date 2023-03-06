@@ -7,6 +7,7 @@ import {
   Auth0VueClientOptions
 } from './global';
 import { AUTH0_INJECTION_KEY, AUTH0_TOKEN } from './token';
+import { deprecateRedirectUri } from './utils';
 
 export * from './global';
 export { AUTH0_INJECTION_KEY } from './token';
@@ -28,6 +29,7 @@ export function createAuth0(
   clientOptions: Auth0VueClientOptions,
   pluginOptions?: Auth0PluginOptions
 ) {
+  deprecateRedirectUri(clientOptions);
   return new Auth0Plugin(clientOptions, pluginOptions);
 }
 
