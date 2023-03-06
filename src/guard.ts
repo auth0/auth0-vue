@@ -1,4 +1,4 @@
-import type { RouteLocation, NavigationGuardNext } from 'vue-router';
+import type { RouteLocation } from 'vue-router';
 import { watchEffectOnceAsync } from './utils';
 import { client as auth0Client } from './plugin';
 import { AUTH0_TOKEN } from './token';
@@ -34,10 +34,45 @@ async function createGuardHandler(
   return fn();
 }
 
+/**
+ * The options used when creating an AuthGuard.
+ */
+export interface AuthGuardOptions {
+  /**
+   * The vue application
+   */
+  app?: App;
+
+  /**
+   * Route specific options to use when being redirected to Auth0
+   */
+  redirectLoginOptions?: RedirectLoginOptions;
+}
+
+/**
+ *
+ * @param [app] The vue application
+ */
 export function createAuthGuard(
-  app?: App,
-  redirectLoginOptions?: RedirectLoginOptions
-) {
+  app?: App
+): (to: RouteLocation) => Promise<boolean>;
+
+/**
+ *
+ * @param [options] The options used when creating an AuthGuard.
+ */
+export function createAuthGuard(
+  options?: AuthGuardOptions
+): (to: RouteLocation) => Promise<boolean>;
+
+export function createAuthGuard(
+  appOrOptions: App | AuthGuardOptions
+): (to: RouteLocation) => Promise<boolean> {
+  const { app, redirectLoginOptions } =
+    'app' in appOrOptions || 'redirectLoginOptions' in appOrOptions
+      ? appOrOptions
+      : { app: appOrOptions as App, redirectLoginOptions: undefined };
+
   return async (to: RouteLocation) => {
     // eslint-disable-next-line security/detect-object-injection
     const auth0 = app

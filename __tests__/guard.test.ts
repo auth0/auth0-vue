@@ -56,7 +56,13 @@ describe('createAuthGuard', () => {
   });
 
   it('should create the guard without app', async () => {
-    const guard = createAuthGuard();
+    const guard = createAuthGuard({});
+    expect(guard).toBeDefined();
+    expect(typeof guard).toBe('function');
+  });
+
+  it('should create the guard with app in the options', async () => {
+    const guard = createAuthGuard({ app: appMock });
     expect(guard).toBeDefined();
     expect(typeof guard).toBe('function');
   });
@@ -117,11 +123,14 @@ describe('createAuthGuard', () => {
   });
 
   it('should call loginWithRedirect with RedirectLoginOptions and use default appState value', async () => {
-    const guard = createAuthGuard(appMock, {
-      authorizationParams: {
-        redirect_uri: '/custom_redirect'
-      }
-    } as RedirectLoginOptions);
+    const guard = createAuthGuard({
+      app: appMock,
+      redirectLoginOptions: {
+        authorizationParams: {
+          redirect_uri: '/custom_redirect'
+        }
+      } as RedirectLoginOptions
+    });
 
     expect.assertions(1);
 
@@ -139,12 +148,15 @@ describe('createAuthGuard', () => {
     );
   });
   it('should call loginWithRedirect with RedirectLoginOptions and use provided appState value', async () => {
-    const guard = createAuthGuard(appMock, {
-      appState: { target: '123' },
-      authorizationParams: {
-        redirect_uri: '/custom_redirect2'
-      }
-    } as RedirectLoginOptions);
+    const guard = createAuthGuard({
+      app: appMock,
+      redirectLoginOptions: {
+        appState: { target: '123' },
+        authorizationParams: {
+          redirect_uri: '/custom_redirect2'
+        }
+      } as RedirectLoginOptions
+    });
 
     expect.assertions(1);
 
