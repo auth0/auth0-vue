@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface AppState {
   /**
    * Target path the app gets routed to after
