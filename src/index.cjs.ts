@@ -1,5 +1,3 @@
-import { createAuth0, useAuth0 } from './index';
-
-const Auth0Vue = { createAuth0, useAuth0 };
+import * as Auth0Vue from './index';
 
 export default Auth0Vue;
