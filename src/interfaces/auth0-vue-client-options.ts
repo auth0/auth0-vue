@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 import type {
   Auth0ClientOptions,
   LogoutOptions as SPALogoutOptions,
@@ -11,4 +12,5 @@ import { AppState } from './app-state';
 export interface Auth0VueClientOptions extends Auth0ClientOptions {}
 
 export interface LogoutOptions extends Omit<SPALogoutOptions, 'onRedirect'> {}
-export interface RedirectLoginOptions<TAppState = AppState> extends Omit<SPARedirectLoginOptions<TAppState>, 'onRedirect'> {}
+export interface RedirectLoginOptions<TAppState = AppState>
+  extends Omit<SPARedirectLoginOptions<TAppState>, 'onRedirect'> {}
