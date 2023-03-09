@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   User,
   IdToken,
@@ -10,7 +11,10 @@ import type {
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
-import { LogoutOptions, RedirectLoginOptions } from './auth0-vue-client-options';
+import {
+  LogoutOptions,
+  RedirectLoginOptions
+} from './auth0-vue-client-options';
 
 export interface Auth0VueClient {
   /**
@@ -138,7 +142,7 @@ export interface Auth0VueClient {
   getAccessTokenWithPopup(
     options?: GetTokenWithPopupOptions,
     config?: PopupConfigOptions
-  ): Promise<string|undefined>;
+  ): Promise<string | undefined>;
 
   /**
    * ```js
