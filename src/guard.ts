@@ -69,10 +69,9 @@ export function createAuthGuard(
   appOrOptions?: App | AuthGuardOptions
 ): (to: RouteLocation) => Promise<boolean> {
   const { app, redirectLoginOptions } =
-    appOrOptions &&
-    ('app' in appOrOptions || 'redirectLoginOptions' in appOrOptions)
-      ? appOrOptions
-      : { app: appOrOptions as App, redirectLoginOptions: undefined };
+    !appOrOptions || 'config' in appOrOptions
+      ? { app: appOrOptions as App, redirectLoginOptions: undefined }
+      : (appOrOptions as AuthGuardOptions);
 
   return async (to: RouteLocation) => {
     // eslint-disable-next-line security/detect-object-injection
