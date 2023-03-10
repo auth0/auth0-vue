@@ -1,5 +1,14 @@
 # Change Log
 
+## [v2.1.0](https://github.com/auth0/auth0-vue/tree/v2.1.0) (2023-03-10)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.2...v2.1.0)
+
+**Added**
+- Add RedirectLoginOptions to createAuthGuard [\#209](https://github.com/auth0/auth0-vue/pull/209) ([june07](https://github.com/june07))
+
+**Fixed**
+- Correctly expose SDK API from CJS bundle [\#219](https://github.com/auth0/auth0-vue/pull/219) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.0.2](https://github.com/auth0/auth0-vue/tree/v2.0.2) (2023-02-22)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.1...v2.0.2)
 
