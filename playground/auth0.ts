@@ -9,12 +9,15 @@ const domain = res?.domain || defaultDomain;
 const clientId = res?.client_id || defaultClientId;
 const audience = res?.audience || defaultAudience;
 
-export const auth0 = createAuth0({
-  domain,
-  clientId,
-  authorizationParams: {
-    audience,
-    redirect_uri: window.location.origin,
+export const auth0 = createAuth0(
+  {
+    domain,
+    clientId,
+    authorizationParams: {
+      audience,
+      redirect_uri: window.location.origin
+    },
+    useFormData: res?.useFormData || true
   },
-  useFormData: res?.useFormData || true,
-});
+  { errorPath: '/error' }
+);

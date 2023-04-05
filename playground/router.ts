@@ -6,6 +6,8 @@ import Home from './components/Home.vue';
 // Fix for https://github.com/ezolenko/rollup-plugin-typescript2/issues/129#issuecomment-454558185
 // @ts-ignore
 import Profile from './components/Profile.vue';
+// @ts-ignore
+import Error from './components/Error.vue';
 
 export function createRouter({ client_id, domain, audience }: any) {
   return createVueRouter({
@@ -26,6 +28,11 @@ export function createRouter({ client_id, domain, audience }: any) {
         name: 'profile',
         component: Profile,
         beforeEnter: authGuard
+      },
+      {
+        path: '/error',
+        name: 'error',
+        component: Error
       }
     ],
     history: createWebHistory()
