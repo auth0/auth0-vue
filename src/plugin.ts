@@ -153,8 +153,8 @@ export class Auth0Plugin implements Auth0VueClient {
         await this.checkSession();
       }
     } catch (e) {
-      // Check Session should never throw an exception as it will fail installing the plugin.
-      // Instead, errors during checkSession are propagated using the errors property on `useAuth0`.
+      // __checkSession should never throw an exception as it will fail installing the plugin.
+      // Instead, errors during __checkSession are propagated using the errors property on `useAuth0`.
 
       window.history.replaceState({}, '', '/');
 
