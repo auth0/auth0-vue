@@ -436,6 +436,60 @@ describe('Auth0Plugin', () => {
     });
   });
 
+  it('should call the router, if provided, with the default path when no appState', async () => {
+    const routerPushMock = jest.fn();
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    } as unknown as Router;
+
+    handleRedirectCallbackMock.mockResolvedValue({});
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    urlParams.set('code', '123');
+    urlParams.set('state', 'xyz');
+
+    window.location.search = urlParams as any;
+
+    plugin.install(appMock);
+
+    return flushPromises().then(() => {
+      expect(routerPushMock).toHaveBeenCalledWith('/');
+    });
+  });
+
+  it('should call the router, if provided, with the default path when handleRedirectCallback returns undefined', async () => {
+    const routerPushMock = jest.fn();
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    } as unknown as Router;
+
+    handleRedirectCallbackMock.mockResolvedValue(undefined);
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    urlParams.set('code', '123');
+    urlParams.set('state', 'xyz');
+
+    window.location.search = urlParams as any;
+
+    plugin.install(appMock);
+
+    return flushPromises().then(() => {
+      expect(routerPushMock).toHaveBeenCalledWith('/');
+    });
+  });
+
   it('should proxy loginWithRedirect', async () => {
     const plugin = createAuth0({
       domain: '',
