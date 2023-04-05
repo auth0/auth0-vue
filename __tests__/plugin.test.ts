@@ -141,6 +141,81 @@ describe('Auth0Plugin', () => {
     );
   });
 
+  it('should swallow exceptions upon installation', async () => {
+    const plugin = createAuth0({
+      domain: 'domain 123',
+      clientId: 'client id 123',
+      authorizationParams: {
+        foo: 'bar'
+      }
+    });
+
+    handleRedirectCallbackMock.mockRejectedValue('Some Error');
+
+    expect(() => plugin.install(appMock)).not.toThrow();
+  });
+
+  it('should redirect to / when handleRedirect failed upon installation', async () => {
+    const routerPushMock = jest.fn();
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    } as unknown as Router;
+
+    handleRedirectCallbackMock.mockRejectedValue('Some Error');
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    urlParams.set('error', 'some_error');
+    urlParams.set('state', 'xyz');
+
+    window.location.search = urlParams as any;
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      expect(routerPushMock).toHaveBeenCalledWith('/');
+    });
+  });
+
+  it('should redirect to errorPath when handleRedirect failed upon installation', async () => {
+    const routerPushMock = jest.fn();
+    const plugin = createAuth0(
+      {
+        domain: '',
+        clientId: ''
+      },
+      { errorPath: '/error' }
+    );
+
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    } as unknown as Router;
+
+    handleRedirectCallbackMock.mockRejectedValue('Some Error');
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    urlParams.set('error', 'some_error');
+    urlParams.set('state', 'xyz');
+
+    window.location.search = urlParams as any;
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      expect(routerPushMock).toHaveBeenCalledWith('/error');
+    });
+  });
+
   it('should support redirect_uri', async () => {
     const plugin = createAuth0({
       domain: 'domain 123',
