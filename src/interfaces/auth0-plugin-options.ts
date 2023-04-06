@@ -21,4 +21,10 @@ export interface Auth0PluginOptions {
    *
    */
   skipRedirectCallback?: boolean;
+
+  /**
+   * Path in your application to redirect to when the Authorization server
+   * returns an error. Defaults to `/`
+   */
+  errorPath?: string;
 }

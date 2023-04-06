@@ -262,7 +262,7 @@ export default {
         auth0.logout({
           openUrl: false,
           logoutParams: {
-            returnTo: window.location.origin,
+            returnTo: window.location.origin
           }
         });
       },
@@ -275,8 +275,8 @@ export default {
         getAccessTokenSilentlyOutsideComponent({
           authorizationParams: {
             audience,
-            scope,
-          },
+            scope
+          }
         }).then(function (token: string) {
           access_tokens.push({
             token: obfuscateToken(token),
@@ -294,8 +294,8 @@ export default {
           .getAccessTokenSilently({
             authorizationParams: {
               audience,
-              scope,
-            },
+              scope
+            }
           })
           .then(function (token: string) {
             access_tokens.push({
@@ -310,11 +310,11 @@ export default {
         access_tokens: any[]
       ) {
         auth0
-          .getAccessTokenWithPopup({ 
+          .getAccessTokenWithPopup({
             authorizationParams: {
               audience,
-              scope,
-            },
+              scope
+            }
           })
           .then(function (token: string) {
             access_tokens.push({

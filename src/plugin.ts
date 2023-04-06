@@ -132,24 +132,35 @@ export class Auth0Plugin implements Auth0VueClient {
   private async __checkSession(router?: Router) {
     const search = window.location.search;
 
-    if (
-      (search.includes('code=') || search.includes('error=')) &&
-      search.includes('state=') &&
-      !this.pluginOptions?.skipRedirectCallback
-    ) {
-      const result = await this.handleRedirectCallback();
-      const appState = result?.appState;
-      const target = appState?.target ?? '/';
+    try {
+      if (
+        (search.includes('code=') || search.includes('error=')) &&
+        search.includes('state=') &&
+        !this.pluginOptions?.skipRedirectCallback
+      ) {
+        const result = await this.handleRedirectCallback();
+        const appState = result?.appState;
+        const target = appState?.target ?? '/';
+
+        window.history.replaceState({}, '', '/');
+
+        if (router) {
+          router.push(target);
+        }
+
+        return result;
+      } else {
+        await this.checkSession();
+      }
+    } catch (e) {
+      // __checkSession should never throw an exception as it will fail installing the plugin.
+      // Instead, errors during __checkSession are propagated using the errors property on `useAuth0`.
 
       window.history.replaceState({}, '', '/');
 
       if (router) {
-        router.push(target);
+        router.push(this.pluginOptions?.errorPath || '/');
       }
-
-      return result;
-    } else {
-      await this.checkSession();
     }
   }
 
