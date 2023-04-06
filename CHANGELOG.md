@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.2.0](https://github.com/auth0/auth0-vue/tree/v2.2.0) (2023-04-06)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.1.0...v2.2.0)
+
+**Added**
+- Gracefully handle errors upon plugin installation [\#224](https://github.com/auth0/auth0-vue/pull/224) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.1.0](https://github.com/auth0/auth0-vue/tree/v2.1.0) (2023-03-10)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.2...v2.1.0)
 
