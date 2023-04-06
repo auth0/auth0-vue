@@ -142,7 +142,7 @@ export class Auth0Plugin implements Auth0VueClient {
         const appState = result?.appState;
         const target = appState?.target ?? '/';
 
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', target);
 
         if (router) {
           router.push(target);
