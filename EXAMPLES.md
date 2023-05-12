@@ -501,3 +501,96 @@ export async function getAccessTokenSilentlyOutsideComponent(options) {
 This would allow you to interact with our SDK from outside of components, such as Axios interceptors.
 
 **Note**: Be aware that none of the above is specific to our SDK, but would translate to any plugin in Vue.
+
+## Organizations
+
+[Organizations](https://auth0.com/docs/organizations) is a set of features that provide better support for developers who build and maintain SaaS and Business-to-Business (B2B) applications.
+
+Note that Organizations is currently only available to customers on our Enterprise and Startup subscription plans.
+
+### Log in to an organization
+
+Log in to an organization by specifying the `organization` parameter when registering the plugin:
+
+```js
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      organization: 'YOUR_ORGANIZATION_ID'
+    }
+  })
+);
+```
+
+You can also specify the organization when logging in:
+
+```js
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { loginWithRedirect, loginWithPopup } = useAuth0();
+
+      return {
+        login: () => {
+          // Using a redirect
+          loginWithRedirect({ 
+            authorizationParams: { 
+              organization: 'YOUR_ORGANIZATION_ID',
+            }
+          });
+
+          // Using a popup window
+          loginWithPopup({ 
+            authorizationParams: { 
+              organization: 'YOUR_ORGANIZATION_ID',
+            }
+          })
+        }
+      };
+    }
+  };
+</script>
+```
+
+### Accept user invitations
+
+Accept a user invitation through the SDK by creating a route within your application that can handle the user invitation URL, and log the user in by passing the `organization` and `invitation` parameters from this URL. You can either use `loginWithRedirect` or `loginWithPopup` as needed.
+
+```js
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { loginWithRedirect, loginWithPopup } = useAuth0();
+      const route = useRoute();
+      const { organization, invitation } = route.params;
+
+      return {
+        login: () => {
+          // Using a redirect
+          loginWithRedirect({ 
+            authorizationParams: { 
+              organization,
+              invitation,
+            }
+          });
+
+          // Using a popup window
+          loginWithPopup({ 
+            authorizationParams: { 
+              organization,
+              invitation,
+            }
+          })
+        }
+      };
+    }
+  };
+</script>
+```
