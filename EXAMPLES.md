@@ -9,6 +9,7 @@
 - [Protecting a route](#protecting-a-route)
 - [Protecting a route when using multiple Vue applications](#protecting-a-route-when-using-multiple-vue-applications)
 - [Accessing Auth0Client outside of a component](#accessing-auth0client-outside-of-a-component)
+- [Organizations](#organizations)
 
 ## Add login to your application
 
