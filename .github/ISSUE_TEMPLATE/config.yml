@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: FAQ
-    url: https://github.com/auth0/auth0-vue/blob/master/FAQ.md
+    url: https://github.com/auth0/auth0-vue/blob/main/FAQ.md
     about: Read the FAQ to get answers to common issues
   - name: SDK API Documentation
     url: https://auth0.github.io/auth0-vue/
