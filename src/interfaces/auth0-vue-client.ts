@@ -30,12 +30,12 @@ export interface Auth0VueClient {
   /**
    * Contains the information of the user if available.
    */
-  user: Ref<User>;
+  user: Ref<User | undefined>;
 
   /**
    * Contains all claims from the id_token if available.
    */
-  idTokenClaims: Ref<IdToken>;
+  idTokenClaims: Ref<IdToken | undefined>;
 
   /**
    * Contains an error that occured in the SDK

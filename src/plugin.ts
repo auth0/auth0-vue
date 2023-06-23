@@ -12,6 +12,7 @@ import type {
 import { AUTH0_INJECTION_KEY, AUTH0_TOKEN } from './token';
 import version from './version';
 import type {
+  GenericError,
   GetTokenSilentlyOptions,
   GetTokenSilentlyVerboseResponse,
   GetTokenWithPopupOptions,
@@ -26,18 +27,18 @@ import { bindPluginMethods, deprecateRedirectUri } from './utils';
 /**
  * @ignore
  */
-export const client: Ref<Auth0VueClient> = ref(null);
+export const client: Ref<Auth0VueClient | null> = ref(null);
 
 /**
  * @ignore
  */
 export class Auth0Plugin implements Auth0VueClient {
-  private _client: Auth0Client;
+  private _client!: Auth0Client;
   private _isLoading: Ref<boolean> = ref(true);
   private _isAuthenticated: Ref<boolean> = ref(false);
-  private _user: Ref<User> = ref({});
-  private _idTokenClaims: Ref<IdToken> = ref();
-  private _error = ref(null);
+  private _user: Ref<User | undefined> = ref({});
+  private _idTokenClaims = ref<IdToken>();
+  private _error = ref<Error | null>(null);
 
   isLoading = readonly(this._isLoading);
   isAuthenticated = readonly(this._isAuthenticated);
@@ -67,9 +68,9 @@ export class Auth0Plugin implements Auth0VueClient {
 
     // eslint-disable-next-line security/detect-object-injection
     app.config.globalProperties[AUTH0_TOKEN] = this;
-    app.provide(AUTH0_INJECTION_KEY, this);
+    app.provide(AUTH0_INJECTION_KEY, this as Auth0VueClient);
 
-    client.value = this;
+    client.value = this as Auth0VueClient;
   }
 
   async loginWithRedirect(options?: RedirectLoginOptions<AppState>) {
@@ -177,7 +178,7 @@ export class Auth0Plugin implements Auth0VueClient {
       result = await cb();
       this._error.value = null;
     } catch (e) {
-      this._error.value = e;
+      this._error.value = e as Error;
       throw e;
     } finally {
       if (refreshState) {

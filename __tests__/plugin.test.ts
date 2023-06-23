@@ -80,7 +80,7 @@ describe('Auth0Plugin', () => {
   let appMock: App<any>;
 
   beforeEach(() => {
-    delete window.location;
+    delete (window as any).location;
     window.location = Object.assign(new URL('https://example.org'), {
       ancestorOrigins: '',
       assign: jest.fn(),
@@ -88,7 +88,7 @@ describe('Auth0Plugin', () => {
       replace: jest.fn()
     }) as any;
 
-    delete window.history;
+    delete (window as any).history;
     window.history = {
       replaceState: replaceStateMock
     } as any;

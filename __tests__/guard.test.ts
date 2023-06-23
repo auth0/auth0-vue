@@ -1,4 +1,4 @@
-import type { RouteLocation, NavigationGuardNext } from 'vue-router';
+import type { RouteLocation } from 'vue-router';
 import { App, ref } from 'vue';
 import { Auth0VueClient, authGuard, createAuthGuard } from '../src/index';
 import { AUTH0_TOKEN } from '../src/token';
@@ -31,11 +31,11 @@ jest.mock('./../src/plugin', () => {
 
 describe('createAuthGuard', () => {
   let appMock: App<any>;
-  let auth0Mock: Partial<Auth0VueClient> = {
+  let auth0Mock: Auth0VueClient = {
     loginWithRedirect: jest.fn<any>().mockResolvedValue({}),
     isAuthenticated: ref(false),
     isLoading: ref(false)
-  };
+  } as unknown as Auth0VueClient;
 
   beforeEach(() => {
     auth0Mock.isAuthenticated.value = false;
@@ -67,7 +67,7 @@ describe('createAuthGuard', () => {
   it('should create the guard without app', async () => {
     const guard = createAuthGuard();
 
-    client.value.isAuthenticated = true as any;
+    client.value!.isAuthenticated = true as any;
 
     expect.assertions(2);
 
@@ -82,7 +82,7 @@ describe('createAuthGuard', () => {
   it('should create the guard with empty options', async () => {
     const guard = createAuthGuard({});
 
-    client.value.isAuthenticated = true as any;
+    client.value!.isAuthenticated = true as any;
 
     expect.assertions(2);
 
@@ -211,8 +211,8 @@ describe('authGuard', () => {
   let auth0Mock;
 
   beforeEach(() => {
-    client.value.isAuthenticated = false as any;
-    client.value.isLoading = false as any;
+    client.value!.isAuthenticated = false as any;
+    client.value!.isLoading = false as any;
     auth0Mock = client.value;
   });
 

@@ -38,5 +38,5 @@ export function createAuth0(
  * @returns An instance of Auth0VueClient
  */
 export function useAuth0(): Auth0VueClient {
-  return inject(AUTH0_INJECTION_KEY);
+  return inject(AUTH0_INJECTION_KEY) as Auth0VueClient;
 }
