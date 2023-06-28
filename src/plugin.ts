@@ -24,20 +24,49 @@ import { Auth0Client, User } from '@auth0/auth0-spa-js';
 import { bindPluginMethods, deprecateRedirectUri } from './utils';
 
 /**
+ * Helper callback that's used by default before the plugin is installed.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const PLUGIN_NOT_INSTALLED_HANDLER: any = () => {
+  console.error(`Please ensure Auth0's Vue plugin is correctly installed.`);
+};
+
+/**
+ * Helper client that's used by default before the plugin is installed.
+ */
+const PLUGIN_NOT_INSTALLED_CLIENT: Auth0VueClient = {
+  isLoading: ref(false),
+  isAuthenticated: ref(false),
+  user: ref(undefined),
+  idTokenClaims: ref(undefined),
+  error: ref(null),
+  loginWithPopup: PLUGIN_NOT_INSTALLED_HANDLER,
+  loginWithRedirect: PLUGIN_NOT_INSTALLED_HANDLER,
+  getAccessTokenSilently: PLUGIN_NOT_INSTALLED_HANDLER,
+  getAccessTokenWithPopup: PLUGIN_NOT_INSTALLED_HANDLER,
+  logout: PLUGIN_NOT_INSTALLED_HANDLER,
+  checkSession: PLUGIN_NOT_INSTALLED_HANDLER,
+  handleRedirectCallback: PLUGIN_NOT_INSTALLED_HANDLER
+};
+
+/**
  * @ignore
  */
-export const client: Ref<Auth0VueClient> = ref(null);
+export const client: Ref<Auth0VueClient> = ref(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  PLUGIN_NOT_INSTALLED_CLIENT as any
+);
 
 /**
  * @ignore
  */
 export class Auth0Plugin implements Auth0VueClient {
-  private _client: Auth0Client;
+  private _client!: Auth0Client;
   private _isLoading: Ref<boolean> = ref(true);
   private _isAuthenticated: Ref<boolean> = ref(false);
-  private _user: Ref<User> = ref({});
-  private _idTokenClaims: Ref<IdToken> = ref();
-  private _error = ref(null);
+  private _user: Ref<User | undefined> = ref({});
+  private _idTokenClaims = ref<IdToken>();
+  private _error = ref<Error | null>(null);
 
   isLoading = readonly(this._isLoading);
   isAuthenticated = readonly(this._isAuthenticated);
@@ -67,9 +96,9 @@ export class Auth0Plugin implements Auth0VueClient {
 
     // eslint-disable-next-line security/detect-object-injection
     app.config.globalProperties[AUTH0_TOKEN] = this;
-    app.provide(AUTH0_INJECTION_KEY, this);
+    app.provide(AUTH0_INJECTION_KEY, this as Auth0VueClient);
 
-    client.value = this;
+    client.value = this as Auth0VueClient;
   }
 
   async loginWithRedirect(options?: RedirectLoginOptions<AppState>) {
@@ -177,7 +206,7 @@ export class Auth0Plugin implements Auth0VueClient {
       result = await cb();
       this._error.value = null;
     } catch (e) {
-      this._error.value = e;
+      this._error.value = e as Error;
       throw e;
     } finally {
       if (refreshState) {

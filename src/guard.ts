@@ -77,14 +77,14 @@ export function createAuthGuard(
     // eslint-disable-next-line security/detect-object-injection
     const auth0 = app
       ? (app.config.globalProperties[AUTH0_TOKEN] as Auth0VueClient)
-      : unref(auth0Client);
+      : (unref(auth0Client) as Auth0VueClient);
 
     return createGuardHandler(auth0, to, redirectLoginOptions);
   };
 }
 
 export async function authGuard(to: RouteLocation) {
-  const auth0 = unref(auth0Client);
+  const auth0 = unref(auth0Client) as Auth0VueClient;
 
   return createGuardHandler(auth0, to);
 }

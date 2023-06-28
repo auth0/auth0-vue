@@ -173,7 +173,7 @@ import { ref, computed } from 'vue';
 import { useAuth0 } from '../../src';
 import { getAccessTokenSilentlyOutsideComponent } from '../api';
 
-const obfuscateToken = function (value: string) {
+const obfuscateToken = function (value: string | undefined) {
   if (value && value.length > 35) {
     return value.substr(0, 16) + '…  …' + value.substr(-16, 16);
   }
@@ -316,7 +316,7 @@ export default {
               scope
             }
           })
-          .then(function (token: string) {
+          .then(function (token: string | undefined) {
             access_tokens.push({
               token: obfuscateToken(token),
               __raw: token
