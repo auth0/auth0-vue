@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.2.1](https://github.com/auth0/auth0-vue/tree/v2.2.1) (2023-07-07)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.2.0...v2.2.1)
+
+**Fixed**
+- Improve TypeScript types when using strict set to true [\#235](https://github.com/auth0/auth0-vue/pull/235) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.2.0](https://github.com/auth0/auth0-vue/tree/v2.2.0) (2023-04-06)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.1.0...v2.2.0)
 
