@@ -56,7 +56,7 @@ jest.mock('@auth0/auth0-spa-js', () => {
 });
 
 describe('Client', () => {
-  it('throws log console error when used before installing the plugin', async () => {
+  it('logs console error when used before installing the plugin', async () => {
     const spy = jest.spyOn(console, 'error');
 
     await client.value.loginWithRedirect();
