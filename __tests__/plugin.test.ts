@@ -10,6 +10,7 @@ import {
   it,
   jest
 } from '@jest/globals';
+import { client } from '../src/plugin';
 
 const loginWithRedirectMock = jest.fn<any>().mockResolvedValue(null);
 const loginWithPopupMock = jest.fn<any>().mockResolvedValue(null);
@@ -52,6 +53,18 @@ jest.mock('@auth0/auth0-spa-js', () => {
       };
     })
   };
+});
+
+describe('Client', () => {
+  it('logs console error when used before installing the plugin', async () => {
+    const spy = jest.spyOn(console, 'error');
+
+    await client.value.loginWithRedirect();
+
+    expect(spy).toHaveBeenCalledWith(
+      `Please ensure Auth0's Vue plugin is correctly installed.`
+    );
+  });
 });
 
 describe('createAuth0', () => {
