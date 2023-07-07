@@ -8,7 +8,8 @@ module.exports = {
     '/node_modules/',
     './cypress',
     './jest.config.js',
-    './__tests__'
+    './__tests__',
+    './src/global.ts'
   ],
   reporters: [
     'default',
@@ -23,6 +24,6 @@ module.exports = {
       {
         tsconfig: 'tsconfig.test.json'
       }
-    ],
-},
+    ]
+  }
 };
