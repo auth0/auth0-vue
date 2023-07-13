@@ -83,7 +83,7 @@
     "wait-on": "^6.0.0"
   },
   "dependencies": {
-    "@auth0/auth0-spa-js": "^2.0.4",
+    "@auth0/auth0-spa-js": "^2.1.0",
     "vue": "^3.2.41"
   },
   "peerDependencies": {

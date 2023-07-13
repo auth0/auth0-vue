@@ -474,6 +474,7 @@ app.mount('#app');
 Doing the above ensures every guard is connected to the Auth0Plugin that's configured in the same Vue application.
 
 ## Accessing Auth0Client outside of a component
+
 To be able to access `Auth0Client` outside of the component, there are a couple of things you need to do.
 
 First of all, start with moving the creation of the plugin to an external file:
@@ -483,22 +484,23 @@ export const auth0 = createAuth0({ ... });
 ```
 
 Next, you can import the exported plugin instance when configuring the Vue app.
+
 ```ts
 import { auth0 } from './auth0';
 
-createApp(App)
-  .use(auth0)
-  .mount('#app');
+createApp(App).use(auth0).mount('#app');
 ```
+
 However, you can now also import the exported plugin instance anywhere else and access it's methods
 
 ```ts
-import { auth0 } from './auth0'
+import { auth0 } from './auth0';
 
 export async function getAccessTokenSilentlyOutsideComponent(options) {
   return auth0.getAccessTokenSilently(options);
 }
 ```
+
 This would allow you to interact with our SDK from outside of components, such as Axios interceptors.
 
 **Note**: Be aware that none of the above is specific to our SDK, but would translate to any plugin in Vue.
@@ -520,7 +522,7 @@ app.use(
     clientId: '<AUTH0_CLIENT_ID>',
     authorizationParams: {
       redirect_uri: '<MY_CALLBACK_URL>',
-      organization: 'YOUR_ORGANIZATION_ID'
+      organization: 'YOUR_ORGANIZATION_ID_OR_NAME'
     }
   })
 );
@@ -539,16 +541,16 @@ You can also specify the organization when logging in:
       return {
         login: () => {
           // Using a redirect
-          loginWithRedirect({ 
-            authorizationParams: { 
-              organization: 'YOUR_ORGANIZATION_ID',
+          loginWithRedirect({
+            authorizationParams: {
+              organization: 'YOUR_ORGANIZATION_ID_OR_NAME',
             }
           });
 
           // Using a popup window
-          loginWithPopup({ 
-            authorizationParams: { 
-              organization: 'YOUR_ORGANIZATION_ID',
+          loginWithPopup({
+            authorizationParams: {
+              organization: 'YOUR_ORGANIZATION_ID_OR_NAME',
             }
           })
         }
@@ -575,16 +577,16 @@ Accept a user invitation through the SDK by creating a route within your applica
       return {
         login: () => {
           // Using a redirect
-          loginWithRedirect({ 
-            authorizationParams: { 
+          loginWithRedirect({
+            authorizationParams: {
               organization,
               invitation,
             }
           });
 
           // Using a popup window
-          loginWithPopup({ 
-            authorizationParams: { 
+          loginWithPopup({
+            authorizationParams: {
               organization,
               invitation,
             }
