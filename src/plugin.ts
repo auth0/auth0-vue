@@ -1,5 +1,5 @@
 import type { App, Ref } from 'vue';
-import { readonly, ref } from 'vue';
+import { ref } from 'vue';
 import type { Router } from 'vue-router';
 import type {
   AppState,
@@ -62,17 +62,11 @@ export const client: Ref<Auth0VueClient> = ref(
  */
 export class Auth0Plugin implements Auth0VueClient {
   private _client!: Auth0Client;
-  private _isLoading: Ref<boolean> = ref(true);
-  private _isAuthenticated: Ref<boolean> = ref(false);
-  private _user: Ref<User | undefined> = ref({});
-  private _idTokenClaims = ref<IdToken>();
-  private _error = ref<Error | null>(null);
-
-  isLoading = readonly(this._isLoading);
-  isAuthenticated = readonly(this._isAuthenticated);
-  user = readonly(this._user);
-  idTokenClaims = readonly(this._idTokenClaims);
-  error = readonly(this._error);
+  public isLoading: Ref<boolean> = ref(true);
+  public isAuthenticated: Ref<boolean> = ref(false);
+  public user: Ref<User | undefined> = ref({});
+  public idTokenClaims = ref<IdToken | undefined>();
+  public error = ref<Error | null>(null);
 
   constructor(
     private clientOptions: Auth0VueClientOptions,
@@ -194,19 +188,19 @@ export class Auth0Plugin implements Auth0VueClient {
   }
 
   private async __refreshState() {
-    this._isAuthenticated.value = await this._client.isAuthenticated();
-    this._user.value = await this._client.getUser();
-    this._idTokenClaims.value = await this._client.getIdTokenClaims();
-    this._isLoading.value = false;
+    this.isAuthenticated.value = await this._client.isAuthenticated();
+    this.user.value = await this._client.getUser();
+    this.idTokenClaims.value = await this._client.getIdTokenClaims();
+    this.isLoading.value = false;
   }
 
   private async __proxy<T>(cb: () => T, refreshState = true) {
     let result;
     try {
       result = await cb();
-      this._error.value = null;
+      this.error.value = null;
     } catch (e) {
-      this._error.value = e as Error;
+      this.error.value = e as Error;
       throw e;
     } finally {
       if (refreshState) {
