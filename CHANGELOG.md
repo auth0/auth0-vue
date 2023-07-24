@@ -1,5 +1,14 @@
 # Change Log
 
+## [v2.3.0](https://github.com/auth0/auth0-vue/tree/v2.3.0) (2023-07-24)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.2.1...v2.3.0)
+
+**Added**
+- Support Organization Name [\#242](https://github.com/auth0/auth0-vue/pull/242) ([frederikprijck](https://github.com/frederikprijck))
+
+**Changed**
+- Avoid using readonly for public exposed reactive properties [\#243](https://github.com/auth0/auth0-vue/pull/243) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.2.1](https://github.com/auth0/auth0-vue/tree/v2.2.1) (2023-07-07)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.2.0...v2.2.1)
 
