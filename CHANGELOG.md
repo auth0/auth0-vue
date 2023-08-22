@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.3.1](https://github.com/auth0/auth0-vue/tree/v2.3.1) (2023-08-22)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.3.0...v2.3.1)
+
+**Fixed**
+- bump auth0-spa-js to latest version [\#253](https://github.com/auth0/auth0-vue/pull/253) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.3.0](https://github.com/auth0/auth0-vue/tree/v2.3.0) (2023-07-24)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.2.1...v2.3.0)
 
