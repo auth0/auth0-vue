@@ -27,4 +27,6 @@ export interface Auth0PluginOptions {
    * returns an error. Defaults to `/`
    */
   errorPath?: string;
+
+  router?: any;
 }
