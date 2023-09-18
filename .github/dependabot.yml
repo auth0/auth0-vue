@@ -10,4 +10,4 @@ updates:
         interval: "daily"
     ignore:
         - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-patch"]
