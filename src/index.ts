@@ -1,8 +1,8 @@
 import { inject } from 'vue';
 import './global';
-import {
+import { Auth0Plugin } from './global';
+import type {
   Auth0VueClient,
-  Auth0Plugin,
   Auth0PluginOptions,
   Auth0VueClientOptions
 } from './global';

@@ -5,7 +5,7 @@ import { AUTH0_TOKEN } from './token';
 import type { Auth0VueClient } from './interfaces';
 import type { App } from 'vue';
 import { unref } from 'vue';
-import { RedirectLoginOptions } from '@auth0/auth0-spa-js';
+import type { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
 async function createGuardHandler(
   client: Auth0VueClient,
