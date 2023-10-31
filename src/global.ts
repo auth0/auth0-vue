@@ -2,7 +2,9 @@ export { Auth0Plugin } from './plugin';
 export * from './interfaces';
 export * from './guard';
 
-export {
+export { User, InMemoryCache, LocalStorageCache } from '@auth0/auth0-spa-js';
+
+export type {
   AuthorizationParams,
   PopupLoginOptions,
   PopupConfigOptions,
@@ -11,9 +13,6 @@ export {
   CacheLocation,
   GetTokenSilentlyOptions,
   IdToken,
-  User,
   ICache,
-  InMemoryCache,
-  LocalStorageCache,
-  Cacheable,
+  Cacheable
 } from '@auth0/auth0-spa-js';

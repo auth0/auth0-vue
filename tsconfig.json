@@ -9,7 +9,8 @@
     "moduleResolution": "node",
     "noImplicitAny": true,
     "downlevelIteration": true,
-    "strict": true
+    "strict": true,
+    "verbatimModuleSyntax": true
   },
   "exclude": [
     "./__tests__",

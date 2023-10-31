@@ -4,7 +4,7 @@ import type {
   LogoutOptions as SPALogoutOptions,
   RedirectLoginOptions as SPARedirectLoginOptions
 } from '@auth0/auth0-spa-js';
-import { AppState } from './app-state';
+import type { AppState } from './app-state';
 
 /**
  * Configuration for the Auth0 Vue Client

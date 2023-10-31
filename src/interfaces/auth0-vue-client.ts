@@ -11,7 +11,7 @@ import type {
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
-import {
+import type {
   LogoutOptions,
   RedirectLoginOptions
 } from './auth0-vue-client-options';
