@@ -1,51 +1,75 @@
 # Change Log
 
+## [v2.3.2](https://github.com/auth0/auth0-vue/tree/v2.3.2) (2023-10-31)
+
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.3.1...v2.3.2)
+
+**Fixed**
+
+- Use export type and import type to allow verbatimModuleSyntax [\#303](https://github.com/auth0/auth0-vue/pull/303) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.3.1](https://github.com/auth0/auth0-vue/tree/v2.3.1) (2023-08-22)
+
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.3.0...v2.3.1)
 
 **Fixed**
+
 - bump auth0-spa-js to latest version [\#253](https://github.com/auth0/auth0-vue/pull/253) ([frederikprijck](https://github.com/frederikprijck))
 
 ## [v2.3.0](https://github.com/auth0/auth0-vue/tree/v2.3.0) (2023-07-24)
+
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.2.1...v2.3.0)
 
 **Added**
+
 - Support Organization Name [\#242](https://github.com/auth0/auth0-vue/pull/242) ([frederikprijck](https://github.com/frederikprijck))
 
 **Changed**
+
 - Avoid using readonly for public exposed reactive properties [\#243](https://github.com/auth0/auth0-vue/pull/243) ([frederikprijck](https://github.com/frederikprijck))
 
 ## [v2.2.1](https://github.com/auth0/auth0-vue/tree/v2.2.1) (2023-07-07)
+
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.2.0...v2.2.1)
 
 **Fixed**
+
 - Improve TypeScript types when using strict set to true [\#235](https://github.com/auth0/auth0-vue/pull/235) ([frederikprijck](https://github.com/frederikprijck))
 
 ## [v2.2.0](https://github.com/auth0/auth0-vue/tree/v2.2.0) (2023-04-06)
+
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.1.0...v2.2.0)
 
 **Added**
+
 - Gracefully handle errors upon plugin installation [\#224](https://github.com/auth0/auth0-vue/pull/224) ([frederikprijck](https://github.com/frederikprijck))
 
 ## [v2.1.0](https://github.com/auth0/auth0-vue/tree/v2.1.0) (2023-03-10)
+
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.2...v2.1.0)
 
 **Added**
+
 - Add RedirectLoginOptions to createAuthGuard [\#209](https://github.com/auth0/auth0-vue/pull/209) ([june07](https://github.com/june07))
 
 **Fixed**
+
 - Correctly expose SDK API from CJS bundle [\#219](https://github.com/auth0/auth0-vue/pull/219) ([frederikprijck](https://github.com/frederikprijck))
 
 ## [v2.0.2](https://github.com/auth0/auth0-vue/tree/v2.0.2) (2023-02-22)
+
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.1...v2.0.2)
 
 **Fixed**
+
 - Map redirect_uri on config to authorizationParams [\#211](https://github.com/auth0/auth0-vue/pull/211) ([ewanharris](https://github.com/ewanharris))
 
 ## [v2.0.1](https://github.com/auth0/auth0-vue/tree/v2.0.1) (2023-01-31)
+
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.0.0...v2.0.1)
 
 **Fixed**
+
 - Add exports field to package.json [\#201](https://github.com/auth0/auth0-vue/pull/201) ([frederikprijck](https://github.com/frederikprijck))
 
 ## [v2.0.0](https://github.com/auth0/auth0-vue/tree/v2.0.0-beta.0) (2023-01-19)
