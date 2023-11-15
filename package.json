@@ -80,7 +80,7 @@
     "typedoc": "^0.25.1",
     "typescript": "^5.2.2",
     "vue-router": "^4.0.12",
-    "wait-on": "^6.0.0"
+    "wait-on": "^7.2.0"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.1.2",
