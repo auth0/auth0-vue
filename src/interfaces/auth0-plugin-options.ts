@@ -11,7 +11,7 @@ export interface Auth0PluginOptions {
    * In these cases you can instruct the client to ignore certain URLs by setting `skipRedirectCallback`.
    *
    * ```js
-   * createAuth0({
+   * createAuth0({}, {
    *   skipRedirectCallback: window.location.pathname === '/other-callback'
    * })
    * ```
