@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.3.3](https://github.com/auth0/auth0-vue/tree/v2.3.3) (2023-12-11)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.3.2...v2.3.3)
+
+**Changed**
+- Update Auth0-SPA-JS to latest version [\#335](https://github.com/auth0/auth0-vue/pull/335) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.3.2](https://github.com/auth0/auth0-vue/tree/v2.3.2) (2023-10-31)
 
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.3.1...v2.3.2)
