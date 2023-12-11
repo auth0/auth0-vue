@@ -1,6 +1,7 @@
 {
   "files": {
     "src/version.ts": [],
+    ".version": [],
     "README.md": [
       "{MAJOR}.{MINOR}"
     ]
