@@ -12,7 +12,7 @@ import { deprecateRedirectUri } from './utils';
 export * from './global';
 export { AUTH0_INJECTION_KEY } from './token';
 
-declare module '@vue/runtime-core' {
+declare module 'vue' {
   export interface ComponentCustomProperties {
     [AUTH0_TOKEN]: Auth0VueClient;
   }
