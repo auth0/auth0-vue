@@ -55,14 +55,14 @@ If after successfully logging in, your user returns to your SPA and is still not
 
 ## 3. User is redirected to `/` after successful sign in with redirect
 
-By default, the SDK is configured to redirect the user back to the root of the application after succesfully exchanging the `code` for the corresponding token(s).
+By default, the SDK is configured to redirect the user back to the root of the application after successfully exchanging the `code` for the corresponding token(s).
 
 This is what a typical default flow looks like:
 
 - `createAuth0` is configured with a specific redirectUrl (e.g. `http://localhost:4200/callback`).
 - User initiates login by calling `loginWithRedirect()`
 - User is redirected to Auth0, including a `redirectUri` (in this case `http://localhost:4200/callback`)
-- After succesful authentication, the user is redirected back to the provided redirectUri, including a `code` and `state` query parameter (in this case `http://localhost:4200/callback?code={code}&state={state}`)
+- After successful authentication, the user is redirected back to the provided redirectUri, including a `code` and `state` query parameter (in this case `http://localhost:4200/callback?code={code}&state={state}`)
 - The configured `redirectUri` is only used to process `code` and `state` in order to retrieve an actual token.
 - The user is then redirected to `/`
 

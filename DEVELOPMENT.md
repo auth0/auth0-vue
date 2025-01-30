@@ -69,7 +69,7 @@ Then, browse to http://localhost:5000 to view an HTML-based coverage report.
 
 ## The SDK Playground
 
-The SDK provides a simple [Vue JS](https://vuejs.org/) app to test out and experiment with features of the SDK. This Playground is also used by the integration tests to verify behaviors. If you make changes to the Playground that are to be commited, ensure that the integration tests pass.
+The SDK provides a simple [Vue JS](https://vuejs.org/) app to test out and experiment with features of the SDK. This Playground is also used by the integration tests to verify behaviors. If you make changes to the Playground that are to be committed, ensure that the integration tests pass.
 
 To test the SDK manually and play around with the various options and features, you can use the Playground by cloning this repository and using:
 
