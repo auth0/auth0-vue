@@ -1,5 +1,28 @@
 # Change Log
 
+## [v2.4.0](https://github.com/auth0/auth0-vue/tree/v2.4.0) (2024-12-02)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.3.3...v2.4.0)
+
+**Added**
+- added RL workflow [\#428](https://github.com/auth0/auth0-vue/pull/428) ([tusharpandey13](https://github.com/tusharpandey13))
+
+**Changed**
+- ci: changed pull_request_target to pull_request and removed the authorize step [\#420](https://github.com/auth0/auth0-vue/pull/420) ([desusai7](https://github.com/desusai7))
+- Update codeowner file with new GitHub team name [\#416](https://github.com/auth0/auth0-vue/pull/416) ([stevenwong-okta](https://github.com/stevenwong-okta))
+- Bump vue from 3.3.12 to 3.3.13 [\#348](https://github.com/auth0/auth0-vue/pull/348) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump vue from 3.3.11 to 3.3.12 [\#347](https://github.com/auth0/auth0-vue/pull/347) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump eslint from 8.55.0 to 8.56.0 [\#346](https://github.com/auth0/auth0-vue/pull/346) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump browserstack-cypress-cli from 1.27.0 to 1.28.0 [\#342](https://github.com/auth0/auth0-vue/pull/342) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump github/codeql-action from 2 to 3 [\#343](https://github.com/auth0/auth0-vue/pull/343) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump rollup-plugin-visualizer from 5.10.0 to 5.11.0 [\#338](https://github.com/auth0/auth0-vue/pull/338) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+**Fixed**
+- chore: use declare module 'vue' to fix type issues [\#419](https://github.com/auth0/auth0-vue/pull/419) ([andreasgangso](https://github.com/andreasgangso))
+- Update automated release process to latest version [\#344](https://github.com/auth0/auth0-vue/pull/344) ([frederikprijck](https://github.com/frederikprijck))
+- Use outputs for capturing release-notes [\#341](https://github.com/auth0/auth0-vue/pull/341) ([frederikprijck](https://github.com/frederikprijck))
+- Ensure tag-exists action works as intended [\#340](https://github.com/auth0/auth0-vue/pull/340) ([frederikprijck](https://github.com/frederikprijck))
+- Align release process by supporting release-directory [\#339](https://github.com/auth0/auth0-vue/pull/339) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.3.3](https://github.com/auth0/auth0-vue/tree/v2.3.3) (2023-12-11)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.3.2...v2.3.3)
 
