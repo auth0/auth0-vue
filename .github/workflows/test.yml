@@ -67,7 +67,7 @@ jobs:
         run: npm run test -- --maxWorkers=2
 
       - name: Upload coverage
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # pin@3.1.4
+        uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00 # pin@5.5.0
 
   compatibility:
     needs: build # Require build to complete before running tests
