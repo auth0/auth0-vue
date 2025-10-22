@@ -2,6 +2,7 @@
 
 ![Release](https://img.shields.io/npm/v/@auth0/auth0-vue)
 [![Codecov](https://codecov.io/gh/auth0/auth0-vue/branch/main/graph/badge.svg)](https://codecov.io/gh/auth0/auth0-vue)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/auth0/auth0-vue)
 ![Downloads](https://img.shields.io/npm/dw/@auth0/auth0-vue)
 [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 [![CircleCI](https://img.shields.io/circleci/build/github/auth0/auth0-vue)](https://circleci.com/gh/auth0/auth0-vue)
