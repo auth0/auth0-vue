@@ -1,10 +1,5 @@
-// TextEncoder / TextDecoder polyfill
+// Polyfills for Node.js test environment
 const { TextEncoder, TextDecoder } = require('util');
 
-if (global.TextEncoder === undefined) {
-  global.TextEncoder = TextEncoder;
-}
-
-if (global.TextDecoder === undefined) {
-  global.TextDecoder = TextDecoder;
-}
+global.TextEncoder ??= TextEncoder;
+global.TextDecoder ??= TextDecoder;

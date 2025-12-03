@@ -8,7 +8,10 @@ import type {
   GetTokenSilentlyOptions,
   GetTokenSilentlyVerboseResponse,
   GetTokenWithPopupOptions,
-  ConnectAccountRedirectResult
+  ConnectAccountRedirectResult,
+  CustomFetchMinimalOutput,
+  Fetcher,
+  FetcherConfig
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
@@ -168,4 +171,99 @@ export interface Auth0VueClient {
    * @param options
    */
   logout(options?: LogoutOptions): Promise<void>;
+
+  /**
+   * ```js
+   * const nonce = await getDpopNonce();
+   * ```
+   *
+   * Retrieves the current DPoP nonce value for a specific identifier.
+   *
+   * The nonce is used to prevent replay attacks when using DPoP (Demonstrating Proof-of-Possession).
+   * It may return `undefined` initially before the first server response.
+   *
+   * **Note:** Requires `useDpop: true` in the Auth0 client configuration.
+   *
+   * @param id - Optional identifier for the nonce. If omitted, returns the nonce for Auth0 requests.
+   *             Use a custom identifier for tracking nonces for different API endpoints.
+   */
+  getDpopNonce(id?: string): Promise<string | undefined>;
+
+  /**
+   * ```js
+   * await setDpopNonce('new-nonce-value', 'my-api');
+   * ```
+   *
+   * Stores a DPoP nonce value for future use with a specific identifier.
+   *
+   * This is typically called automatically when the server provides a new nonce
+   * in the `DPoP-Nonce` response header. Manual usage is only needed for advanced scenarios.
+   *
+   * **Note:** Requires `useDpop: true` in the Auth0 client configuration.
+   *
+   * @param nonce - The nonce value to store
+   * @param id - Optional identifier for the nonce. If omitted, sets the nonce for Auth0 requests.
+   *             Use a custom identifier for managing nonces for different API endpoints.
+   */
+  setDpopNonce(nonce: string, id?: string): Promise<void>;
+
+  /**
+   * ```js
+   * const proof = await generateDpopProof({
+   *   url: 'https://api.example.com/data',
+   *   method: 'GET',
+   *   accessToken: token
+   * });
+   * ```
+   *
+   * Generates a DPoP proof JWT that cryptographically binds an access token to the current client.
+   *
+   * The proof is a signed JWT that demonstrates possession of the private key associated with
+   * the public key in the access token. This prevents token theft and replay attacks.
+   *
+   * **Note:** Requires `useDpop: true` in the Auth0 client configuration.
+   * Most developers should use `createFetcher()` instead, which handles proof generation automatically.
+   *
+   * @param params - Configuration for generating the proof
+   * @param params.url - The target URL for the API request
+   * @param params.method - The HTTP method (GET, POST, etc.)
+   * @param params.accessToken - The access token to bind to the proof
+   * @param params.nonce - Optional nonce value from a previous server response
+   */
+  generateDpopProof(params: {
+    url: string;
+    method: string;
+    accessToken: string;
+    nonce?: string;
+  }): Promise<string>;
+
+  /**
+   * ```js
+   * const fetcher = createFetcher({
+   *   dpopNonceId: 'my-api',
+   *   baseUrl: 'https://api.example.com'
+   * });
+   *
+   * const response = await fetcher.fetchWithAuth('/data', {
+   *   method: 'GET'
+   * });
+   * const data = await response.json();
+   * ```
+   *
+   * Creates a fetcher instance that automatically handles authentication for API requests.
+   *
+   * The fetcher automatically:
+   * - Retrieves access tokens using `getAccessTokenSilently()`
+   * - Adds proper `Authorization` headers
+   * - Generates and includes DPoP proofs when using DPoP tokens
+   * - Manages DPoP nonces and retries on nonce errors
+   * - Handles token refreshing
+   *
+   * This is the recommended way to make authenticated API calls, especially when using DPoP.
+   *
+   * @param config - Configuration options for the fetcher
+   */
+  createFetcher<TOutput extends CustomFetchMinimalOutput = Response>(
+    config?: FetcherConfig<TOutput>
+  ): Fetcher<TOutput>;
 }

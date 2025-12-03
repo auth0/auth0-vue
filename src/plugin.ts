@@ -19,7 +19,10 @@ import type {
   PopupConfigOptions,
   PopupLoginOptions,
   RedirectLoginResult,
-  ConnectAccountRedirectResult
+  ConnectAccountRedirectResult,
+  FetcherConfig,
+  Fetcher,
+  CustomFetchMinimalOutput
 } from '@auth0/auth0-spa-js';
 import { Auth0Client, User } from '@auth0/auth0-spa-js';
 import { bindPluginMethods, deprecateRedirectUri } from './utils';
@@ -47,7 +50,11 @@ const PLUGIN_NOT_INSTALLED_CLIENT: Auth0VueClient = {
   getAccessTokenWithPopup: PLUGIN_NOT_INSTALLED_HANDLER,
   logout: PLUGIN_NOT_INSTALLED_HANDLER,
   checkSession: PLUGIN_NOT_INSTALLED_HANDLER,
-  handleRedirectCallback: PLUGIN_NOT_INSTALLED_HANDLER
+  handleRedirectCallback: PLUGIN_NOT_INSTALLED_HANDLER,
+  getDpopNonce: PLUGIN_NOT_INSTALLED_HANDLER,
+  setDpopNonce: PLUGIN_NOT_INSTALLED_HANDLER,
+  generateDpopProof: PLUGIN_NOT_INSTALLED_HANDLER,
+  createFetcher: PLUGIN_NOT_INSTALLED_HANDLER
 };
 
 /**
@@ -153,6 +160,29 @@ export class Auth0Plugin implements Auth0VueClient {
     return this.__proxy(() =>
       this._client.handleRedirectCallback<AppState>(url)
     );
+  }
+
+  async getDpopNonce(id?: string): Promise<string | undefined> {
+    return this._client.getDpopNonce(id);
+  }
+
+  async setDpopNonce(nonce: string, id?: string): Promise<void> {
+    return this._client.setDpopNonce(nonce, id);
+  }
+
+  async generateDpopProof(params: {
+    url: string;
+    method: string;
+    accessToken: string;
+    nonce?: string;
+  }): Promise<string> {
+    return this._client.generateDpopProof(params);
+  }
+
+  createFetcher<TOutput extends CustomFetchMinimalOutput = Response>(
+    config?: FetcherConfig<TOutput>
+  ): Fetcher<TOutput> {
+    return this._client.createFetcher<TOutput>(config);
   }
 
   private async __checkSession(router?: Router) {
