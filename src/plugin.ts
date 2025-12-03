@@ -18,7 +18,8 @@ import type {
   IdToken,
   PopupConfigOptions,
   PopupLoginOptions,
-  RedirectLoginResult
+  RedirectLoginResult,
+  ConnectAccountRedirectResult
 } from '@auth0/auth0-spa-js';
 import { Auth0Client, User } from '@auth0/auth0-spa-js';
 import { bindPluginMethods, deprecateRedirectUri } from './utils';
@@ -146,7 +147,9 @@ export class Auth0Plugin implements Auth0VueClient {
 
   async handleRedirectCallback(
     url?: string
-  ): Promise<RedirectLoginResult<AppState>> {
+  ): Promise<
+    RedirectLoginResult<AppState> | ConnectAccountRedirectResult<AppState>
+  > {
     return this.__proxy(() =>
       this._client.handleRedirectCallback<AppState>(url)
     );

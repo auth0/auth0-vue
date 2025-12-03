@@ -7,7 +7,8 @@ import type {
   RedirectLoginResult,
   GetTokenSilentlyOptions,
   GetTokenSilentlyVerboseResponse,
-  GetTokenWithPopupOptions
+  GetTokenWithPopupOptions,
+  ConnectAccountRedirectResult
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
@@ -92,7 +93,11 @@ export interface Auth0VueClient {
    * **Note:** The Auth0-Vue SDK handles this for you, unless you set `skipRedirectCallback` to true.
    * In that case, be sure to explicitly call `handleRedirectCallback` yourself.
    */
-  handleRedirectCallback(url?: string): Promise<RedirectLoginResult<AppState>>;
+  handleRedirectCallback(
+    url?: string
+  ): Promise<
+    RedirectLoginResult<AppState> | ConnectAccountRedirectResult<AppState>
+  >;
 
   /**
    * ```js
