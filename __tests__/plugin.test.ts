@@ -25,6 +25,13 @@ const buildLogoutUrlMock = jest.fn<any>().mockResolvedValue(null);
 const getTokenSilentlyMock = jest.fn<any>().mockResolvedValue(null);
 const getTokenWithPopupMock = jest.fn<any>().mockResolvedValue(null);
 
+const getDpopNonceMock = jest.fn<any>().mockResolvedValue(undefined);
+const setDpopNonceMock = jest.fn<any>().mockResolvedValue(undefined);
+const generateDpopProofMock = jest.fn<any>().mockResolvedValue('mock-proof');
+const createFetcherMock = jest.fn<any>().mockReturnValue({
+  fetchWithAuth: jest.fn<any>().mockResolvedValue({ status: 200, data: 'test' })
+});
+
 jest.mock('vue', () => {
   const originalModule = jest.requireActual('vue');
   return {
@@ -49,7 +56,11 @@ jest.mock('@auth0/auth0-spa-js', () => {
         buildAuthorizeUrl: buildAuthorizeUrlMock,
         buildLogoutUrl: buildLogoutUrlMock,
         getTokenSilently: getTokenSilentlyMock,
-        getTokenWithPopup: getTokenWithPopupMock
+        getTokenWithPopup: getTokenWithPopupMock,
+        getDpopNonce: getDpopNonceMock,
+        setDpopNonce: setDpopNonceMock,
+        generateDpopProof: generateDpopProofMock,
+        createFetcher: createFetcherMock
       };
     })
   };
@@ -1052,6 +1063,241 @@ describe('Auth0Plugin', () => {
     handleRedirectCallbackMock.mockResolvedValue({});
 
     await appMock.config.globalProperties.$auth0.handleRedirectCallback();
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toBeFalsy();
+  });
+
+  it('should proxy getDpopNonce with id parameter', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    getDpopNonceMock.mockResolvedValue('auth0-nonce');
+
+    const result = await appMock.config.globalProperties.$auth0.getDpopNonce(
+      'my-api'
+    );
+
+    expect(getDpopNonceMock).toHaveBeenCalledWith('my-api');
+    expect(result).toBe('auth0-nonce');
+  });
+
+  it('should proxy getDpopNonce without id parameter', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    getDpopNonceMock.mockResolvedValue('auth0-nonce');
+
+    const result = await appMock.config.globalProperties.$auth0.getDpopNonce();
+
+    expect(getDpopNonceMock).toHaveBeenCalledWith(undefined);
+    expect(result).toBe('auth0-nonce');
+  });
+
+  it('should proxy setDpopNonce with id parameter', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.setDpopNonce(
+      'nonce-abc',
+      'my-api'
+    );
+
+    expect(setDpopNonceMock).toHaveBeenCalledWith('nonce-abc', 'my-api');
+  });
+
+  it('should proxy setDpopNonce without id parameter', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.setDpopNonce('nonce-abc');
+
+    expect(setDpopNonceMock).toHaveBeenCalledWith('nonce-abc', undefined);
+  });
+
+  it('should proxy generateDpopProof', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    const params = {
+      url: 'https://api.example.com/data',
+      method: 'GET',
+      accessToken: 'test-token',
+      nonce: 'test-nonce'
+    };
+
+    const result =
+      await appMock.config.globalProperties.$auth0.generateDpopProof(params);
+
+    expect(generateDpopProofMock).toHaveBeenCalledWith(params);
+    expect(result).toBe('mock-proof');
+  });
+
+  it('should proxy createFetcher', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    const fetcherConfig = {
+      dpopNonceId: 'test-api',
+      baseUrl: 'https://api.example.com'
+    };
+
+    const mockFetcher = {
+      fetchWithAuth: jest
+        .fn<any>()
+        .mockResolvedValue({ status: 200, data: 'test' })
+    };
+
+    createFetcherMock.mockReturnValue(mockFetcher);
+
+    const fetcher =
+      appMock.config.globalProperties.$auth0.createFetcher(fetcherConfig);
+
+    expect(createFetcherMock).toHaveBeenCalledWith(fetcherConfig);
+    expect(fetcher).toBe(mockFetcher);
+  });
+
+  it('should proxy createFetcher without config', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    const mockFetcher = {
+      fetchWithAuth: jest.fn<any>()
+    };
+
+    createFetcherMock.mockReturnValue(mockFetcher);
+
+    const fetcher = appMock.config.globalProperties.$auth0.createFetcher();
+
+    expect(createFetcherMock).toHaveBeenCalledWith(undefined);
+    expect(fetcher).toBe(mockFetcher);
+  });
+
+  it('should track errors when getDpopNonce throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    getDpopNonceMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.getDpopNonce('my-api');
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should track errors when setDpopNonce throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    setDpopNonceMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.setDpopNonce(
+        'nonce',
+        'my-api'
+      );
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should track errors when generateDpopProof throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    generateDpopProofMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.generateDpopProof({
+        url: 'https://api.example.com/data',
+        method: 'GET',
+        accessToken: 'test-token'
+      });
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should clear errors when getDpopNonce is successful', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useDpop: true
+    });
+
+    plugin.install(appMock);
+
+    // First call fails
+    getDpopNonceMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.getDpopNonce('my-api');
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+
+    // Second call succeeds
+    getDpopNonceMock.mockResolvedValue('nonce-123');
+
+    await appMock.config.globalProperties.$auth0.getDpopNonce('my-api');
 
     expect(appMock.config.globalProperties.$auth0.error.value).toBeFalsy();
   });

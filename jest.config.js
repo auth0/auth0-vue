@@ -17,7 +17,7 @@ module.exports = {
   ],
   coverageReporters: ['lcov', 'text', 'text-summary'],
   preset: 'ts-jest/presets/default-legacy',
-  setupFiles: [],
+  setupFiles: ['<rootDir>/jest.setup.js'],
   transform: {
     '.*\\.test\\.ts': [
       'ts-jest',
