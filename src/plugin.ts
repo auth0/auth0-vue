@@ -163,11 +163,11 @@ export class Auth0Plugin implements Auth0VueClient {
   }
 
   async getDpopNonce(id?: string): Promise<string | undefined> {
-    return this._client.getDpopNonce(id);
+    return this.__proxy(() => this._client.getDpopNonce(id));
   }
 
   async setDpopNonce(nonce: string, id?: string): Promise<void> {
-    return this._client.setDpopNonce(nonce, id);
+    return this.__proxy(() => this._client.setDpopNonce(nonce, id));
   }
 
   async generateDpopProof(params: {
@@ -176,7 +176,7 @@ export class Auth0Plugin implements Auth0VueClient {
     accessToken: string;
     nonce?: string;
   }): Promise<string> {
-    return this._client.generateDpopProof(params);
+    return this.__proxy(() => this._client.generateDpopProof(params));
   }
 
   createFetcher<TOutput extends CustomFetchMinimalOutput = Response>(
