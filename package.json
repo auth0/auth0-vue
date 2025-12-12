@@ -3,7 +3,7 @@
   "name": "@auth0/auth0-vue",
   "description": "Auth0 SDK for Vue Applications using Authorization Code Grant Flow with PKCE",
   "license": "MIT",
-  "version": "2.5.0",
+  "version": "2.4.0",
   "main": "dist/lib/auth0-vue.cjs.js",
   "types": "dist/typings/index.d.ts",
   "module": "dist/auth0-vue.production.esm.js",
