@@ -43,6 +43,7 @@
     "@auth0/component-cdn-uploader": "github:auth0/component-cdn-uploader#v2.2.2",
     "@jest/globals": "^29.3.1",
     "@rollup/plugin-replace": "^3.0.0",
+    "@types/node": "^25.0.1",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "@typescript-eslint/parser": "^5.54.1",
     "browserstack-cypress-cli": "^1.19.0",
@@ -77,8 +78,8 @@
     "serve": "^14.1.1",
     "ts-jest": "^29.0.3",
     "tslib": "^2.3.1",
-    "typedoc": "^0.25.1",
-    "typescript": "^5.2.2",
+    "typedoc": "^0.26.11",
+    "typescript": "^5.6.3",
     "vue-router": "^4.0.12",
     "wait-on": "^7.2.0"
   },
