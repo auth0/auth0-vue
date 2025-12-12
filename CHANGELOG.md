@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.5.0](https://github.com/auth0/auth0-vue/tree/v2.5.0) (2025-12-12)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.4.0...v2.5.0)
+
+**Added**
+- feat: add DPoP support with fetcher API [\#500](https://github.com/auth0/auth0-vue/pull/500) ([yogeshchoudhary147](https://github.com/yogeshchoudhary147))
+
 ## [v2.4.0](https://github.com/auth0/auth0-vue/tree/v2.4.0) (2024-12-02)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.3.3...v2.4.0)
 
