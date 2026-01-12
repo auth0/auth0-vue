@@ -10,6 +10,7 @@
 - [Protecting a route when using multiple Vue applications](#protecting-a-route-when-using-multiple-vue-applications)
 - [Accessing Auth0Client outside of a component](#accessing-auth0client-outside-of-a-component)
 - [Organizations](#organizations)
+- [DPoP (Demonstrating Proof-of-Possession)](#dpop-demonstrating-proof-of-possession)
 
 ## Add login to your application
 
@@ -597,3 +598,460 @@ Accept a user invitation through the SDK by creating a route within your applica
   };
 </script>
 ```
+
+## DPoP (Demonstrating Proof-of-Possession)
+
+[DPoP](https://datatracker.ietf.org/doc/html/rfc9449) is a security mechanism that cryptographically binds access tokens to the client that requested them, preventing token theft and replay attacks. When enabled, tokens are bound to a client's private key, making stolen tokens unusable by attackers.
+
+### Benefits of DPoP
+
+- **Token Theft Protection**: Stolen tokens cannot be used without the client's private key
+- **Replay Attack Prevention**: Each request requires a unique cryptographic proof
+- **Token Exfiltration Mitigation**: Tokens are useless without the corresponding private key
+
+### Enabling DPoP
+
+To enable DPoP support, set `useDpop: true` when configuring the plugin:
+
+```js
+import { createAuth0 } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      audience: '<AUTH0_AUDIENCE>'
+    },
+    useDpop: true
+  })
+);
+
+app.mount('#app');
+```
+
+### Using createFetcher (Recommended)
+
+The simplest way to make DPoP-protected API calls is using `createFetcher()`, which automatically handles token retrieval, DPoP proof generation, and nonce management:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { createFetcher } = useAuth0();
+
+      return {
+        fetchProtectedData: async () => {
+          // Create a fetcher with automatic DPoP handling
+          const fetcher = createFetcher({
+            dpopNonceId: 'my-api',
+            baseUrl: 'https://api.example.com'
+          });
+
+          // Make authenticated request with DPoP
+          const response = await fetcher.fetchWithAuth('/protected-data');
+          const data = await response.json();
+          return data;
+        }
+      };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  export default {
+    methods: {
+      async fetchProtectedData() {
+        const fetcher = this.$auth0.createFetcher({
+          dpopNonceId: 'my-api',
+          baseUrl: 'https://api.example.com'
+        });
+
+        const response = await fetcher.fetchWithAuth('/protected-data');
+        const data = await response.json();
+        return data;
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
+### Multiple API Endpoints
+
+When calling multiple APIs, create separate fetchers for each to manage nonces independently:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { createFetcher } = useAuth0();
+
+      // Create separate fetchers for different APIs
+      const internalApi = createFetcher({
+        dpopNonceId: 'internal-api',
+        baseUrl: 'https://internal.example.com'
+      });
+
+      const partnerApi = createFetcher({
+        dpopNonceId: 'partner-api',
+        baseUrl: 'https://partner.example.com'
+      });
+
+      return {
+        fetchInternalData: async () => {
+          const response = await internalApi.fetchWithAuth('/data');
+          return response.json();
+        },
+        fetchPartnerData: async () => {
+          const response = await partnerApi.fetchWithAuth('/resources');
+          return response.json();
+        }
+      };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  export default {
+    data() {
+      return {
+        internalApi: this.$auth0.createFetcher({
+          dpopNonceId: 'internal-api',
+          baseUrl: 'https://internal.example.com'
+        }),
+        partnerApi: this.$auth0.createFetcher({
+          dpopNonceId: 'partner-api',
+          baseUrl: 'https://partner.example.com'
+        })
+      };
+    },
+    methods: {
+      async fetchInternalData() {
+        const response = await this.internalApi.fetchWithAuth('/data');
+        return response.json();
+      },
+      async fetchPartnerData() {
+        const response = await this.partnerApi.fetchWithAuth('/resources');
+        return response.json();
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
+### POST Requests with DPoP
+
+The fetcher supports all HTTP methods and automatically includes DPoP proofs:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { createFetcher } = useAuth0();
+
+      const fetcher = createFetcher({
+        dpopNonceId: 'my-api',
+        baseUrl: 'https://api.example.com'
+      });
+
+      return {
+        createPost: async postData => {
+          const response = await fetcher.fetchWithAuth('/posts', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(postData)
+          });
+          return response.json();
+        },
+        updatePost: async (postId, postData) => {
+          const response = await fetcher.fetchWithAuth(`/posts/${postId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(postData)
+          });
+          return response.json();
+        },
+        deletePost: async postId => {
+          await fetcher.fetchWithAuth(`/posts/${postId}`, {
+            method: 'DELETE'
+          });
+        }
+      };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  export default {
+    data() {
+      return {
+        fetcher: this.$auth0.createFetcher({
+          dpopNonceId: 'my-api',
+          baseUrl: 'https://api.example.com'
+        })
+      };
+    },
+    methods: {
+      async createPost(postData) {
+        const response = await this.fetcher.fetchWithAuth('/posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(postData)
+        });
+        return response.json();
+      },
+      async updatePost(postId, postData) {
+        const response = await this.fetcher.fetchWithAuth(`/posts/${postId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(postData)
+        });
+        return response.json();
+      },
+      async deletePost(postId) {
+        await this.fetcher.fetchWithAuth(`/posts/${postId}`, {
+          method: 'DELETE'
+        });
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
+### DPoP Error Handling
+
+Handle DPoP-specific errors using the `UseDpopNonceError` class:
+
+```html
+<script>
+  import { useAuth0, UseDpopNonceError } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { createFetcher } = useAuth0();
+
+      const fetcher = createFetcher({
+        dpopNonceId: 'my-api',
+        baseUrl: 'https://api.example.com'
+      });
+
+      return {
+        fetchData: async () => {
+          try {
+            const response = await fetcher.fetchWithAuth('/data');
+            return response.json();
+          } catch (error) {
+            if (error instanceof UseDpopNonceError) {
+              console.error('DPoP nonce error:', error.message);
+              // Handle nonce-specific errors
+            } else {
+              console.error('Request failed:', error);
+              // Handle other errors
+            }
+            throw error;
+          }
+        }
+      };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  import { UseDpopNonceError } from '@auth0/auth0-vue';
+
+  export default {
+    data() {
+      return {
+        fetcher: this.$auth0.createFetcher({
+          dpopNonceId: 'my-api',
+          baseUrl: 'https://api.example.com'
+        })
+      };
+    },
+    methods: {
+      async fetchData() {
+        try {
+          const response = await this.fetcher.fetchWithAuth('/data');
+          return response.json();
+        } catch (error) {
+          if (error instanceof UseDpopNonceError) {
+            console.error('DPoP nonce error:', error.message);
+            // Handle nonce-specific errors
+          } else {
+            console.error('Request failed:', error);
+            // Handle other errors
+          }
+          throw error;
+        }
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
+### Advanced: Manual DPoP Management
+
+For scenarios requiring full control over DPoP proof generation and nonce management:
+
+```html
+<script>
+  import { useAuth0, UseDpopNonceError } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const {
+        getAccessTokenSilently,
+        getDpopNonce,
+        setDpopNonce,
+        generateDpopProof
+      } = useAuth0();
+
+      return {
+        manualDpopRequest: async () => {
+          try {
+            // 1. Get access token
+            const token = await getAccessTokenSilently();
+
+            // 2. Get DPoP nonce for the API
+            const nonce = await getDpopNonce('my-api');
+
+            // 3. Generate DPoP proof
+            const proof = await generateDpopProof({
+              url: 'https://api.example.com/data',
+              method: 'POST',
+              accessToken: token,
+              nonce
+            });
+
+            // 4. Make request with DPoP headers
+            const response = await fetch('https://api.example.com/data', {
+              method: 'POST',
+              headers: {
+                Authorization: `DPoP ${token}`,
+                DPoP: proof,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ data: 'example' })
+            });
+
+            // 5. Update nonce if server provides a new one
+            const newNonce = response.headers.get('DPoP-Nonce');
+            if (newNonce) {
+              await setDpopNonce(newNonce, 'my-api');
+            }
+
+            return response.json();
+          } catch (error) {
+            if (error instanceof UseDpopNonceError) {
+              console.error('DPoP nonce validation failed:', error.message);
+            }
+            throw error;
+          }
+        }
+      };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  import { UseDpopNonceError } from '@auth0/auth0-vue';
+
+  export default {
+    methods: {
+      async manualDpopRequest() {
+        try {
+          // 1. Get access token
+          const token = await this.$auth0.getAccessTokenSilently();
+
+          // 2. Get DPoP nonce for the API
+          const nonce = await this.$auth0.getDpopNonce('my-api');
+
+          // 3. Generate DPoP proof
+          const proof = await this.$auth0.generateDpopProof({
+            url: 'https://api.example.com/data',
+            method: 'POST',
+            accessToken: token,
+            nonce
+          });
+
+          // 4. Make request with DPoP headers
+          const response = await fetch('https://api.example.com/data', {
+            method: 'POST',
+            headers: {
+              Authorization: `DPoP ${token}`,
+              DPoP: proof,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ data: 'example' })
+          });
+
+          // 5. Update nonce if server provides a new one
+          const newNonce = response.headers.get('DPoP-Nonce');
+          if (newNonce) {
+            await this.$auth0.setDpopNonce(newNonce, 'my-api');
+          }
+
+          return response.json();
+        } catch (error) {
+          if (error instanceof UseDpopNonceError) {
+            console.error('DPoP nonce validation failed:', error.message);
+          }
+          throw error;
+        }
+      }
+    }
+  };
+</script>
+```
+
+</details>
