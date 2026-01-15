@@ -599,19 +599,30 @@ Accept a user invitation through the SDK by creating a route within your applica
 </script>
 ```
 
-## DPoP (Demonstrating Proof-of-Possession)
+## Device-bound tokens with DPoP
 
-[DPoP](https://datatracker.ietf.org/doc/html/rfc9449) is a security mechanism that cryptographically binds access tokens to the client that requested them, preventing token theft and replay attacks. When enabled, tokens are bound to a client's private key, making stolen tokens unusable by attackers.
+**Demonstrating Proof-of-Possession** —or simply **DPoP**— is a recent OAuth 2.0 extension defined in [RFC9449](https://datatracker.ietf.org/doc/html/rfc9449).
 
-### Benefits of DPoP
+It defines a mechanism for securely binding tokens to a specific device using cryptographic signatures. Without it, **a token leak caused by XSS or other vulnerabilities could allow an attacker to impersonate the real user.**
 
-- **Token Theft Protection**: Stolen tokens cannot be used without the client's private key
-- **Replay Attack Prevention**: Each request requires a unique cryptographic proof
-- **Token Exfiltration Mitigation**: Tokens are useless without the corresponding private key
+To support DPoP in `auth0-vue`, some APIs available in modern browsers are required:
+
+- [Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Crypto): allows to create and use cryptographic keys, which are used to generate the proofs (i.e. signatures) required for DPoP.
+
+- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API): enables the use of cryptographic keys [without exposing the private material](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto#storing_keys).
+
+The following OAuth 2.0 flows are currently supported by `auth0-vue`:
+
+- [Authorization Code Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow) (`authorization_code`).
+
+- [Refresh Token Flow](https://auth0.com/docs/secure/tokens/refresh-tokens) (`refresh_token`).
+
+> [!IMPORTANT]
+> Currently, only the `ES256` algorithm is supported.
 
 ### Enabling DPoP
 
-To enable DPoP support, set `useDpop: true` when configuring the plugin:
+DPoP is disabled by default. To enable it, set the `useDpop` option to `true` when configuring the plugin. For example:
 
 ```js
 import { createAuth0 } from '@auth0/auth0-vue';
@@ -622,20 +633,67 @@ app.use(
   createAuth0({
     domain: '<AUTH0_DOMAIN>',
     clientId: '<AUTH0_CLIENT_ID>',
+    useDpop: true, // 👈
     authorizationParams: {
       redirect_uri: '<MY_CALLBACK_URL>',
-      audience: '<AUTH0_AUDIENCE>'
     },
-    useDpop: true
   })
 );
 
 app.mount('#app');
 ```
 
-### Using createFetcher (Recommended)
+After enabling DPoP, **every new session using a supported OAuth 2.0 flow in Auth0 will begin transparently to use tokens that are cryptographically bound to the current browser**.
 
-The simplest way to make DPoP-protected API calls is using `createFetcher()`, which automatically handles token retrieval, DPoP proof generation, and nonce management:
+> [!IMPORTANT]
+> DPoP will only be used for new user sessions created after enabling it. Any previously existing sessions will continue using non-DPoP tokens until the user logs in again.
+>
+> You decide how to handle this transition. For example, you might require users to log in again the next time they use your application.
+
+> [!NOTE]
+> Using DPoP requires storing some temporary data in the user's browser. When you log the user out with `logout()`, this data is deleted.
+
+> [!TIP]
+> If all your clients are already using DPoP, you may want to increase security by making Auth0 reject any non-DPoP interactions. See [the docs on Sender Constraining](https://auth0.com/docs/secure/sender-constraining/configure-sender-constraining) for details.
+
+### Using DPoP in your own requests
+
+You use a DPoP token the same way as a "traditional" access token, except it must be sent to the server with an `Authorization: DPoP <token>` header instead of the usual `Authorization: Bearer <token>`.
+
+For internal requests sent by `auth0-vue` to Auth0, simply enable the `useDpop` option and **every interaction with Auth0 will be protected**.
+
+However, **to use DPoP with a custom, external API, some additional work is required**. The SDK provides some low-level methods to help with this:
+
+- `getDpopNonce()`
+- `setDpopNonce()`
+- `generateDpopProof()`
+
+However, due to the nature of how DPoP works, **this is not a trivial task**:
+
+- When a nonce is missing or expired, the request may need to be retried.
+- Received nonces must be stored and managed.
+- DPoP headers must be generated and included in every request, and regenerated for retries.
+
+Because of this, we recommend using the provided `createFetcher()` method with `fetchWithAuth()`, which **handles all of this for you**.
+
+#### Simple usage
+
+The `fetchWithAuth()` method is a drop-in replacement for the native `fetch()` function from the Fetch API, so if you're already using it, the change will be minimal.
+
+For example, if you had this code:
+
+```js
+const response = await fetch('https://api.example.com/foo', {
+  method: 'GET',
+  headers: { 'user-agent': 'My Client 1.0' },
+});
+
+console.log(response.status);
+console.log(response.headers);
+console.log(await response.json());
+```
+
+You would change it as follows:
 
 ```html
 <script>
@@ -646,20 +704,22 @@ The simplest way to make DPoP-protected API calls is using `createFetcher()`, wh
       const { createFetcher } = useAuth0();
 
       return {
-        fetchProtectedData: async () => {
-          // Create a fetcher with automatic DPoP handling
+        fetchData: async () => {
           const fetcher = createFetcher({
-            dpopNonceId: 'my-api',
-            baseUrl: 'https://api.example.com'
+            dpopNonceId: 'my_api_request',
           });
 
-          // Make authenticated request with DPoP
-          const response = await fetcher.fetchWithAuth('/protected-data');
-          const data = await response.json();
-          return data;
-        }
+          const response = await fetcher.fetchWithAuth('https://api.example.com/foo', {
+            method: 'GET',
+            headers: { 'user-agent': 'My Client 1.0' },
+          });
+
+          console.log(response.status);
+          console.log(response.headers);
+          console.log(await response.json());
+        },
       };
-    }
+    },
   };
 </script>
 ```
@@ -671,26 +731,118 @@ The simplest way to make DPoP-protected API calls is using `createFetcher()`, wh
 <script>
   export default {
     methods: {
-      async fetchProtectedData() {
+      async fetchData() {
         const fetcher = this.$auth0.createFetcher({
-          dpopNonceId: 'my-api',
-          baseUrl: 'https://api.example.com'
+          dpopNonceId: 'my_api_request',
         });
 
-        const response = await fetcher.fetchWithAuth('/protected-data');
-        const data = await response.json();
-        return data;
-      }
-    }
+        const response = await fetcher.fetchWithAuth('https://api.example.com/foo', {
+          method: 'GET',
+          headers: { 'user-agent': 'My Client 1.0' },
+        });
+
+        console.log(response.status);
+        console.log(response.headers);
+        console.log(await response.json());
+      },
+    },
   };
 </script>
 ```
 
 </details>
 
-### Multiple API Endpoints
+When using `fetchWithAuth()`, the following will be handled for you automatically:
 
-When calling multiple APIs, create separate fetchers for each to manage nonces independently:
+- Use `getAccessTokenSilently()` to get the access token to inject in the headers.
+- Generate and inject DPoP headers when needed.
+- Store and update any DPoP nonces.
+- Handle retries caused by a rejected nonce.
+
+> [!IMPORTANT]
+> If DPoP is enabled, a `dpopNonceId` **must** be present in the `createFetcher()` parameters, since it's used to keep track of the DPoP nonces for each request.
+
+#### Advanced usage
+
+If you need something more complex than the example above, you can provide a custom implementation in the `fetch` property.
+
+However, since `auth0-vue` needs to make decisions based on HTTP responses, your implementation **must return an object with _at least_ two properties**:
+
+1. `status`: the response status code as a number.
+2. `headers`: the response headers as a plain object or as a Fetch API's Headers-like interface.
+
+Whatever it returns, it will be passed as the output of the `fetchWithAuth()` method.
+
+Your implementation will be called with a standard, ready-to-use [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object, which will contain any headers needed for authorization and DPoP usage (if enabled). Depending on your needs, you can use this object directly or treat it as a container with everything required to make the request your own way.
+
+##### Having a base URL
+
+If you need to make requests to different endpoints of the same API, passing a `baseUrl` to `createFetcher()` can be useful:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { createFetcher } = useAuth0();
+
+      const fetcher = createFetcher({
+        dpopNonceId: 'my-api',
+        baseUrl: 'https://api.example.com',
+      });
+
+      return {
+        getFoo: async () => fetcher.fetchWithAuth('/foo'), // => https://api.example.com/foo
+        getBar: async () => fetcher.fetchWithAuth('/bar'), // => https://api.example.com/bar
+        getXyz: async () => fetcher.fetchWithAuth('/xyz'), // => https://api.example.com/xyz
+
+        // If the passed URL is absolute, `baseUrl` will be ignored for convenience:
+        getFromOtherApi: async () => fetcher.fetchWithAuth('https://other-api.example.com/foo'),
+      };
+    },
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  export default {
+    data() {
+      return {
+        fetcher: this.$auth0.createFetcher({
+          dpopNonceId: 'my-api',
+          baseUrl: 'https://api.example.com',
+        }),
+      };
+    },
+    methods: {
+      async getFoo() {
+        return this.fetcher.fetchWithAuth('/foo'); // => https://api.example.com/foo
+      },
+      async getBar() {
+        return this.fetcher.fetchWithAuth('/bar'); // => https://api.example.com/bar
+      },
+      async getXyz() {
+        return this.fetcher.fetchWithAuth('/xyz'); // => https://api.example.com/xyz
+      },
+      async getFromOtherApi() {
+        // If the passed URL is absolute, `baseUrl` will be ignored for convenience:
+        return this.fetcher.fetchWithAuth('https://other-api.example.com/foo');
+      },
+    },
+  };
+</script>
+```
+
+</details>
+
+##### Multiple API endpoints
+
+When working with multiple APIs, create separate fetchers for each. Each fetcher manages its own nonces independently:
 
 ```html
 <script>
@@ -703,12 +855,12 @@ When calling multiple APIs, create separate fetchers for each to manage nonces i
       // Create separate fetchers for different APIs
       const internalApi = createFetcher({
         dpopNonceId: 'internal-api',
-        baseUrl: 'https://internal.example.com'
+        baseUrl: 'https://internal.example.com',
       });
 
       const partnerApi = createFetcher({
         dpopNonceId: 'partner-api',
-        baseUrl: 'https://partner.example.com'
+        baseUrl: 'https://partner.example.com',
       });
 
       return {
@@ -719,9 +871,19 @@ When calling multiple APIs, create separate fetchers for each to manage nonces i
         fetchPartnerData: async () => {
           const response = await partnerApi.fetchWithAuth('/resources');
           return response.json();
-        }
+        },
+        fetchAllData: async () => {
+          const [internal, partner] = await Promise.all([
+            internalApi.fetchWithAuth('/data'),
+            partnerApi.fetchWithAuth('/resources'),
+          ]);
+          return {
+            internal: await internal.json(),
+            partner: await partner.json(),
+          };
+        },
       };
-    }
+    },
   };
 </script>
 ```
@@ -736,12 +898,12 @@ When calling multiple APIs, create separate fetchers for each to manage nonces i
       return {
         internalApi: this.$auth0.createFetcher({
           dpopNonceId: 'internal-api',
-          baseUrl: 'https://internal.example.com'
+          baseUrl: 'https://internal.example.com',
         }),
         partnerApi: this.$auth0.createFetcher({
           dpopNonceId: 'partner-api',
-          baseUrl: 'https://partner.example.com'
-        })
+          baseUrl: 'https://partner.example.com',
+        }),
       };
     },
     methods: {
@@ -752,15 +914,25 @@ When calling multiple APIs, create separate fetchers for each to manage nonces i
       async fetchPartnerData() {
         const response = await this.partnerApi.fetchWithAuth('/resources');
         return response.json();
-      }
-    }
+      },
+      async fetchAllData() {
+        const [internal, partner] = await Promise.all([
+          this.internalApi.fetchWithAuth('/data'),
+          this.partnerApi.fetchWithAuth('/resources'),
+        ]);
+        return {
+          internal: await internal.json(),
+          partner: await partner.json(),
+        };
+      },
+    },
   };
 </script>
 ```
 
 </details>
 
-### POST Requests with DPoP
+##### POST/PUT/DELETE requests
 
 The fetcher supports all HTTP methods and automatically includes DPoP proofs:
 
@@ -774,17 +946,17 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
 
       const fetcher = createFetcher({
         dpopNonceId: 'my-api',
-        baseUrl: 'https://api.example.com'
+        baseUrl: 'https://api.example.com',
       });
 
       return {
-        createPost: async postData => {
+        createPost: async (postData) => {
           const response = await fetcher.fetchWithAuth('/posts', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
             },
-            body: JSON.stringify(postData)
+            body: JSON.stringify(postData),
           });
           return response.json();
         },
@@ -792,19 +964,19 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
           const response = await fetcher.fetchWithAuth(`/posts/${postId}`, {
             method: 'PUT',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
             },
-            body: JSON.stringify(postData)
+            body: JSON.stringify(postData),
           });
           return response.json();
         },
-        deletePost: async postId => {
+        deletePost: async (postId) => {
           await fetcher.fetchWithAuth(`/posts/${postId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
           });
-        }
+        },
       };
-    }
+    },
   };
 </script>
 ```
@@ -819,8 +991,8 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
       return {
         fetcher: this.$auth0.createFetcher({
           dpopNonceId: 'my-api',
-          baseUrl: 'https://api.example.com'
-        })
+          baseUrl: 'https://api.example.com',
+        }),
       };
     },
     methods: {
@@ -828,9 +1000,9 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
         const response = await this.fetcher.fetchWithAuth('/posts', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify(postData)
+          body: JSON.stringify(postData),
         });
         return response.json();
       },
@@ -838,105 +1010,27 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
         const response = await this.fetcher.fetchWithAuth(`/posts/${postId}`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify(postData)
+          body: JSON.stringify(postData),
         });
         return response.json();
       },
       async deletePost(postId) {
         await this.fetcher.fetchWithAuth(`/posts/${postId}`, {
-          method: 'DELETE'
+          method: 'DELETE',
         });
-      }
-    }
-  };
-</script>
-```
-
-</details>
-
-### DPoP Error Handling
-
-Handle DPoP-specific errors using the `UseDpopNonceError` class:
-
-```html
-<script>
-  import { useAuth0, UseDpopNonceError } from '@auth0/auth0-vue';
-
-  export default {
-    setup() {
-      const { createFetcher } = useAuth0();
-
-      const fetcher = createFetcher({
-        dpopNonceId: 'my-api',
-        baseUrl: 'https://api.example.com'
-      });
-
-      return {
-        fetchData: async () => {
-          try {
-            const response = await fetcher.fetchWithAuth('/data');
-            return response.json();
-          } catch (error) {
-            if (error instanceof UseDpopNonceError) {
-              console.error('DPoP nonce error:', error.message);
-              // Handle nonce-specific errors
-            } else {
-              console.error('Request failed:', error);
-              // Handle other errors
-            }
-            throw error;
-          }
-        }
-      };
-    }
-  };
-</script>
-```
-
-<details>
-  <summary>Using Options API</summary>
-
-```html
-<script>
-  import { UseDpopNonceError } from '@auth0/auth0-vue';
-
-  export default {
-    data() {
-      return {
-        fetcher: this.$auth0.createFetcher({
-          dpopNonceId: 'my-api',
-          baseUrl: 'https://api.example.com'
-        })
-      };
+      },
     },
-    methods: {
-      async fetchData() {
-        try {
-          const response = await this.fetcher.fetchWithAuth('/data');
-          return response.json();
-        } catch (error) {
-          if (error instanceof UseDpopNonceError) {
-            console.error('DPoP nonce error:', error.message);
-            // Handle nonce-specific errors
-          } else {
-            console.error('Request failed:', error);
-            // Handle other errors
-          }
-          throw error;
-        }
-      }
-    }
   };
 </script>
 ```
 
 </details>
 
-### Advanced: Manual DPoP Management
+##### Manual DPoP management
 
-For scenarios requiring full control over DPoP proof generation and nonce management:
+For scenarios requiring full control over DPoP proof generation and nonce management, you can use the low-level methods:
 
 ```html
 <script>
@@ -944,12 +1038,7 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
 
   export default {
     setup() {
-      const {
-        getAccessTokenSilently,
-        getDpopNonce,
-        setDpopNonce,
-        generateDpopProof
-      } = useAuth0();
+      const { getAccessTokenSilently, getDpopNonce, setDpopNonce, generateDpopProof } = useAuth0();
 
       return {
         manualDpopRequest: async () => {
@@ -965,7 +1054,7 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
               url: 'https://api.example.com/data',
               method: 'POST',
               accessToken: token,
-              nonce
+              nonce,
             });
 
             // 4. Make request with DPoP headers
@@ -974,9 +1063,9 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
               headers: {
                 Authorization: `DPoP ${token}`,
                 DPoP: proof,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ data: 'example' })
+              body: JSON.stringify({ data: 'example' }),
             });
 
             // 5. Update nonce if server provides a new one
@@ -992,9 +1081,9 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
             }
             throw error;
           }
-        }
+        },
       };
-    }
+    },
   };
 </script>
 ```
@@ -1021,7 +1110,7 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
             url: 'https://api.example.com/data',
             method: 'POST',
             accessToken: token,
-            nonce
+            nonce,
           });
 
           // 4. Make request with DPoP headers
@@ -1030,9 +1119,9 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
             headers: {
               Authorization: `DPoP ${token}`,
               DPoP: proof,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ data: 'example' })
+            body: JSON.stringify({ data: 'example' }),
           });
 
           // 5. Update nonce if server provides a new one
@@ -1048,10 +1137,11 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
           }
           throw error;
         }
-      }
-    }
+      },
+    },
   };
 </script>
 ```
 
 </details>
+
