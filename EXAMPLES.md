@@ -10,7 +10,7 @@
 - [Protecting a route when using multiple Vue applications](#protecting-a-route-when-using-multiple-vue-applications)
 - [Accessing Auth0Client outside of a component](#accessing-auth0client-outside-of-a-component)
 - [Organizations](#organizations)
-- [DPoP (Demonstrating Proof-of-Possession)](#dpop-demonstrating-proof-of-possession)
+- [Device-bound tokens with DPoP](#device-bound-tokens-with-dpop)
 
 ## Add login to your application
 
