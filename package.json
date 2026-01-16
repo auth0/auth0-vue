@@ -40,7 +40,7 @@
     "publish:cdn": "ccu --trace"
   },
   "devDependencies": {
-    "@auth0/component-cdn-uploader": "github:auth0/component-cdn-uploader#v2.2.2",
+    "@auth0/component-cdn-uploader": "github:auth0/component-cdn-uploader#v2.4.2",
     "@jest/globals": "^29.3.1",
     "@rollup/plugin-replace": "^3.0.0",
     "@types/node": "^25.0.1",
