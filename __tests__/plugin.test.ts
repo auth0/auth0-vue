@@ -134,7 +134,11 @@ describe('Auth0Plugin', () => {
     jest.restoreAllMocks();
   });
   afterEach(() => {
-    window.location = savedLocation;
+    Object.defineProperty(window, 'location', {
+      value: savedLocation,
+      writable: true,
+      configurable: true
+    });
     window.history = savedHistory;
   });
 
