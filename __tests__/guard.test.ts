@@ -206,6 +206,87 @@ describe('createAuthGuard', () => {
       })
     );
   });
+
+  it('should merge custom appState properties', async () => {
+    const guard = createAuthGuard({
+      app: appMock,
+      redirectLoginOptions: {
+        appState: {
+          basePath: '/spa-subpath',
+          customProp: 'customValue'
+        },
+        authorizationParams: {
+          redirect_uri: '/custom_redirect'
+        }
+      } as RedirectLoginOptions
+    });
+
+    expect.assertions(1);
+
+    await guard({
+      fullPath: '/protected-route'
+    } as RouteLocation);
+
+    expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appState: {
+          target: '/protected-route',
+          basePath: '/spa-subpath',
+          customProp: 'customValue'
+        },
+        authorizationParams: {
+          redirect_uri: '/custom_redirect'
+        }
+      })
+    );
+  });
+
+  /**
+   * Previously, if the user provided an `appState` if the `redirectLoginOptions`, we would lose the guard's `target`.
+   * This was reported as an issue in merging properties (https://github.com/auth0/auth0-vue/issues/434),
+   * which is being fixed and verified by the test above (`should merge custom appState properties`).
+   *
+   * However, this also means that when a user provided a `target` in the `appState` of the `redirectLoginOptions`, we would lose the guard's `target`,
+   * but receive the target from the `appState` defined on the `redirectLoginOptions`.
+   *
+   * For backwards compatibility, we have kept this behavior.
+   * Any configured `appState.target` in `redirectLoginOptions` when creating the guard,
+   * will take precedence over the guard's default `target` of the route's fullPath.
+   */
+  it('should merge custom appState properties while preserving redirectLoginOptions target', async () => {
+    const guard = createAuthGuard({
+      app: appMock,
+      redirectLoginOptions: {
+        appState: {
+          target: '123',
+          basePath: '/spa-subpath',
+          customProp: 'customValue'
+        },
+        authorizationParams: {
+          redirect_uri: '/custom_redirect'
+        }
+      } as RedirectLoginOptions
+    });
+
+    expect.assertions(1);
+
+    await guard({
+      fullPath: '/protected-route'
+    } as RouteLocation);
+
+    expect(auth0Mock.loginWithRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appState: {
+          target: '123',
+          basePath: '/spa-subpath',
+          customProp: 'customValue'
+        },
+        authorizationParams: {
+          redirect_uri: '/custom_redirect'
+        }
+      })
+    );
+  });
 });
 describe('authGuard', () => {
   let auth0Mock;
