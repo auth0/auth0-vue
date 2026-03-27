@@ -39,6 +39,7 @@ const getPlugins = shouldMinify => {
     typescript({
       clean: true,
       useTsconfigDeclarationDir: true,
+      include: ['**/*.ts', '**/*.tsx'],
       tsconfigOverride: {
         noEmit: false,
         sourceMap: true,
