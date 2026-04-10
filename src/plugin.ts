@@ -198,7 +198,8 @@ export class Auth0Plugin implements Auth0VueClient {
         const appState = result?.appState;
         const target = appState?.target ?? '/';
 
-        window.history.replaceState({}, '', '/');
+        // Remove query parameters from the URL, keeping the exact pathname.
+        window.history.replaceState({}, '', window.location.pathname);
 
         if (router) {
           router.push(target);
