@@ -22,7 +22,8 @@ import type {
   ConnectAccountRedirectResult,
   FetcherConfig,
   Fetcher,
-  CustomFetchMinimalOutput
+  CustomFetchMinimalOutput,
+  MfaApiClient
 } from '@auth0/auth0-spa-js';
 import { Auth0Client, User } from '@auth0/auth0-spa-js';
 import { bindPluginMethods, deprecateRedirectUri } from './utils';
@@ -54,7 +55,15 @@ const PLUGIN_NOT_INSTALLED_CLIENT: Auth0VueClient = {
   getDpopNonce: PLUGIN_NOT_INSTALLED_HANDLER,
   setDpopNonce: PLUGIN_NOT_INSTALLED_HANDLER,
   generateDpopProof: PLUGIN_NOT_INSTALLED_HANDLER,
-  createFetcher: PLUGIN_NOT_INSTALLED_HANDLER
+  createFetcher: PLUGIN_NOT_INSTALLED_HANDLER,
+  mfa: {
+    setMFAAuthDetails: PLUGIN_NOT_INSTALLED_HANDLER,
+    getAuthenticators: PLUGIN_NOT_INSTALLED_HANDLER,
+    enroll: PLUGIN_NOT_INSTALLED_HANDLER,
+    challenge: PLUGIN_NOT_INSTALLED_HANDLER,
+    verify: PLUGIN_NOT_INSTALLED_HANDLER,
+    getEnrollmentFactors: PLUGIN_NOT_INSTALLED_HANDLER
+  } as unknown as MfaApiClient
 };
 
 /**
@@ -75,6 +84,7 @@ export class Auth0Plugin implements Auth0VueClient {
   public user: Ref<User | undefined> = ref({});
   public idTokenClaims = ref<IdToken | undefined>();
   public error = ref<Error | null>(null);
+  public mfa: MfaApiClient = PLUGIN_NOT_INSTALLED_CLIENT.mfa;
 
   constructor(
     private clientOptions: Auth0VueClientOptions,
@@ -93,6 +103,8 @@ export class Auth0Plugin implements Auth0VueClient {
         version: version
       }
     });
+
+    this.mfa = this._client.mfa;
 
     this.__checkSession(app.config.globalProperties.$router);
 

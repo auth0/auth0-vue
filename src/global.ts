@@ -6,11 +6,19 @@ export {
   User,
   InMemoryCache,
   LocalStorageCache,
-  UseDpopNonceError
+  UseDpopNonceError,
+  MfaRequiredError,
+  MfaError,
+  MfaListAuthenticatorsError,
+  MfaEnrollmentError,
+  MfaChallengeError,
+  MfaVerifyError,
+  MfaEnrollmentFactorsError
 } from '@auth0/auth0-spa-js';
 
 export type {
   AuthorizationParams,
+  InteractiveErrorHandler,
   PopupLoginOptions,
   PopupConfigOptions,
   GetTokenWithPopupOptions,
@@ -22,5 +30,24 @@ export type {
   Cacheable,
   FetcherConfig,
   Fetcher,
-  CustomFetchMinimalOutput
+  CustomFetchMinimalOutput,
+  MfaApiClient,
+  Authenticator,
+  AuthenticatorType,
+  OobChannel,
+  MfaFactorType,
+  EnrollParams,
+  EnrollOtpParams,
+  EnrollSmsParams,
+  EnrollVoiceParams,
+  EnrollEmailParams,
+  EnrollPushParams,
+  EnrollmentResponse,
+  OtpEnrollmentResponse,
+  OobEnrollmentResponse,
+  ChallengeAuthenticatorParams,
+  ChallengeResponse,
+  VerifyParams,
+  MfaGrantType,
+  EnrollmentFactor
 } from '@auth0/auth0-spa-js';

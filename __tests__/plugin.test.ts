@@ -60,7 +60,15 @@ jest.mock('@auth0/auth0-spa-js', () => {
         getDpopNonce: getDpopNonceMock,
         setDpopNonce: setDpopNonceMock,
         generateDpopProof: generateDpopProofMock,
-        createFetcher: createFetcherMock
+        createFetcher: createFetcherMock,
+        mfa: {
+          setMFAAuthDetails: jest.fn(),
+          getAuthenticators: jest.fn<any>().mockResolvedValue([]),
+          enroll: jest.fn<any>().mockResolvedValue({}),
+          challenge: jest.fn<any>().mockResolvedValue({}),
+          verify: jest.fn<any>().mockResolvedValue({}),
+          getEnrollmentFactors: jest.fn<any>().mockResolvedValue([])
+        }
       };
     })
   };
