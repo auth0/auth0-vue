@@ -131,6 +131,25 @@ describe('MFA', () => {
 
       expect(auth0.mfa).toBeDefined();
     });
+
+    it('should call mfa methods through the useAuth0 composition API', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      (inject as jest.Mock).mockReturnValue(plugin);
+      const auth0 = useAuth0();
+
+      mfaGetAuthenticatorsMock.mockResolvedValue([
+        { id: 'otp|dev_1', authenticatorType: 'otp', active: true }
+      ]);
+
+      const result = await auth0.mfa.getAuthenticators('test-mfa-token');
+
+      expect(mfaGetAuthenticatorsMock).toHaveBeenCalledWith('test-mfa-token');
+      expect(result).toEqual([
+        { id: 'otp|dev_1', authenticatorType: 'otp', active: true }
+      ]);
+    });
   });
 
   describe('mfa methods', () => {
@@ -155,6 +174,13 @@ describe('MFA', () => {
       ]);
     });
 
+    it('should bubble errors from getAuthenticators to the caller', async () => {
+      const errorObj = new Error('getAuthenticators failed');
+      mfaGetAuthenticatorsMock.mockRejectedValue(errorObj);
+
+      await expect(plugin.mfa.getAuthenticators('test-mfa-token')).rejects.toBe(errorObj);
+    });
+
     it('should call enroll on the underlying spa-js mfa client', async () => {
       const enrollParams = { mfaToken: 'test-mfa-token', factorType: 'otp' as const };
       const enrollResponse = {
@@ -168,6 +194,15 @@ describe('MFA', () => {
 
       expect(mfaEnrollMock).toHaveBeenCalledWith(enrollParams);
       expect(result).toEqual(enrollResponse);
+    });
+
+    it('should bubble errors from enroll to the caller', async () => {
+      const errorObj = new Error('enroll failed');
+      mfaEnrollMock.mockRejectedValue(errorObj);
+
+      await expect(
+        plugin.mfa.enroll({ mfaToken: 'test-mfa-token', factorType: 'otp' })
+      ).rejects.toBe(errorObj);
     });
 
     it('should call challenge on the underlying spa-js mfa client', async () => {
@@ -185,6 +220,15 @@ describe('MFA', () => {
       expect(result).toEqual(challengeResponse);
     });
 
+    it('should bubble errors from challenge to the caller', async () => {
+      const errorObj = new Error('challenge failed');
+      mfaChallengeMock.mockRejectedValue(errorObj);
+
+      await expect(
+        plugin.mfa.challenge({ mfaToken: 'test-mfa-token', challengeType: 'otp', authenticatorId: 'otp|dev_1' })
+      ).rejects.toBe(errorObj);
+    });
+
     it('should call verify on the underlying spa-js mfa client', async () => {
       const verifyParams = { mfaToken: 'test-mfa-token', otp: '123456' };
       const tokenResponse = { access_token: 'new-access-token' };
@@ -196,6 +240,15 @@ describe('MFA', () => {
       expect(result).toEqual(tokenResponse);
     });
 
+    it('should bubble errors from verify to the caller', async () => {
+      const errorObj = new Error('verify failed');
+      mfaVerifyMock.mockRejectedValue(errorObj);
+
+      await expect(
+        plugin.mfa.verify({ mfaToken: 'test-mfa-token', otp: '123456' })
+      ).rejects.toBe(errorObj);
+    });
+
     it('should call getEnrollmentFactors on the underlying spa-js mfa client', async () => {
       const mfaToken = 'test-mfa-token';
       mfaGetEnrollmentFactorsMock.mockResolvedValue([{ type: 'otp' }, { type: 'phone' }]);
@@ -204,6 +257,13 @@ describe('MFA', () => {
 
       expect(mfaGetEnrollmentFactorsMock).toHaveBeenCalledWith(mfaToken);
       expect(result).toEqual([{ type: 'otp' }, { type: 'phone' }]);
+    });
+
+    it('should bubble errors from getEnrollmentFactors to the caller', async () => {
+      const errorObj = new Error('getEnrollmentFactors failed');
+      mfaGetEnrollmentFactorsMock.mockRejectedValue(errorObj);
+
+      await expect(plugin.mfa.getEnrollmentFactors('test-mfa-token')).rejects.toBe(errorObj);
     });
   });
 });

@@ -1303,10 +1303,15 @@ Use the challenge flow when the user already has an enrolled authenticator.
       const recoveryCode = ref('');
 
       const verifyRecoveryCode = async (mfaToken) => {
-        await mfa.verify({
+        const tokens = await mfa.verify({
           mfaToken,
           recoveryCode: recoveryCode.value
         });
+        // Auth0 rotates the recovery code on use — save the replacement or the
+        // user will be locked out if they need to fall back again.
+        if (tokens.recovery_code) {
+          console.warn('Save your new recovery code:', tokens.recovery_code);
+        }
         // Refresh Vue reactive state (isAuthenticated, user, etc.)
         await checkSession();
       };
