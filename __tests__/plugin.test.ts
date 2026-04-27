@@ -60,7 +60,15 @@ jest.mock('@auth0/auth0-spa-js', () => {
         getDpopNonce: getDpopNonceMock,
         setDpopNonce: setDpopNonceMock,
         generateDpopProof: generateDpopProofMock,
-        createFetcher: createFetcherMock
+        createFetcher: createFetcherMock,
+        mfa: {
+          setMFAAuthDetails: jest.fn(),
+          getAuthenticators: jest.fn<any>().mockResolvedValue([]),
+          enroll: jest.fn<any>().mockResolvedValue({}),
+          challenge: jest.fn<any>().mockResolvedValue({}),
+          verify: jest.fn<any>().mockResolvedValue({}),
+          getEnrollmentFactors: jest.fn<any>().mockResolvedValue([])
+        }
       };
     })
   };
@@ -71,6 +79,16 @@ describe('Client', () => {
     const spy = jest.spyOn(console, 'error');
 
     await client.value.loginWithRedirect();
+
+    expect(spy).toHaveBeenCalledWith(
+      `Please ensure Auth0's Vue plugin is correctly installed.`
+    );
+  });
+
+  it('logs console error when mfa methods are called before installing the plugin', async () => {
+    const spy = jest.spyOn(console, 'error');
+
+    await client.value.mfa.getAuthenticators('test-token');
 
     expect(spy).toHaveBeenCalledWith(
       `Please ensure Auth0's Vue plugin is correctly installed.`

@@ -11,7 +11,8 @@ import type {
   ConnectAccountRedirectResult,
   CustomFetchMinimalOutput,
   Fetcher,
-  FetcherConfig
+  FetcherConfig,
+  MfaApiClient
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
@@ -266,4 +267,45 @@ export interface Auth0VueClient {
   createFetcher<TOutput extends CustomFetchMinimalOutput = Response>(
     config?: FetcherConfig<TOutput>
   ): Fetcher<TOutput>;
+
+  /**
+   * MFA API client for multi-factor authentication operations.
+   *
+   * Use this property to handle MFA challenge and enrollment flows
+   * after receiving a `MfaRequiredError` from `getAccessTokenSilently`.
+   *
+   * **Note:** `mfa.verify()` returns raw tokens but does not automatically
+   * update Vue's reactive state (`isAuthenticated`, `user`, `idTokenClaims`).
+   * Call `checkSession()` after a successful `verify()` to reflect the new
+   * session in your components.
+   *
+   * **Note:** Errors thrown by `mfa` methods are **not** captured in the
+   * `error` ref returned by `useAuth0()`. Unlike other SDK methods, MFA
+   * operations bypass the plugin's error handling proxy. Always wrap `mfa`
+   * calls in a `try/catch` and handle typed MFA errors (e.g.
+   * `MfaVerifyError`, `MfaChallengeError`) directly in your component.
+   *
+   * ```js
+   * import { MfaRequiredError } from '@auth0/auth0-vue';
+   *
+   * const { getAccessTokenSilently, mfa, checkSession } = useAuth0();
+   *
+   * try {
+   *   await getAccessTokenSilently();
+   * } catch (e) {
+   *   if (e instanceof MfaRequiredError) {
+   *     if (e.mfa_requirements?.enroll?.length) {
+   *       const factors = await mfa.getEnrollmentFactors(e.mfa_token);
+   *       // ... show enrollment UI
+   *     } else {
+   *       const authenticators = await mfa.getAuthenticators(e.mfa_token);
+   *       // ... show challenge UI, then:
+   *       await mfa.verify({ mfaToken: e.mfa_token, otp: userCode });
+   *       await checkSession(); // refresh isAuthenticated, user, etc.
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  mfa: MfaApiClient;
 }

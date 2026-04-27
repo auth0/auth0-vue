@@ -11,6 +11,8 @@
 - [Accessing Auth0Client outside of a component](#accessing-auth0client-outside-of-a-component)
 - [Organizations](#organizations)
 - [Device-bound tokens with DPoP](#device-bound-tokens-with-dpop)
+- [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
+- [Step-Up Authentication](#step-up-authentication)
 
 ## Add login to your application
 
@@ -1144,4 +1146,409 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
 ```
 
 </details>
+
+## Multi-Factor Authentication (MFA)
+
+The `mfa` property on the object returned by `useAuth0` gives access to all MFA operations. MFA flows are triggered when `getAccessTokenSilently` throws a `MfaRequiredError`.
+
+> **Prerequisites:** MFA requires refresh token rotation to be enabled in the Auth0 client configuration (`useRefreshTokens: true`).
+
+### Setup
+
+Configure your Auth0 client with refresh tokens:
+
+```js
+import { createAuth0 } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    authorizationParams: {
+      redirect_uri: window.location.origin
+    },
+    useRefreshTokens: true
+  })
+);
+```
+
+### Handling the MFA Required Error
+
+When `getAccessTokenSilently` results in an MFA requirement, it throws `MfaRequiredError`. Check `mfa_requirements.enroll` first — if it is non-empty the user must enroll a new factor before they can authenticate; otherwise proceed with a challenge against an existing authenticator:
+
+```html
+<script>
+  import { useAuth0, MfaRequiredError } from '@auth0/auth0-vue';
+  import { ref } from 'vue';
+
+  export default {
+    setup() {
+      const { getAccessTokenSilently, mfa } = useAuth0();
+      const mfaToken = ref(null);
+
+      const fetchToken = async () => {
+        try {
+          const token = await getAccessTokenSilently({
+            authorizationParams: { audience: 'https://api.example.com' }
+          });
+          console.log('Access token:', token);
+        } catch (e) {
+          if (e instanceof MfaRequiredError) {
+            mfaToken.value = e.mfa_token;
+
+            if (e.mfa_requirements?.enroll?.length) {
+              // User has no authenticators yet — show enrollment UI
+              const factors = await mfa.getEnrollmentFactors(e.mfa_token);
+              // present factors to the user (see Enrollment Flow below)
+            } else {
+              // User is already enrolled — show challenge UI
+              const authenticators = await mfa.getAuthenticators(e.mfa_token);
+              // present authenticators to the user (see Challenge Flow below)
+            }
+          }
+        }
+      };
+
+      return { fetchToken, mfaToken };
+    }
+  };
+</script>
+```
+
+### Challenge Flow
+
+Use the challenge flow when the user already has an enrolled authenticator.
+
+> **Note:** `mfa.verify()` returns raw tokens but does **not** automatically update Vue's reactive state (`isAuthenticated`, `user`, `idTokenClaims`). Call `checkSession()` after a successful `verify()` to refresh the auth state in your components.
+
+#### OTP (TOTP / Authenticator App)
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+  import { ref } from 'vue';
+
+  export default {
+    setup() {
+      const { mfa, checkSession } = useAuth0();
+      const otpCode = ref('');
+
+      const verifyOtp = async (mfaToken) => {
+        // For OTP, no challenge call is required — the user enters
+        // the code directly from their authenticator app.
+        await mfa.verify({
+          mfaToken,
+          otp: otpCode.value
+        });
+        // Refresh Vue reactive state (isAuthenticated, user, etc.)
+        await checkSession();
+      };
+
+      return { otpCode, verifyOtp };
+    }
+  };
+</script>
+```
+
+#### SMS / Email OTP
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+  import { ref } from 'vue';
+
+  export default {
+    setup() {
+      const { mfa, checkSession } = useAuth0();
+      const bindingCode = ref('');
+      const oobCode = ref('');
+
+      const sendChallenge = async (mfaToken, authenticatorId) => {
+        const challenge = await mfa.challenge({
+          mfaToken,
+          challengeType: 'oob',
+          authenticatorId
+        });
+        oobCode.value = challenge.oobCode;
+      };
+
+      const verifyOob = async (mfaToken) => {
+        await mfa.verify({
+          mfaToken,
+          oobCode: oobCode.value,
+          bindingCode: bindingCode.value
+        });
+        // Refresh Vue reactive state (isAuthenticated, user, etc.)
+        await checkSession();
+      };
+
+      return { bindingCode, oobCode, sendChallenge, verifyOob };
+    }
+  };
+</script>
+```
+
+#### Recovery Code
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+  import { ref } from 'vue';
+
+  export default {
+    setup() {
+      const { mfa, checkSession } = useAuth0();
+      const recoveryCode = ref('');
+
+      const verifyRecoveryCode = async (mfaToken) => {
+        const tokens = await mfa.verify({
+          mfaToken,
+          recoveryCode: recoveryCode.value
+        });
+        // Auth0 rotates the recovery code on use — save the replacement or the
+        // user will be locked out if they need to fall back again.
+        if (tokens.recovery_code) {
+          console.warn('Save your new recovery code:', tokens.recovery_code);
+        }
+        // Refresh Vue reactive state (isAuthenticated, user, etc.)
+        await checkSession();
+      };
+
+      return { recoveryCode, verifyRecoveryCode };
+    }
+  };
+</script>
+```
+
+### Enrollment Flow
+
+Use the enrollment flow when the user has no authenticators yet. Call `getEnrollmentFactors` to discover what they can enroll in.
+
+#### Discover Enrollment Options
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+  import { ref } from 'vue';
+
+  export default {
+    setup() {
+      const { mfa } = useAuth0();
+      const enrollmentFactors = ref([]);
+
+      const loadEnrollmentOptions = async (mfaToken) => {
+        enrollmentFactors.value = await mfa.getEnrollmentFactors(mfaToken);
+        // e.g. [{ type: 'otp' }, { type: 'phone' }, { type: 'push-notification' }]
+      };
+
+      return { enrollmentFactors, loadEnrollmentOptions };
+    }
+  };
+</script>
+```
+
+#### Enroll TOTP
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+  import { ref } from 'vue';
+
+  export default {
+    setup() {
+      const { mfa } = useAuth0();
+      const barcodeUri = ref('');
+      const secret = ref('');
+
+      const enrollTotp = async (mfaToken) => {
+        const enrollment = await mfa.enroll({
+          mfaToken,
+          factorType: 'otp'
+        });
+        barcodeUri.value = enrollment.barcodeUri; // Render as QR code
+        secret.value = enrollment.secret;         // Show as manual entry fallback
+      };
+
+      return { barcodeUri, secret, enrollTotp };
+    }
+  };
+</script>
+```
+
+#### Enroll SMS
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { mfa } = useAuth0();
+
+      const enrollSms = async (mfaToken, phoneNumber) => {
+        await mfa.enroll({
+          mfaToken,
+          factorType: 'sms',
+          phoneNumber // E.164 format, e.g. '+12025551234'
+        });
+        // An OOB code is sent via SMS — prompt the user to enter it
+      };
+
+      return { enrollSms };
+    }
+  };
+</script>
+```
+
+### Error Handling
+
+The `mfa` client throws typed errors for each operation:
+
+```html
+<script>
+  import {
+    useAuth0,
+    MfaRequiredError,
+    MfaListAuthenticatorsError,
+    MfaEnrollmentError,
+    MfaChallengeError,
+    MfaVerifyError,
+    MfaEnrollmentFactorsError
+  } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { getAccessTokenSilently, mfa } = useAuth0();
+
+      const handleMfaFlow = async () => {
+        try {
+          await getAccessTokenSilently();
+        } catch (e) {
+          if (!(e instanceof MfaRequiredError)) throw e;
+
+          try {
+            const authenticators = await mfa.getAuthenticators(e.mfa_token);
+            // ... drive challenge/enrollment UI
+          } catch (mfaError) {
+            if (mfaError instanceof MfaListAuthenticatorsError) {
+              console.error('Failed to list authenticators:', mfaError.error_description);
+            } else if (mfaError instanceof MfaVerifyError) {
+              console.error('Verification failed:', mfaError.error_description);
+            } else if (mfaError instanceof MfaEnrollmentError) {
+              console.error('Enrollment failed:', mfaError.error_description);
+            } else if (mfaError instanceof MfaChallengeError) {
+              console.error('Challenge failed:', mfaError.error_description);
+            } else if (mfaError instanceof MfaEnrollmentFactorsError) {
+              console.error('Failed to retrieve enrollment factors:', mfaError.error_description);
+            }
+          }
+        }
+      };
+
+      return { handleMfaFlow };
+    }
+  };
+</script>
+```
+
+### Options API
+
+All MFA operations are also available via the Options API using `this.$auth0.mfa`:
+
+```html
+<script>
+  import { MfaRequiredError } from '@auth0/auth0-vue';
+
+  export default {
+    data() {
+      return {
+        mfaToken: null,
+        authenticators: []
+      };
+    },
+    methods: {
+      async fetchToken() {
+        try {
+          await this.$auth0.getAccessTokenSilently({
+            authorizationParams: { audience: 'https://api.example.com' }
+          });
+        } catch (e) {
+          if (e instanceof MfaRequiredError) {
+            this.mfaToken = e.mfa_token;
+            if (e.mfa_requirements?.enroll?.length) {
+              // User needs to enroll — show enrollment UI
+            } else {
+              // User is already enrolled — show challenge UI
+              this.authenticators = await this.$auth0.mfa.getAuthenticators(e.mfa_token);
+            }
+          }
+        }
+      },
+      async verifyOtp(otpCode) {
+        await this.$auth0.mfa.verify({
+          mfaToken: this.mfaToken,
+          otp: otpCode
+        });
+        // Refresh Vue reactive state (isAuthenticated, user, etc.)
+        await this.$auth0.checkSession();
+      }
+    }
+  };
+</script>
+```
+
+## Step-Up Authentication
+
+Step-Up Authentication is an alternative to building a custom MFA UI. When `interactiveErrorHandler: 'popup'` is configured, `getAccessTokenSilently()` automatically handles any `mfa_required` error by opening a Universal Login popup for the user to complete MFA — the token is then returned transparently with no extra code needed in your components.
+
+### Setup
+
+```js
+import { createAuth0 } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    authorizationParams: {
+      redirect_uri: window.location.origin
+    },
+    useRefreshTokens: true,
+    interactiveErrorHandler: 'popup'
+  })
+);
+```
+
+### Usage
+
+With `interactiveErrorHandler: 'popup'` set, no special error handling is needed. If Auth0 requires MFA, the SDK opens Universal Login in a popup automatically:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { getAccessTokenSilently } = useAuth0();
+
+      const fetchToken = async () => {
+        // If MFA is required, the SDK opens a popup automatically.
+        // The token is returned once the user completes authentication.
+        const token = await getAccessTokenSilently({
+          authorizationParams: { audience: 'https://api.example.com' }
+        });
+        console.log('Access token:', token);
+      };
+
+      return { fetchToken };
+    }
+  };
+</script>
+```
+
+If there is a problem with the popup, `getAccessTokenSilently` will throw one of `PopupOpenError`, `PopupCancelledError`, or `PopupTimeoutError`.
 
