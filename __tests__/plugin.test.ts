@@ -84,6 +84,16 @@ describe('Client', () => {
       `Please ensure Auth0's Vue plugin is correctly installed.`
     );
   });
+
+  it('logs console error when mfa methods are called before installing the plugin', async () => {
+    const spy = jest.spyOn(console, 'error');
+
+    await client.value.mfa.getAuthenticators('test-token');
+
+    expect(spy).toHaveBeenCalledWith(
+      `Please ensure Auth0's Vue plugin is correctly installed.`
+    );
+  });
 });
 
 describe('createAuth0', () => {

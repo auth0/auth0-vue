@@ -1440,6 +1440,8 @@ The `mfa` client throws typed errors for each operation:
               console.error('Enrollment failed:', mfaError.error_description);
             } else if (mfaError instanceof MfaChallengeError) {
               console.error('Challenge failed:', mfaError.error_description);
+            } else if (mfaError instanceof MfaEnrollmentFactorsError) {
+              console.error('Failed to retrieve enrollment factors:', mfaError.error_description);
             }
           }
         }

@@ -265,5 +265,21 @@ describe('MFA', () => {
 
       await expect(plugin.mfa.getEnrollmentFactors('test-mfa-token')).rejects.toBe(errorObj);
     });
+
+    it('should not set the plugin error ref or refresh reactive state when mfa.verify rejects', async () => {
+      mfaVerifyMock.mockRejectedValue(new Error('verify failed'));
+
+      // Clear calls accumulated during plugin.install (checkSession triggers __refreshState)
+      isAuthenticatedMock.mockClear();
+      getUserMock.mockClear();
+      getIdTokenClaimsMock.mockClear();
+
+      await plugin.mfa.verify({ mfaToken: 'test-mfa-token', otp: '000000' }).catch(() => {});
+
+      expect(plugin.error.value).toBeNull();
+      expect(isAuthenticatedMock).not.toHaveBeenCalled();
+      expect(getUserMock).not.toHaveBeenCalled();
+      expect(getIdTokenClaimsMock).not.toHaveBeenCalled();
+    });
   });
 });
