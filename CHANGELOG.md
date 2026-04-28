@@ -1,5 +1,12 @@
 # Change Log
 
+## [v2.6.0](https://github.com/auth0/auth0-vue/tree/v2.6.0) (2026-04-28)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.5.0...v2.6.0)
+
+**Added**
+- feat: add Multi-Factor Authentication (MFA) support [\#602](https://github.com/auth0/auth0-vue/pull/602) ([yogeshchoudhary147](https://github.com/yogeshchoudhary147))
+- feat: add support for vue-router v5 [\#541](https://github.com/auth0/auth0-vue/pull/541) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.5.0](https://github.com/auth0/auth0-vue/tree/v2.5.0) (2025-12-12)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.4.0...v2.5.0)
 
