@@ -49,7 +49,7 @@ export interface AuthGuardOptions {
   /**
    * Route specific options to use when being redirected to Auth0.
    * If appState is provided, it will be merged with the guard's automatic
-   * target property. The guard's target always takes precedence.
+   * target property. Any target provided in appState will take precedence over the guard's default target.
    */
   redirectLoginOptions?: RedirectLoginOptions;
 }
