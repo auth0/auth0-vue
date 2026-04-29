@@ -51,11 +51,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - name: Setup Node and npm
+        uses: ./.github/actions/setup-node-npm
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
 
       - name: Restore build artifacts
         uses: actions/cache/restore@v5
@@ -79,11 +78,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - name: Setup Node and npm
+        uses: ./.github/actions/setup-node-npm
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
 
       - name: Restore build artifacts
         uses: actions/cache/restore@v5
@@ -104,11 +102,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - name: Setup Node and npm
+        uses: ./.github/actions/setup-node-npm
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
 
       - name: Restore build artifacts
         uses: actions/cache/restore@v5

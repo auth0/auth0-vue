@@ -21,7 +21,6 @@ runs:
       uses: ./.github/actions/setup-node-npm
       with:
         node-version: ${{ inputs.node-version }}
-        registry-url: 'https://registry.npmjs.org'
 
     - name: Install dependencies
       shell: bash
