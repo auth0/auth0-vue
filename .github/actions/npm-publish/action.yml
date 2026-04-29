@@ -17,16 +17,11 @@ runs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node
-      uses: actions/setup-node@v4
+    - name: Setup Node and npm
+      uses: ./.github/actions/setup-node-npm
       with:
         node-version: ${{ inputs.node-version }}
-        cache: 'npm'
         registry-url: 'https://registry.npmjs.org'
-
-    - name: Update npm to version 11
-      shell: bash
-      run: npm install -g npm@11.10.0
 
     - name: Install dependencies
       shell: bash
