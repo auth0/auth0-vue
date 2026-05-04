@@ -1,5 +1,12 @@
 # Change Log
 
+## [v2.6.1](https://github.com/auth0/auth0-vue/tree/v2.6.1) (2026-05-04)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.6.0...v2.6.1)
+
+**Fixed**
+- fix: ensure to use pathname instead of '/' when clearing query parameters [\#544](https://github.com/auth0/auth0-vue/pull/544) ([frederikprijck](https://github.com/frederikprijck))
+- fix: merge appState in Auth Guard [\#543](https://github.com/auth0/auth0-vue/pull/543) ([frederikprijck](https://github.com/frederikprijck))
+
 ## [v2.6.0](https://github.com/auth0/auth0-vue/tree/v2.6.0) (2026-04-28)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.5.0...v2.6.0)
 
