@@ -124,8 +124,7 @@ if (isProduction) {
       input: 'src/index.ts',
       output: [
         {
-          // Output ESM build as .mjs for proper module resolution
-          file: 'dist/auth0-vue.production.esm.mjs',
+          file: pkg.module,
           format: 'esm'
         }
       ],
