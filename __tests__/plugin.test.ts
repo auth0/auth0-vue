@@ -145,6 +145,10 @@ describe('Auth0Plugin', () => {
     getIdTokenClaimsMock.mockResolvedValue(null);
     loginWithRedirectMock.mockResolvedValue(null);
     loginWithPopupMock.mockResolvedValue(null);
+    loginWithCustomTokenExchangeMock.mockResolvedValue({
+      access_token: '__test_access_token__',
+      token_type: 'Bearer'
+    });
     checkSessionMock.mockResolvedValue(null);
 
     appMock = {
