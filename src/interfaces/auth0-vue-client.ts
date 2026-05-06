@@ -12,7 +12,9 @@ import type {
   CustomFetchMinimalOutput,
   Fetcher,
   FetcherConfig,
-  MfaApiClient
+  MfaApiClient,
+  CustomTokenExchangeOptions,
+  TokenEndpointResponse
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
@@ -87,6 +89,29 @@ export interface Auth0VueClient {
    * @param options
    */
   loginWithRedirect(options?: RedirectLoginOptions<AppState>): Promise<void>;
+
+  /**
+   * ```js
+   * const tokenResponse = await loginWithCustomTokenExchange({
+   *   subject_token: 'external_token_value',
+   *   subject_token_type: 'urn:acme:legacy-system-token',
+   *   scope: 'openid profile email'
+   * });
+   * ```
+   *
+   * Exchanges an external subject token for Auth0 tokens and logs the user in.
+   * This method implements the Custom Token Exchange grant as specified in RFC 8693.
+   *
+   * The exchanged tokens are automatically cached, establishing an authenticated session.
+   * After calling this method, `isAuthenticated` will be `true` and `user` will contain
+   * the user's information.
+   *
+   * @param options - The options required to perform the token exchange
+   * @returns A promise that resolves to the token endpoint response containing Auth0 tokens
+   */
+  loginWithCustomTokenExchange(
+    options: CustomTokenExchangeOptions
+  ): Promise<TokenEndpointResponse>;
 
   /**
    * After the browser redirects back to the callback page,

@@ -23,7 +23,9 @@ import type {
   FetcherConfig,
   Fetcher,
   CustomFetchMinimalOutput,
-  MfaApiClient
+  MfaApiClient,
+  CustomTokenExchangeOptions,
+  TokenEndpointResponse
 } from '@auth0/auth0-spa-js';
 import { Auth0Client, User } from '@auth0/auth0-spa-js';
 import { bindPluginMethods, deprecateRedirectUri } from './utils';
@@ -47,6 +49,7 @@ const PLUGIN_NOT_INSTALLED_CLIENT: Auth0VueClient = {
   error: ref(null),
   loginWithPopup: PLUGIN_NOT_INSTALLED_HANDLER,
   loginWithRedirect: PLUGIN_NOT_INSTALLED_HANDLER,
+  loginWithCustomTokenExchange: PLUGIN_NOT_INSTALLED_HANDLER,
   getAccessTokenSilently: PLUGIN_NOT_INSTALLED_HANDLER,
   getAccessTokenWithPopup: PLUGIN_NOT_INSTALLED_HANDLER,
   logout: PLUGIN_NOT_INSTALLED_HANDLER,
@@ -158,6 +161,14 @@ export class Auth0Plugin implements Auth0VueClient {
   ) {
     deprecateRedirectUri(options);
     return this.__proxy(() => this._client.getTokenWithPopup(options, config));
+  }
+
+  async loginWithCustomTokenExchange(
+    options: CustomTokenExchangeOptions
+  ): Promise<TokenEndpointResponse> {
+    return this.__proxy(() =>
+      this._client.loginWithCustomTokenExchange(options)
+    );
   }
 
   async checkSession(options?: GetTokenSilentlyOptions) {
