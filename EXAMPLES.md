@@ -13,6 +13,7 @@
 - [Device-bound tokens with DPoP](#device-bound-tokens-with-dpop)
 - [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
 - [Step-Up Authentication](#step-up-authentication)
+- [Custom Token Exchange](#custom-token-exchange)
 
 ## Add login to your application
 
@@ -1552,3 +1553,64 @@ With `interactiveErrorHandler: 'popup'` set, no special error handling is needed
 
 If there is a problem with the popup, `getAccessTokenSilently` will throw one of `PopupOpenError`, `PopupCancelledError`, or `PopupTimeoutError`.
 
+## Custom Token Exchange
+
+Exchange an external token for Auth0 tokens using the Custom Token Exchange grant ([RFC 8693](https://www.rfc-editor.org/rfc/rfc8693)). This establishes a full Auth0 session — after a successful exchange, `isAuthenticated` will be `true` and `user` will be populated.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { loginWithCustomTokenExchange, isAuthenticated, user } = useAuth0();
+
+      const exchangeToken = async (externalToken) => {
+        try {
+          await loginWithCustomTokenExchange({
+            subject_token: externalToken,
+            subject_token_type: 'urn:your-company:legacy-system-token',
+            audience: 'https://api.example.com/',
+            scope: 'openid profile email'
+          });
+        } catch (e) {
+          console.error('Token exchange failed:', e);
+        }
+      };
+
+      return { exchangeToken, isAuthenticated, user };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  export default {
+    methods: {
+      async exchangeToken(externalToken) {
+        try {
+          await this.$auth0.loginWithCustomTokenExchange({
+            subject_token: externalToken,
+            subject_token_type: 'urn:your-company:legacy-system-token',
+            audience: 'https://api.example.com/',
+            scope: 'openid profile email'
+          });
+        } catch (e) {
+          console.error('Token exchange failed:', e);
+        }
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
+**Notes:**
+- `subject_token_type` must be a namespaced URI under your organization's control. Well-known prefixes such as `urn:ietf:params:oauth:*`, `urn:auth0:*`, and `https://auth0.com/*` are reserved and should not be used for custom token types. See the [Auth0 Custom Token Exchange documentation](https://auth0.com/docs/authenticate/login/custom-token-exchange) for details.
+- The external token must be validated in an Auth0 Action using strong cryptographic verification.
+- `audience` and `scope` fall back to the SDK's configured defaults if not provided.

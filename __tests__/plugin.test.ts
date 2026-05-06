@@ -28,6 +28,10 @@ const getTokenWithPopupMock = jest.fn<any>().mockResolvedValue(null);
 const getDpopNonceMock = jest.fn<any>().mockResolvedValue(undefined);
 const setDpopNonceMock = jest.fn<any>().mockResolvedValue(undefined);
 const generateDpopProofMock = jest.fn<any>().mockResolvedValue('mock-proof');
+const loginWithCustomTokenExchangeMock = jest.fn<any>().mockResolvedValue({
+  access_token: '__test_access_token__',
+  token_type: 'Bearer'
+});
 const createFetcherMock = jest.fn<any>().mockReturnValue({
   fetchWithAuth: jest.fn<any>().mockResolvedValue({ status: 200, data: 'test' })
 });
@@ -60,6 +64,7 @@ jest.mock('@auth0/auth0-spa-js', () => {
         getDpopNonce: getDpopNonceMock,
         setDpopNonce: setDpopNonceMock,
         generateDpopProof: generateDpopProofMock,
+        loginWithCustomTokenExchange: loginWithCustomTokenExchangeMock,
         createFetcher: createFetcherMock,
         mfa: {
           setMFAAuthDetails: jest.fn(),
@@ -140,6 +145,10 @@ describe('Auth0Plugin', () => {
     getIdTokenClaimsMock.mockResolvedValue(null);
     loginWithRedirectMock.mockResolvedValue(null);
     loginWithPopupMock.mockResolvedValue(null);
+    loginWithCustomTokenExchangeMock.mockResolvedValue({
+      access_token: '__test_access_token__',
+      token_type: 'Bearer'
+    });
     checkSessionMock.mockResolvedValue(null);
 
     appMock = {
@@ -1358,6 +1367,116 @@ describe('Auth0Plugin', () => {
     getDpopNonceMock.mockResolvedValue('nonce-123');
 
     await appMock.config.globalProperties.$auth0.getDpopNonce('my-api');
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toBeFalsy();
+  });
+
+  it('should proxy loginWithCustomTokenExchange', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    const options = {
+      subject_token: '__test_subject_token__',
+      subject_token_type: 'urn:acme:legacy-system-token',
+      scope: 'openid profile email'
+    };
+
+    const result =
+      await appMock.config.globalProperties.$auth0.loginWithCustomTokenExchange(
+        options
+      );
+
+    expect(loginWithCustomTokenExchangeMock).toHaveBeenCalledWith(options);
+    expect(result).toEqual({
+      access_token: '__test_access_token__',
+      token_type: 'Bearer'
+    });
+  });
+
+  it('should update auth state after loginWithCustomTokenExchange', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    isAuthenticatedMock.mockResolvedValue(true);
+    getUserMock.mockResolvedValue({ name: '__test_user__' });
+
+    await appMock.config.globalProperties.$auth0.loginWithCustomTokenExchange({
+      subject_token: '__test_subject_token__',
+      subject_token_type: 'urn:acme:legacy-system-token'
+    });
+
+    expect(
+      appMock.config.globalProperties.$auth0.isAuthenticated.value
+    ).toEqual(true);
+    expect(appMock.config.globalProperties.$auth0.user.value).toEqual({
+      name: '__test_user__'
+    });
+  });
+
+  it('should track errors when loginWithCustomTokenExchange throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    loginWithCustomTokenExchangeMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.loginWithCustomTokenExchange(
+        {
+          subject_token: '__test_subject_token__',
+          subject_token_type: 'urn:acme:legacy-system-token'
+        }
+      );
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should clear errors when loginWithCustomTokenExchange is successful', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    loginWithCustomTokenExchangeMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.loginWithCustomTokenExchange(
+        {
+          subject_token: '__test_subject_token__',
+          subject_token_type: 'urn:acme:legacy-system-token'
+        }
+      );
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+
+    loginWithCustomTokenExchangeMock.mockResolvedValue({
+      access_token: '__test_access_token__',
+      token_type: 'Bearer'
+    });
+
+    await appMock.config.globalProperties.$auth0.loginWithCustomTokenExchange({
+      subject_token: '__test_subject_token__',
+      subject_token_type: 'urn:acme:legacy-system-token'
+    });
 
     expect(appMock.config.globalProperties.$auth0.error.value).toBeFalsy();
   });
