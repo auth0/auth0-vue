@@ -7,7 +7,7 @@ module.exports = {
   coveragePathIgnorePatterns: [
     '/node_modules/',
     './cypress',
-    './jest.config.js',
+    './jest.config.cjs',
     './__tests__',
     './src/global.ts'
   ],
@@ -17,7 +17,7 @@ module.exports = {
   ],
   coverageReporters: ['lcov', 'text', 'text-summary'],
   preset: 'ts-jest/presets/default-legacy',
-  setupFiles: ['<rootDir>/jest.setup.js'],
+  setupFiles: ['<rootDir>/jest.setup.cjs'],
   transform: {
     '.*\\.test\\.ts': [
       'ts-jest',
