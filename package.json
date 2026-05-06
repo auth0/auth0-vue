@@ -36,7 +36,7 @@
     "test:integration": "concurrently --raw --kill-others --success first npm:test:integration:server npm:test:integration:tests",
     "serve:coverage": "serve coverage/lcov-report -n",
     "serve:stats": "serve bundle-stats -n",
-    "print-bundle-size": "node ./scripts/print-bundle-size",
+    "print-bundle-size": "node ./scripts/print-bundle-size.cjs",
     "prepack": "npm run build",
     "publish:cdn": "ccu --trace"
   },
