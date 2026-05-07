@@ -1,6 +1,6 @@
 const excludeFiles = [];
 
-module.exports = {
+export default {
   entryPoints: ['./src/index.ts'], // Changed from: includes: './src'
   out: './docs/',
   readme: './README.MD',
