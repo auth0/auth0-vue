@@ -1,5 +1,14 @@
 # Change Log
 
+## [v2.7.0](https://github.com/auth0/auth0-vue/tree/v2.7.0) (2026-05-07)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.6.1...v2.7.0)
+
+**Added**
+- feat: add custom token exchange support [\#618](https://github.com/auth0/auth0-vue/pull/618) ([yogeshchoudhary147](https://github.com/yogeshchoudhary147))
+
+**Fixed**
+- fix: respect appState.target when no router is present [\#619](https://github.com/auth0/auth0-vue/pull/619) ([yogeshchoudhary147](https://github.com/yogeshchoudhary147))
+
 ## [v2.6.1](https://github.com/auth0/auth0-vue/tree/v2.6.1) (2026-05-04)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.6.0...v2.6.1)
 
