@@ -545,13 +545,18 @@ describe('Auth0Plugin', () => {
     });
   });
 
-  it('should preserve pathname when calling replaceState for subdirectory deployments', async () => {
+  it('should preserve pathname when calling replaceState for subdirectory deployments with router', async () => {
+    const routerPushMock = jest.fn();
     const plugin = createAuth0({
       domain: '',
       clientId: ''
     });
 
-    // Simulate subdirectory deployment
+    appMock.config.globalProperties['$router'] = {
+      push: routerPushMock
+    } as unknown as Router;
+
+    // Simulate subdirectory deployment with router
     delete (window as any).location;
     const mockLocation = {
       href: 'https://example.org/subdir?code=123&state=xyz',
@@ -572,6 +577,83 @@ describe('Auth0Plugin', () => {
 
     handleRedirectCallbackMock.mockResolvedValue({
       appState: { target: '/dashboard' }
+    });
+
+    plugin.install(appMock);
+
+    expect.assertions(2);
+
+    return flushPromises().then(() => {
+      expect(replaceStateMock).toHaveBeenCalledWith({}, '', '/subdir');
+      expect(routerPushMock).toHaveBeenCalledWith('/dashboard');
+    });
+  });
+
+  it('should use appState.target for replaceState when no router is present', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    // Simulate subdirectory deployment with no router
+    delete (window as any).location;
+    const mockLocation = {
+      href: 'https://example.org/subdir?code=123&state=xyz',
+      origin: 'https://example.org',
+      protocol: 'https:',
+      host: 'example.org',
+      hostname: 'example.org',
+      port: '',
+      pathname: '/subdir',
+      search: '?code=123&state=xyz',
+      hash: '',
+      ancestorOrigins: '',
+      assign: jest.fn(),
+      reload: jest.fn(),
+      replace: jest.fn()
+    };
+    window.location = mockLocation as any;
+
+    handleRedirectCallbackMock.mockResolvedValue({
+      appState: { target: '/dashboard' }
+    });
+
+    plugin.install(appMock);
+
+    expect.assertions(1);
+
+    return flushPromises().then(() => {
+      expect(replaceStateMock).toHaveBeenCalledWith({}, '', '/dashboard');
+    });
+  });
+
+  it('should preserve pathname for replaceState in subdirectory deployment when no router and no appState.target', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    // Simulate subdirectory deployment with no router and no appState.target
+    delete (window as any).location;
+    const mockLocation = {
+      href: 'https://example.org/subdir?code=123&state=xyz',
+      origin: 'https://example.org',
+      protocol: 'https:',
+      host: 'example.org',
+      hostname: 'example.org',
+      port: '',
+      pathname: '/subdir',
+      search: '?code=123&state=xyz',
+      hash: '',
+      ancestorOrigins: '',
+      assign: jest.fn(),
+      reload: jest.fn(),
+      replace: jest.fn()
+    };
+    window.location = mockLocation as any;
+
+    handleRedirectCallbackMock.mockResolvedValue({
+      appState: {}
     });
 
     plugin.install(appMock);
