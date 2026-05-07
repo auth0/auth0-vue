@@ -219,13 +219,18 @@ export class Auth0Plugin implements Auth0VueClient {
       ) {
         const result = await this.handleRedirectCallback();
         const appState = result?.appState;
-        const target = appState?.target ?? '/';
-
-        // Remove query parameters from the URL, keeping the exact pathname.
-        window.history.replaceState({}, '', window.location.pathname);
+        const appStateTarget = appState?.target;
+        const target = appStateTarget ?? '/';
 
         if (router) {
+          window.history.replaceState({}, '', window.location.pathname);
           router.push(target);
+        } else {
+          window.history.replaceState(
+            {},
+            '',
+            appStateTarget ?? window.location.pathname
+          );
         }
 
         return result;
