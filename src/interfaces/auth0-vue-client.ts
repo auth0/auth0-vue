@@ -14,7 +14,9 @@ import type {
   FetcherConfig,
   MfaApiClient,
   CustomTokenExchangeOptions,
-  TokenEndpointResponse
+  TokenEndpointResponse,
+  PasskeyApiClient,
+  MyAccountApiClient
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
@@ -333,4 +335,75 @@ export interface Auth0VueClient {
    * ```
    */
   mfa: MfaApiClient;
+
+  /**
+   * ```js
+   * const { passkey } = useAuth0();
+   * const tokens = await passkey.signup({ email: 'user@example.com' });
+   * ```
+   *
+   * Passkey API client for WebAuthn-based passwordless authentication.
+   *
+   * - `signup(options)` — register a new user and create a passkey credential
+   * - `login(options?)` — authenticate an existing user via passkey assertion
+   *
+   * Both methods handle the full WebAuthn flow internally (challenge → browser
+   * credential ceremony → token exchange) and update `isAuthenticated` / `user`
+   * in the same way as `loginWithPopup`.
+   *
+   * **Note:** Errors thrown by `passkey` methods are **not** captured in the
+   * `error` ref. Always wrap calls in a `try/catch` and handle typed passkey
+   * errors (e.g. `PasskeyError`, `PasskeyRegisterError`) directly in your component.
+   *
+   * ```js
+   * import { PasskeyError } from '@auth0/auth0-vue';
+   *
+   * const { passkey } = useAuth0();
+   *
+   * try {
+   *   const tokens = await passkey.signup({ email: 'user@example.com' });
+   * } catch (e) {
+   *   if (e instanceof PasskeyError) {
+   *     // handle passkey-specific errors
+   *   }
+   * }
+   * ```
+   */
+  passkey: PasskeyApiClient;
+
+  /**
+   * ```js
+   * const { myAccount } = useAuth0();
+   * const factors = await myAccount.getFactors();
+   * ```
+   *
+   * MyAccount API client for self-service account management operations.
+   *
+   * Provides methods for managing the authenticated user's authentication
+   * methods and factors:
+   * - `getFactors()` — list all enabled factors and those available for enrollment
+   * - `getAuthenticationMethods(type?)` — list enrolled authentication methods, optionally filtered by type
+   * - `getAuthenticationMethod(id)` — get a single authentication method by ID
+   * - `updateAuthenticationMethod(id, data)` — update an authentication method (e.g. rename)
+   * - `deleteAuthenticationMethod(id)` — remove an enrolled authentication method
+   * - `enrollmentChallenge(options)` — initiate a two-step enrollment challenge
+   * - `enrollmentVerify(options)` — complete enrollment by verifying the challenge
+   *
+   * **Note:** MyAccount API calls require an access token with the appropriate
+   * scope (e.g. `read:me:authentication-methods`). Use MRRT to exchange a
+   * refresh token for a scoped access token if needed.
+   *
+   * ```js
+   * const { myAccount } = useAuth0();
+   *
+   * // List passkey authentication methods
+   * const methods = await myAccount.getAuthenticationMethods('passkey');
+   *
+   * // Enroll a new passkey
+   * const challenge = await myAccount.enrollmentChallenge({ type: 'passkey' });
+   * const credential = await navigator.credentials.create({ publicKey: challenge.authn_params_public_key });
+   * await myAccount.enrollmentVerify({ type: 'passkey', auth_session: challenge.auth_session, location: challenge.location, authn_response: credential });
+   * ```
+   */
+  myAccount: MyAccountApiClient;
 }

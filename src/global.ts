@@ -13,7 +13,12 @@ export {
   MfaEnrollmentError,
   MfaChallengeError,
   MfaVerifyError,
-  MfaEnrollmentFactorsError
+  MfaEnrollmentFactorsError,
+  PasskeyError,
+  PasskeyRegisterError,
+  PasskeyChallengeError,
+  PasskeyGetTokenError,
+  MyAccountApiError
 } from '@auth0/auth0-spa-js';
 
 export type {
@@ -51,5 +56,16 @@ export type {
   ChallengeResponse,
   VerifyParams,
   MfaGrantType,
-  EnrollmentFactor
+  EnrollmentFactor,
+  PasskeyApiClient,
+  PasskeySignupOptions,
+  PasskeyLoginOptions,
+  MyAccountApiClient,
+  AuthenticationMethod,
+  AuthenticationMethodType,
+  Factor,
+  UpdateAuthenticationMethodRequest,
+  EnrollmentChallengeOptions,
+  EnrollmentChallengeResponse,
+  EnrollmentVerifyOptions
 } from '@auth0/auth0-spa-js';
