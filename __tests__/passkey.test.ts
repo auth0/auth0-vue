@@ -1,5 +1,5 @@
 import { App } from 'vue';
-import { createAuth0, useAuth0 } from '../src/index';
+import { createAuth0 } from '../src/index';
 import {
   afterEach,
   beforeEach,
@@ -8,7 +8,6 @@ import {
   it,
   jest
 } from '@jest/globals';
-import { inject } from 'vue';
 
 const passkeySignupMock = jest
   .fn<any>()
