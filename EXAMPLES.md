@@ -14,6 +14,8 @@
 - [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
 - [Step-Up Authentication](#step-up-authentication)
 - [Custom Token Exchange](#custom-token-exchange)
+- [Passkeys](#passkeys)
+- [MyAccount API](#myaccount-api)
 
 ## Add login to your application
 
@@ -1614,3 +1616,634 @@ Exchange an external token for Auth0 tokens using the Custom Token Exchange gran
 - `subject_token_type` must be a namespaced URI under your organization's control. Well-known prefixes such as `urn:ietf:params:oauth:*`, `urn:auth0:*`, and `https://auth0.com/*` are reserved and should not be used for custom token types. See the [Auth0 Custom Token Exchange documentation](https://auth0.com/docs/authenticate/login/custom-token-exchange) for details.
 - The external token must be validated in an Auth0 Action using strong cryptographic verification.
 - `audience` and `scope` fall back to the SDK's configured defaults if not provided.
+
+## Passkeys
+
+Passkeys provide password-less authentication using platform biometrics (Face ID, Touch ID, Windows Hello) or security keys via the WebAuthn standard. The SDK supports two flows:
+
+- **Signup**: Register a new user with a passkey
+- **Login**: Authenticate an existing user with a passkey
+
+- [Setup](#setup-1)
+- [Important: Use Refresh Tokens with Passkeys](#important-use-refresh-tokens-with-passkeys)
+- [Signup with Passkey](#signup-with-passkey)
+- [Login with Passkey](#login-with-passkey)
+- [Complete Passkey Flow Example](#complete-passkey-flow-example)
+- [Passkey Error Handling](#passkey-error-handling)
+
+### Setup
+
+Before using passkeys, ensure the following are configured in your [Auth0 Dashboard](https://manage.auth0.com):
+
+1. **Enable passkey authentication method**: Go to **Authentication** > **Database** > your connection > **Authentication Methods** > **Passkey**.
+2. **Enable the WebAuthn passkey grant**: Go to your **Application** > **Advanced Settings** > **Grant Types** and enable the **Passkey** grant.
+3. **Custom domain required**: Passkeys are bound to an origin (domain). A [custom domain](https://auth0.com/docs/customize/custom-domains) must be configured — passkeys will not work on the default `*.auth0.com` domain.
+
+### Important: Use Refresh Tokens with Passkeys
+
+> **Important:** When using passkeys, you **must** configure `createAuth0` with `useRefreshTokens: true`.
+
+Passkey authentication uses a direct token exchange (`/oauth/token` with the WebAuthn grant type) and does **not** create an Auth0 session cookie. Without refresh tokens, `getAccessTokenSilently()` will fail with `login_required` when the access token expires — or worse, silently return tokens for a different user if a prior redirect-based session cookie exists.
+
+```js
+// main.js
+import { createApp } from 'vue';
+import { createAuth0 } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: 'YOUR_AUTH0_DOMAIN',
+    clientId: 'YOUR_AUTH0_CLIENT_ID',
+    useRefreshTokens: true, // Required for passkey-based sessions
+    authorizationParams: {
+      redirect_uri: window.location.origin
+    }
+  })
+);
+```
+
+You must also enable **Refresh Token Rotation** in your Auth0 Dashboard under **Applications** > your app > **Settings** > **Refresh Token Rotation**.
+
+### Signup with Passkey
+
+Register a new user with a passkey. The SDK handles the entire flow internally — requesting a challenge from Auth0, triggering the browser's WebAuthn credential creation ceremony, and exchanging the credential for tokens. After a successful call, `isAuthenticated`, `user`, and `getAccessTokenSilently()` all work as expected.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey } = useAuth0();
+
+      const signupWithPasskey = async () => {
+        await passkey.signup({
+          email: 'user@example.com',
+          name: 'Jane Doe' // optional display name
+        });
+      };
+
+      return { signupWithPasskey };
+    }
+  };
+</script>
+```
+
+You can also pass `scope` and `audience` to control the access token:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey } = useAuth0();
+
+      const signupWithPasskey = async () => {
+        await passkey.signup({
+          email: 'user@example.com',
+          scope: 'openid profile email read:products',
+          audience: 'https://api.example.com'
+        });
+      };
+
+      return { signupWithPasskey };
+    }
+  };
+</script>
+```
+
+### Login with Passkey
+
+Authenticate an existing user with their registered passkey. A single call handles the entire assertion flow.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey } = useAuth0();
+
+      const loginWithPasskey = async () => {
+        await passkey.login();
+        // Or with optional params:
+        // await passkey.login({ realm, organization, scope, audience });
+      };
+
+      return { loginWithPasskey };
+    }
+  };
+</script>
+```
+
+### Complete Passkey Flow Example
+
+```html
+<template>
+  <div v-if="isAuthenticated">
+    <p>Welcome, {{ user.name }}!</p>
+  </div>
+  <div v-else>
+    <button @click="handleSignup">Sign up with Passkey</button>
+    <button @click="handleLogin">Sign in with Passkey</button>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+  </div>
+</template>
+
+<script>
+  import { ref } from 'vue';
+  import { useAuth0, PasskeyError, PasskeyRegisterError } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey, isAuthenticated, user } = useAuth0();
+      const errorMessage = ref('');
+
+      const handleSignup = async () => {
+        try {
+          await passkey.signup({ email: 'user@example.com' });
+          // isAuthenticated and user are now updated automatically
+        } catch (error) {
+          if (error instanceof PasskeyRegisterError) {
+            errorMessage.value = `Registration failed: ${error.message}`;
+          } else if (error instanceof PasskeyError) {
+            errorMessage.value = `Passkey error: ${error.message}`;
+          }
+        }
+      };
+
+      const handleLogin = async () => {
+        try {
+          await passkey.login();
+          // isAuthenticated and user are now updated automatically
+        } catch (error) {
+          if (error instanceof PasskeyError) {
+            errorMessage.value = `Passkey error: ${error.message}`;
+          }
+        }
+      };
+
+      return { isAuthenticated, user, errorMessage, handleSignup, handleLogin };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  import { PasskeyError, PasskeyRegisterError } from '@auth0/auth0-vue';
+
+  export default {
+    data() {
+      return { errorMessage: '' };
+    },
+    methods: {
+      async handleSignup() {
+        try {
+          await this.$auth0.passkey.signup({ email: 'user@example.com' });
+        } catch (error) {
+          if (error instanceof PasskeyRegisterError) {
+            this.errorMessage = `Registration failed: ${error.message}`;
+          } else if (error instanceof PasskeyError) {
+            this.errorMessage = `Passkey error: ${error.message}`;
+          }
+        }
+      },
+      async handleLogin() {
+        try {
+          await this.$auth0.passkey.login();
+        } catch (error) {
+          if (error instanceof PasskeyError) {
+            this.errorMessage = `Passkey error: ${error.message}`;
+          }
+        }
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
+### Passkey Error Handling
+
+Both `signup()` and `login()` throw typed errors for precise error handling:
+
+```html
+<script>
+  import { useAuth0, PasskeyError, PasskeyRegisterError, PasskeyChallengeError } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey } = useAuth0();
+
+      const signupWithPasskey = async () => {
+        try {
+          await passkey.signup({ email: 'user@example.com' });
+        } catch (error) {
+          if (error instanceof PasskeyRegisterError) {
+            // Registration ceremony failed (e.g. user cancelled biometric prompt)
+            console.error('Registration failed:', error.message);
+          } else if (error instanceof PasskeyChallengeError) {
+            // Could not obtain the WebAuthn challenge from Auth0
+            console.error('Challenge error:', error.message);
+          } else if (error instanceof PasskeyError) {
+            // General passkey error
+            console.error('Passkey error:', error.message);
+          }
+        }
+      };
+
+      const loginWithPasskey = async () => {
+        try {
+          await passkey.login();
+        } catch (error) {
+          if (error instanceof PasskeyError) {
+            console.error('Login failed:', error.message);
+          }
+        }
+      };
+
+      return { signupWithPasskey, loginWithPasskey };
+    }
+  };
+</script>
+```
+
+> **Tip:** Both `signup()` and `login()` throw an error if the user cancels the biometric prompt. Wrap calls in `try/catch` to handle cancellation, network failures, or misconfigured connections.
+
+## MyAccount API
+
+The MyAccount API lets you manage the current user's authentication methods, factors, and connected accounts directly from your Vue application.
+
+> **Note:** The MyAccount API requires the MyAccount audience (`https://{your-domain}/me/`) and the corresponding scopes in your `authorizationParams`. If your app uses a custom API audience alongside MyAccount, you will also need refresh tokens and MRRT.
+
+- [Setup](#setup-2)
+- [Factors](#factors)
+- [Authentication Methods](#authentication-methods)
+- [Enrollment](#enrollment)
+- [MyAccount Error Handling](#myaccount-error-handling)
+
+### Setup
+
+Configure your Auth0 client with the MyAccount audience and required scopes:
+
+```js
+// main.js
+import { createApp } from 'vue';
+import { createAuth0 } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: 'YOUR_AUTH0_DOMAIN',
+    clientId: 'YOUR_AUTH0_CLIENT_ID',
+    authorizationParams: {
+      redirect_uri: window.location.origin,
+      audience: 'https://YOUR_AUTH0_DOMAIN/me/',
+      scope: 'openid profile email read:me:factors read:me:authentication_methods create:me:authentication_methods update:me:authentication_methods delete:me:authentication_methods'
+    }
+  })
+);
+```
+
+### Factors
+
+Get the list of MFA factors and their enabled status for the current user.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const loadFactors = async () => {
+        const factors = await myAccount.getFactors();
+        // [{ type: 'totp', usage: ['secondary'] }, ...]
+        console.log(factors);
+      };
+
+      return { loadFactors };
+    }
+  };
+</script>
+```
+
+### Authentication Methods
+
+#### List all authentication methods
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const loadMethods = async () => {
+        const methods = await myAccount.getAuthenticationMethods();
+        console.log(methods);
+      };
+
+      return { loadMethods };
+    }
+  };
+</script>
+```
+
+#### Get a single authentication method by ID
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const loadMethod = async (methodId) => {
+        const method = await myAccount.getAuthenticationMethod(methodId);
+        console.log(method);
+      };
+
+      return { loadMethod };
+    }
+  };
+</script>
+```
+
+#### Update an authentication method
+
+Currently supported for passkey methods — for example, to rename a passkey:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const renamePasskey = async (methodId) => {
+        const updated = await myAccount.updateAuthenticationMethod(methodId, {
+          name: 'My Work Laptop'
+        });
+        console.log(updated);
+      };
+
+      return { renamePasskey };
+    }
+  };
+</script>
+```
+
+#### Delete an authentication method
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const deleteMethod = async (methodId) => {
+        await myAccount.deleteAuthenticationMethod(methodId);
+      };
+
+      return { deleteMethod };
+    }
+  };
+</script>
+```
+
+### Enrollment
+
+Enrollment is a two-step flow: request a challenge, then verify the credential.
+
+#### Passkey
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const enrollPasskey = async () => {
+        // Step 1: get the WebAuthn creation challenge
+        const challenge = await myAccount.enrollmentChallenge({ type: 'passkey' });
+
+        // Step 2: trigger the browser WebAuthn ceremony
+        const credential = await navigator.credentials.create({
+          publicKey: {
+            ...challenge.authn_params_public_key,
+            challenge: base64urlToBuffer(challenge.authn_params_public_key.challenge),
+            user: {
+              ...challenge.authn_params_public_key.user,
+              id: base64urlToBuffer(challenge.authn_params_public_key.user.id)
+            }
+          }
+        });
+
+        // Step 3: verify and complete enrollment
+        const method = await myAccount.enrollmentVerify({
+          type: 'passkey',
+          location: challenge.location,
+          auth_session: challenge.auth_session,
+          authn_response: serializeCredential(credential)
+        });
+
+        console.log('Enrolled passkey:', method);
+      };
+
+      return { enrollPasskey };
+    }
+  };
+</script>
+```
+
+#### Email
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const enrollEmail = async (email, otpCode) => {
+        // Step 1: request OTP to the email address
+        const challenge = await myAccount.enrollmentChallenge({
+          type: 'email',
+          email
+        });
+
+        // Step 2: verify with the OTP the user received
+        await myAccount.enrollmentVerify({
+          type: 'email',
+          location: challenge.location,
+          auth_session: challenge.auth_session,
+          otp_code: otpCode
+        });
+      };
+
+      return { enrollEmail };
+    }
+  };
+</script>
+```
+
+#### Phone
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const enrollPhone = async (phoneNumber, otpCode) => {
+        // Step 1: request OTP to the phone number
+        const challenge = await myAccount.enrollmentChallenge({
+          type: 'phone',
+          phone_number: phoneNumber,
+          preferred_authentication_method: 'sms'
+        });
+
+        // Step 2: verify with the OTP the user received
+        await myAccount.enrollmentVerify({
+          type: 'phone',
+          location: challenge.location,
+          auth_session: challenge.auth_session,
+          otp_code: otpCode
+        });
+      };
+
+      return { enrollPhone };
+    }
+  };
+</script>
+```
+
+#### TOTP (Authenticator App)
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const enrollTotp = async (otpCode) => {
+        // Step 1: get the TOTP secret and QR code URI
+        const challenge = await myAccount.enrollmentChallenge({ type: 'totp' });
+        // challenge.barcode_uri  — render as a QR code for the user to scan
+        // challenge.manual_input_code — fallback manual entry code
+
+        // Step 2: user scans QR code and enters the generated OTP to confirm
+        await myAccount.enrollmentVerify({
+          type: 'totp',
+          location: challenge.location,
+          auth_session: challenge.auth_session,
+          otp_code: otpCode
+        });
+      };
+
+      return { enrollTotp };
+    }
+  };
+</script>
+```
+
+### MyAccount Error Handling
+
+All MyAccount API errors throw `MyAccountApiError` with RFC 7807 fields.
+
+```html
+<script>
+  import { useAuth0, MyAccountApiError } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const enrollPasskey = async () => {
+        try {
+          const challenge = await myAccount.enrollmentChallenge({ type: 'passkey' });
+          // ... complete enrollment
+        } catch (err) {
+          if (err instanceof MyAccountApiError) {
+            console.error(err.status, err.title, err.detail);
+            if (err.validation_errors) {
+              err.validation_errors.forEach(e => console.error(e.field, e.detail));
+            }
+          }
+        }
+      };
+
+      const deleteMethod = async (methodId) => {
+        try {
+          await myAccount.deleteAuthenticationMethod(methodId);
+        } catch (err) {
+          if (err instanceof MyAccountApiError) {
+            console.error(err.status, err.title, err.detail);
+          }
+        }
+      };
+
+      return { enrollPasskey, deleteMethod };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  import { MyAccountApiError } from '@auth0/auth0-vue';
+
+  export default {
+    methods: {
+      async loadFactors() {
+        try {
+          const factors = await this.$auth0.myAccount.getFactors();
+          console.log(factors);
+        } catch (err) {
+          if (err instanceof MyAccountApiError) {
+            console.error(err.status, err.title, err.detail);
+          }
+        }
+      },
+      async enrollPasskey() {
+        try {
+          const challenge = await this.$auth0.myAccount.enrollmentChallenge({ type: 'passkey' });
+          // ... complete enrollment
+        } catch (err) {
+          if (err instanceof MyAccountApiError) {
+            console.error(err.status, err.title, err.detail);
+          }
+        }
+      }
+    }
+  };
+</script>
+```
+
+</details>
