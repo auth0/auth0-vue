@@ -2107,10 +2107,10 @@ Enrollment is a two-step flow: request a challenge, then verify the credential.
         const credential = await navigator.credentials.create({
           publicKey: {
             ...challenge.authn_params_public_key,
-            challenge: base64urlToBuffer(challenge.authn_params_public_key.challenge),
+            challenge: base64urlToBuffer(challenge.authn_params_public_key.challenge), // decode base64url → ArrayBuffer
             user: {
               ...challenge.authn_params_public_key.user,
-              id: base64urlToBuffer(challenge.authn_params_public_key.user.id)
+              id: base64urlToBuffer(challenge.authn_params_public_key.user.id) // decode base64url → ArrayBuffer
             }
           }
         });
@@ -2120,7 +2120,7 @@ Enrollment is a two-step flow: request a challenge, then verify the credential.
           type: 'passkey',
           location: challenge.location,
           auth_session: challenge.auth_session,
-          authn_response: serializeCredential(credential)
+          authn_response: serializeCredential(credential) // serialize PublicKeyCredential → plain object
         });
 
         console.log('Enrolled passkey:', method);
@@ -2131,6 +2131,10 @@ Enrollment is a two-step flow: request a challenge, then verify the credential.
   };
 </script>
 ```
+
+> **Note:** The WebAuthn API requires binary buffers for `challenge` and `user.id`, and expects a plain serializable object when sending the credential back to Auth0. You will need two small helpers:
+> - `base64urlToBuffer(str)` — converts a base64url string to `ArrayBuffer`. See [MDN: Base64 encoding and decoding](https://developer.mozilla.org/en-US/docs/Glossary/Base64) or use a library such as [`@simplewebauthn/browser`](https://simplewebauthn.dev).
+> - `serializeCredential(credential)` — converts the `PublicKeyCredential` returned by `navigator.credentials.create()` into a plain JSON-serializable object. Most WebAuthn libraries provide this out of the box.
 
 #### Email
 
