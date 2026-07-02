@@ -1664,11 +1664,13 @@ app.use(
 );
 ```
 
-You must also enable **Refresh Token Rotation** in your Auth0 Dashboard under **Applications** > your app > **Settings** > **Refresh Token Rotation**.
+It is also recommended to enable **Refresh Token Rotation** in your Auth0 Dashboard under **Applications** > your app > **Settings** > **Refresh Token Rotation**.
 
 ### Signup with Passkey
 
 Register a new user with a passkey. The SDK handles the entire flow internally — requesting a challenge from Auth0, triggering the browser's WebAuthn credential creation ceremony, and exchanging the credential for tokens. After a successful call, `isAuthenticated`, `user`, and `getAccessTokenSilently()` all work as expected.
+
+At least one user identifier (`email`, `phoneNumber`, or `username`) is required. Which identifiers are accepted depends on what is configured on your database connection.
 
 ```html
 <script>
@@ -1680,8 +1682,7 @@ Register a new user with a passkey. The SDK handles the entire flow internally �
 
       const signupWithPasskey = async () => {
         await passkey.signup({
-          email: 'user@example.com',
-          name: 'Jane Doe' // optional display name
+          email: 'user@example.com' // required — at least one of: email, phoneNumber, username
         });
       };
 
@@ -1691,7 +1692,7 @@ Register a new user with a passkey. The SDK handles the entire flow internally �
 </script>
 ```
 
-You can also pass `scope` and `audience` to control the access token:
+All supported options:
 
 ```html
 <script>
@@ -1703,7 +1704,24 @@ You can also pass `scope` and `audience` to control the access token:
 
       const signupWithPasskey = async () => {
         await passkey.signup({
+          // Identifiers — at least one required
           email: 'user@example.com',
+          phoneNumber: '+15551234567', // E.164 format
+          username: 'janedoe',
+
+          // Profile fields — all optional
+          name: 'Jane Doe',           // display name
+          givenName: 'Jane',
+          familyName: 'Doe',
+          nickname: 'janie',
+          picture: 'https://example.com/avatar.png',
+          userMetadata: { plan: 'pro' }, // stored in user_metadata on the Auth0 user
+
+          // Context — optional
+          realm: 'Username-Password-Authentication', // database connection name
+          organization: 'org_abc123',
+
+          // Token control — optional
           scope: 'openid profile email read:products',
           audience: 'https://api.example.com'
         });
@@ -1876,6 +1894,37 @@ Both `signup()` and `login()` throw typed errors for precise error handling:
 </script>
 ```
 
+If your tenant requires MFA after a passkey login, `passkey.login()` will throw an `MfaRequiredError`. Handle it using the MFA API:
+
+```html
+<script>
+  import { useAuth0, PasskeyError, MfaRequiredError } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey, mfa } = useAuth0();
+
+      const loginWithPasskey = async () => {
+        try {
+          await passkey.login();
+        } catch (error) {
+          if (error instanceof MfaRequiredError) {
+            // MFA step-up required — proceed with the MFA API
+            const mfaToken = error.mfa_token;
+            const authenticators = await mfa.getAuthenticators(mfaToken);
+            // continue with challenge/verify flow — see the MFA section for full examples
+          } else if (error instanceof PasskeyError) {
+            console.error('Login failed:', error.message);
+          }
+        }
+      };
+
+      return { loginWithPasskey };
+    }
+  };
+</script>
+```
+
 > **Tip:** Both `signup()` and `login()` throw an error if the user cancels the biometric prompt. Wrap calls in `try/catch` to handle cancellation, network failures, or misconfigured connections.
 
 ## MyAccount API
@@ -1984,7 +2033,7 @@ Get the list of MFA factors and their enabled status for the current user.
 
 #### Update an authentication method
 
-Currently supported for passkey methods — for example, to rename a passkey:
+Rename a `totp` or `push-notification` method using the `name` field. For `phone` methods, update the preferred delivery channel using `preferred_authentication_method`.
 
 ```html
 <script>
@@ -1994,14 +2043,23 @@ Currently supported for passkey methods — for example, to rename a passkey:
     setup() {
       const { myAccount } = useAuth0();
 
-      const renamePasskey = async (methodId) => {
+      // Rename a totp or push-notification method
+      const renameMethod = async (methodId) => {
         const updated = await myAccount.updateAuthenticationMethod(methodId, {
-          name: 'My Work Laptop'
+          name: 'My Authenticator App'
         });
         console.log(updated);
       };
 
-      return { renamePasskey };
+      // Update preferred delivery channel for a phone method
+      const updatePhoneMethod = async (methodId) => {
+        const updated = await myAccount.updateAuthenticationMethod(methodId, {
+          preferred_authentication_method: 'voice' // 'sms' | 'voice'
+        });
+        console.log(updated);
+      };
+
+      return { renameMethod, updatePhoneMethod };
     }
   };
 </script>
