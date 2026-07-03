@@ -173,6 +173,19 @@ describe('Passkey API', () => {
         plugin.passkey.signup({ email: 'user@example.com' })
       ).rejects.toThrow('WebAuthn not supported');
     });
+
+    it('should update isAuthenticated and user after passkey.signup', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      isAuthenticatedMock.mockResolvedValue(true);
+      getUserMock.mockResolvedValue({ name: '__test_user__' });
+
+      await plugin.passkey.signup({ email: 'user@example.com' });
+
+      expect(plugin.isAuthenticated.value).toEqual(true);
+      expect(plugin.user.value).toEqual({ name: '__test_user__' });
+    });
   });
 
   describe('passkey.login', () => {
@@ -210,6 +223,19 @@ describe('Passkey API', () => {
       await new Promise(resolve => setTimeout(resolve, 0));
 
       await expect(plugin.passkey.login()).rejects.toThrow('User cancelled');
+    });
+
+    it('should update isAuthenticated and user after passkey.login', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      isAuthenticatedMock.mockResolvedValue(true);
+      getUserMock.mockResolvedValue({ name: '__test_user__' });
+
+      await plugin.passkey.login();
+
+      expect(plugin.isAuthenticated.value).toEqual(true);
+      expect(plugin.user.value).toEqual({ name: '__test_user__' });
     });
   });
 });

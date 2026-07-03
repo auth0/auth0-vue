@@ -351,8 +351,8 @@ export interface Auth0VueClient {
    * credential ceremony → token exchange) and automatically update
    * `isAuthenticated`, `user`, and `idTokenClaims` on completion.
    *
-   * **Note:** Errors thrown by `passkey` methods are **not** captured in the
-   * `error` ref. Always wrap calls in a `try/catch` and handle typed passkey
+   * **Note:** Errors thrown by `passkey` methods are captured in the `error`
+   * ref. You can also wrap calls in a `try/catch` to handle typed passkey
    * errors (e.g. `PasskeyError`, `PasskeyRegisterError`) directly in your component.
    *
    * ```js
@@ -391,7 +391,7 @@ export interface Auth0VueClient {
    * - `enrollmentVerify(options)` — complete enrollment by verifying the challenge
    *
    * **Note:** MyAccount API calls require an access token with the appropriate
-   * scope (e.g. `read:me:authentication-methods`). Use MRRT to exchange a
+   * scope (e.g. `read:me:authentication_methods`). Use MRRT to exchange a
    * refresh token for a scoped access token if needed.
    *
    * ```js
