@@ -348,12 +348,8 @@ export interface Auth0VueClient {
    * - `login(options?)` — authenticate an existing user via passkey assertion
    *
    * Both methods handle the full WebAuthn flow internally (challenge → browser
-   * credential ceremony → token exchange).
-   *
-   * **Note:** `passkey.signup()` and `passkey.login()` do not automatically
-   * update Vue's reactive state (`isAuthenticated`, `user`, `idTokenClaims`).
-   * Call `checkSession()` after a successful passkey operation to reflect the
-   * new session in your components.
+   * credential ceremony → token exchange) and automatically update
+   * `isAuthenticated`, `user`, and `idTokenClaims` on completion.
    *
    * **Note:** Errors thrown by `passkey` methods are **not** captured in the
    * `error` ref. Always wrap calls in a `try/catch` and handle typed passkey
@@ -362,11 +358,11 @@ export interface Auth0VueClient {
    * ```js
    * import { PasskeyError } from '@auth0/auth0-vue';
    *
-   * const { passkey, checkSession } = useAuth0();
+   * const { passkey } = useAuth0();
    *
    * try {
    *   await passkey.signup({ email: 'user@example.com' });
-   *   await checkSession(); // refresh isAuthenticated, user, etc.
+   *   // isAuthenticated, user, and idTokenClaims are updated automatically
    * } catch (e) {
    *   if (e instanceof PasskeyError) {
    *     // handle passkey-specific errors

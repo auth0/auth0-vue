@@ -27,6 +27,8 @@ import type {
   CustomTokenExchangeOptions,
   TokenEndpointResponse,
   PasskeyApiClient,
+  PasskeySignupOptions,
+  PasskeyLoginOptions,
   MyAccountApiClient
 } from '@auth0/auth0-spa-js';
 import { Auth0Client, User } from '@auth0/auth0-spa-js';
@@ -125,8 +127,13 @@ export class Auth0Plugin implements Auth0VueClient {
     });
 
     this.mfa = this._client.mfa;
-    this.passkey = this._client.passkey;
     this.myAccount = this._client.myAccount;
+
+    const passkeyClient = this._client.passkey;
+    this.passkey = {
+      signup: (options: PasskeySignupOptions) => this.__proxy(() => passkeyClient.signup(options)),
+      login: (options?: PasskeyLoginOptions) => this.__proxy(() => passkeyClient.login(options))
+    } as unknown as PasskeyApiClient;
 
     this.__checkSession(app.config.globalProperties.$router);
 
