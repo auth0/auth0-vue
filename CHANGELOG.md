@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.8.0](https://github.com/auth0/auth0-vue/tree/v2.8.0) (2026-07-03)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.7.0...v2.8.0)
+
+**Added**
+- feat: add Passkeys and MyAccount API support [\#628](https://github.com/auth0/auth0-vue/pull/628) ([cschetan77](https://github.com/cschetan77))
+
 ## [v2.7.0](https://github.com/auth0/auth0-vue/tree/v2.7.0) (2026-05-07)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.6.1...v2.7.0)
 
