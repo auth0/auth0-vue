@@ -73,6 +73,19 @@ jest.mock('@auth0/auth0-spa-js', () => {
           challenge: jest.fn<any>().mockResolvedValue({}),
           verify: jest.fn<any>().mockResolvedValue({}),
           getEnrollmentFactors: jest.fn<any>().mockResolvedValue([])
+        },
+        passkey: {
+          signup: jest.fn<any>().mockResolvedValue({ access_token: 'passkey-token' }),
+          login: jest.fn<any>().mockResolvedValue({ access_token: 'passkey-token' })
+        },
+        myAccount: {
+          getFactors: jest.fn<any>().mockResolvedValue([]),
+          getAuthenticationMethods: jest.fn<any>().mockResolvedValue([]),
+          getAuthenticationMethod: jest.fn<any>().mockResolvedValue({ id: 'test-id' }),
+          updateAuthenticationMethod: jest.fn<any>().mockResolvedValue({ id: 'test-id' }),
+          deleteAuthenticationMethod: jest.fn<any>().mockResolvedValue(undefined),
+          enrollmentChallenge: jest.fn<any>().mockResolvedValue({ id: 'test-challenge-id' }),
+          enrollmentVerify: jest.fn<any>().mockResolvedValue({ id: 'test-method-id' })
         }
       };
     })
@@ -94,6 +107,26 @@ describe('Client', () => {
     const spy = jest.spyOn(console, 'error');
 
     await client.value.mfa.getAuthenticators('test-token');
+
+    expect(spy).toHaveBeenCalledWith(
+      `Please ensure Auth0's Vue plugin is correctly installed.`
+    );
+  });
+
+  it('logs console error when passkey methods are called before installing the plugin', async () => {
+    const spy = jest.spyOn(console, 'error');
+
+    await client.value.passkey.signup({ email: 'user@example.com' } as any);
+
+    expect(spy).toHaveBeenCalledWith(
+      `Please ensure Auth0's Vue plugin is correctly installed.`
+    );
+  });
+
+  it('logs console error when myAccount methods are called before installing the plugin', async () => {
+    const spy = jest.spyOn(console, 'error');
+
+    await client.value.myAccount.getFactors();
 
     expect(spy).toHaveBeenCalledWith(
       `Please ensure Auth0's Vue plugin is correctly installed.`

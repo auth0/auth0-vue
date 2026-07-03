@@ -25,7 +25,11 @@ import type {
   CustomFetchMinimalOutput,
   MfaApiClient,
   CustomTokenExchangeOptions,
-  TokenEndpointResponse
+  TokenEndpointResponse,
+  PasskeyApiClient,
+  PasskeySignupOptions,
+  PasskeyLoginOptions,
+  MyAccountApiClient
 } from '@auth0/auth0-spa-js';
 import { Auth0Client, User } from '@auth0/auth0-spa-js';
 import { bindPluginMethods, deprecateRedirectUri } from './utils';
@@ -66,7 +70,20 @@ const PLUGIN_NOT_INSTALLED_CLIENT: Auth0VueClient = {
     challenge: PLUGIN_NOT_INSTALLED_HANDLER,
     verify: PLUGIN_NOT_INSTALLED_HANDLER,
     getEnrollmentFactors: PLUGIN_NOT_INSTALLED_HANDLER
-  } as unknown as MfaApiClient
+  } as unknown as MfaApiClient,
+  passkey: {
+    signup: PLUGIN_NOT_INSTALLED_HANDLER,
+    login: PLUGIN_NOT_INSTALLED_HANDLER
+  } as unknown as PasskeyApiClient,
+  myAccount: {
+    getFactors: PLUGIN_NOT_INSTALLED_HANDLER,
+    getAuthenticationMethods: PLUGIN_NOT_INSTALLED_HANDLER,
+    getAuthenticationMethod: PLUGIN_NOT_INSTALLED_HANDLER,
+    updateAuthenticationMethod: PLUGIN_NOT_INSTALLED_HANDLER,
+    deleteAuthenticationMethod: PLUGIN_NOT_INSTALLED_HANDLER,
+    enrollmentChallenge: PLUGIN_NOT_INSTALLED_HANDLER,
+    enrollmentVerify: PLUGIN_NOT_INSTALLED_HANDLER
+  } as unknown as MyAccountApiClient
 };
 
 /**
@@ -88,6 +105,8 @@ export class Auth0Plugin implements Auth0VueClient {
   public idTokenClaims = ref<IdToken | undefined>();
   public error = ref<Error | null>(null);
   public mfa: MfaApiClient = PLUGIN_NOT_INSTALLED_CLIENT.mfa;
+  public passkey: PasskeyApiClient = PLUGIN_NOT_INSTALLED_CLIENT.passkey;
+  public myAccount: MyAccountApiClient = PLUGIN_NOT_INSTALLED_CLIENT.myAccount;
 
   constructor(
     private clientOptions: Auth0VueClientOptions,
@@ -108,6 +127,13 @@ export class Auth0Plugin implements Auth0VueClient {
     });
 
     this.mfa = this._client.mfa;
+    this.myAccount = this._client.myAccount;
+
+    const passkeyClient = this._client.passkey;
+    this.passkey = {
+      signup: (options: PasskeySignupOptions) => this.__proxy(() => passkeyClient.signup(options)),
+      login: (options?: PasskeyLoginOptions) => this.__proxy(() => passkeyClient.login(options))
+    } as unknown as PasskeyApiClient;
 
     this.__checkSession(app.config.globalProperties.$router);
 
