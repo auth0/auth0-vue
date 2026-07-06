@@ -18,12 +18,16 @@ export {
   PasskeyRegisterError,
   PasskeyChallengeError,
   PasskeyGetTokenError,
-  MyAccountApiError
+  MyAccountApiError,
+  MissingScopesError,
+  InvalidConfigurationError,
+  RefreshTokenMode
 } from '@auth0/auth0-spa-js';
 
 export type {
   AuthorizationParams,
   InteractiveErrorHandler,
+  RevokeRefreshTokenOptions,
   CustomTokenExchangeOptions,
   TokenEndpointResponse,
   PopupLoginOptions,

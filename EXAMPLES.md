@@ -1150,6 +1150,120 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
 
 </details>
 
+## Online Access (Online Refresh Tokens)
+
+**Online Refresh Tokens (ORTs)** are a refresh token type bound to the lifetime of the user's Auth0 session, unlike rotating offline refresh tokens. An ORT is:
+
+- **Session-bound** — valid only while the underlying Auth0 session is active. When the session ends (logout, idle/absolute session expiry, or an admin revoking the session), the ORT stops working.
+- **Non-rotating** — refreshing an access token with an ORT does **not** issue a new refresh token; the same ORT is reused for the life of the session.
+
+Read more about [Online Refresh Tokens](https://auth0.com/docs/secure/tokens/refresh-tokens/online-refresh-tokens/online-refresh-tokens) to decide whether this fits your application.
+
+> [!IMPORTANT]
+> Online access requires DPoP. Sender-constraining the token via [DPoP](#device-bound-tokens-with-dpop) is mandatory because the ORT is non-rotating — binding it to the browser's key pair is what mitigates token replay if it is exfiltrated. You must set `useDpop: true` explicitly; the SDK does not enable it for you.
+>
+> This also requires the `online_refresh_tokens` flag to be enabled for your Auth0 tenant, and `allow_online_access` to be enabled on the resource server you log in with (on by default).
+
+### Enabling Online Access
+
+Set `refreshTokenMode` to `RefreshTokenMode.Online` together with `useRefreshTokens: true` and `useDpop: true`:
+
+```js
+import { createAuth0, RefreshTokenMode } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    useRefreshTokens: true, // required — online access is a refresh-token grant
+    refreshTokenMode: RefreshTokenMode.Online, // 👈
+    useDpop: true, // required — DPoP is mandatory for online access
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+    },
+  })
+);
+
+app.mount('#app');
+```
+
+`refreshTokenMode` defaults to `RefreshTokenMode.Offline` (rotating refresh tokens). Enabling online mode causes the underlying SDK to:
+
+- Send the `online_access` scope to the authorization server (instead of `offline_access`) — you do **not** need to add it to `authorizationParams.scope` yourself.
+- Route token renewal through the `refresh_token` grant against `/oauth/token` rather than a hidden iframe.
+- Store the non-rotating ORT in the existing cache and reuse it on every refresh, never replacing it.
+
+### Configuration validation
+
+If `refreshTokenMode: RefreshTokenMode.Online` is set without `useRefreshTokens: true` and `useDpop: true`, the underlying `Auth0Client` constructor throws an `InvalidConfigurationError`:
+
+```js
+import { InvalidConfigurationError } from '@auth0/auth0-vue';
+
+try {
+  app.use(
+    createAuth0({
+      domain: '<AUTH0_DOMAIN>',
+      clientId: '<AUTH0_CLIENT_ID>',
+      refreshTokenMode: RefreshTokenMode.Online,
+      useRefreshTokens: true, // missing useDpop: true
+    })
+  );
+} catch (e) {
+  if (e instanceof InvalidConfigurationError) {
+    console.error(e.error_description); // includes the suggested fix
+  }
+}
+```
+
+### Revoking the Online Refresh Token
+
+Use `revokeRefreshToken()` from `useAuth0()` to explicitly revoke the refresh token via the `/oauth/revoke` endpoint:
+
+```js
+const { revokeRefreshToken } = useAuth0();
+
+await revokeRefreshToken();
+// Revoke for a specific audience:
+await revokeRefreshToken({ audience: 'https://api.example.com' });
+```
+
+> [!WARNING]
+> In online mode, `revokeRefreshToken()` behaves differently from offline mode:
+> - The ORT **is** revoked at the authorization server, and because it is session-bound, the Auth0 **session is terminated server-side** as part of revocation.
+> - The entire local cache is cleared immediately — `isAuthenticated` becomes `false`, and `user`/`idTokenClaims` become `undefined` right away, without waiting for the access token to expire.
+>
+> In **offline mode**, only the refresh token is invalidated — the cached access token and user profile remain valid until the access token expires.
+>
+> After calling `revokeRefreshToken()` in online mode, redirect the user to login. For a redirect-based sign-out in either mode, use `logout()` instead.
+
+### Using Online Access with MRRT
+
+Online access is compatible with Multi-Resource Refresh Tokens (MRRT): a single ORT can be exchanged for access tokens across the audiences allowed by your refresh-token policies. The ORT remains non-rotating throughout.
+
+```js
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    useRefreshTokens: true,
+    refreshTokenMode: RefreshTokenMode.Online,
+    useDpop: true,
+    useMrrt: true, // 👈
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      audience: 'https://api.example.com',
+    },
+  })
+);
+```
+
+> [!IMPORTANT]
+> In order for MRRT to work, it needs a previous configuration setting the refresh token policies.
+> Visit [configure and implement MRRT](https://auth0.com/docs/secure/tokens/refresh-tokens/multi-resource-refresh-token/configure-and-implement-multi-resource-refresh-token).
+
 ## Multi-Factor Authentication (MFA)
 
 The `mfa` property on the object returned by `useAuth0` gives access to all MFA operations. MFA flows are triggered when `getAccessTokenSilently` throws a `MfaRequiredError`.

@@ -15,6 +15,7 @@ import { client } from '../src/plugin';
 const loginWithRedirectMock = jest.fn<any>().mockResolvedValue(null);
 const loginWithPopupMock = jest.fn<any>().mockResolvedValue(null);
 const logoutMock = jest.fn<any>();
+const revokeRefreshTokenMock = jest.fn<any>().mockResolvedValue(undefined);
 const checkSessionMock = jest.fn<any>().mockResolvedValue(null);
 const handleRedirectCallbackMock = jest.fn<any>().mockResolvedValue(null);
 const isAuthenticatedMock = jest.fn<any>().mockResolvedValue(false);
@@ -54,6 +55,7 @@ jest.mock('@auth0/auth0-spa-js', () => {
         loginWithRedirect: loginWithRedirectMock,
         loginWithPopup: loginWithPopupMock,
         logout: logoutMock,
+        revokeRefreshToken: revokeRefreshTokenMock,
         isAuthenticated: isAuthenticatedMock,
         getUser: getUserMock,
         getIdTokenClaims: getIdTokenClaimsMock,
@@ -857,6 +859,74 @@ describe('Auth0Plugin', () => {
     expect(getUserMock).not.toHaveBeenCalled();
     expect(getIdTokenClaimsMock).not.toHaveBeenCalled();
     expect(isAuthenticatedMock).not.toHaveBeenCalled();
+  });
+
+  it('should proxy revokeRefreshToken', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.revokeRefreshToken();
+    expect(revokeRefreshTokenMock).toHaveBeenCalledWith(undefined);
+  });
+
+  it('should proxy revokeRefreshToken with options', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    const revokeOptions = { audience: 'https://api.example.com' };
+
+    await appMock.config.globalProperties.$auth0.revokeRefreshToken(
+      revokeOptions
+    );
+    expect(revokeRefreshTokenMock).toHaveBeenCalledWith(revokeOptions);
+  });
+
+  it('should update state after revokeRefreshToken', async () => {
+    // revokeRefreshToken always refreshes state via __proxy, regardless of mode —
+    // online mode clears the session (getUser resolves undefined), offline mode
+    // leaves it untouched (getUser resolves the same user). Either way the SDK
+    // state must be re-read afterward.
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    await flushPromises();
+    jest.clearAllMocks();
+
+    await appMock.config.globalProperties.$auth0.revokeRefreshToken();
+
+    expect(revokeRefreshTokenMock).toHaveBeenCalledTimes(1);
+    expect(getUserMock).toHaveBeenCalledTimes(1);
+    expect(getIdTokenClaimsMock).toHaveBeenCalledTimes(1);
+    expect(isAuthenticatedMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should propagate errors from revokeRefreshToken', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    revokeRefreshTokenMock.mockRejectedValueOnce(
+      new Error('The token has been revoked')
+    );
+
+    await expect(
+      appMock.config.globalProperties.$auth0.revokeRefreshToken()
+    ).rejects.toThrow('The token has been revoked');
   });
 
   it('should proxy getAccessTokenSilently', async () => {
