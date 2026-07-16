@@ -16,8 +16,7 @@ import type {
   CustomTokenExchangeOptions,
   TokenEndpointResponse,
   PasskeyApiClient,
-  MyAccountApiClient,
-  RevokeRefreshTokenOptions
+  MyAccountApiClient
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
@@ -200,39 +199,6 @@ export interface Auth0VueClient {
    * @param options
    */
   logout(options?: LogoutOptions): Promise<void>;
-
-  /**
-   * ```js
-   * await revokeRefreshToken();
-   * ```
-   *
-   * Revokes the refresh token via the `/oauth/revoke` endpoint. This invalidates the
-   * refresh token so it can no longer be used to obtain new access tokens.
-   *
-   * If `useRefreshTokens` is disabled, this method does nothing.
-   *
-   * **Online mode** (`refreshTokenMode: RefreshTokenMode.Online`): revoking the Online
-   * Refresh Token also terminates the Auth0 session server-side and clears the entire
-   * local cache. `isAuthenticated`, `user`, and `idTokenClaims` update immediately to
-   * reflect the terminated session — no redirect required. Use `logout()` instead if
-   * you want a redirect-based sign-out.
-   *
-   * **Offline mode**: only the refresh token is invalidated; the cached access token
-   * and user profile remain valid until the access token expires. `isAuthenticated`
-   * and `user` are unaffected until then.
-   *
-   * @param options - Optional parameters to identify which refresh token to revoke.
-   *   Defaults to the audience configured in `authorizationParams`.
-   *
-   * @example
-   * ```js
-   * const { revokeRefreshToken } = useAuth0();
-   * await revokeRefreshToken();
-   * // Revoke for a specific audience:
-   * await revokeRefreshToken({ audience: 'https://api.example.com' });
-   * ```
-   */
-  revokeRefreshToken(options?: RevokeRefreshTokenOptions): Promise<void>;
 
   /**
    * ```js

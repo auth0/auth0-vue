@@ -27,7 +27,6 @@ export {
 export type {
   AuthorizationParams,
   InteractiveErrorHandler,
-  RevokeRefreshTokenOptions,
   CustomTokenExchangeOptions,
   TokenEndpointResponse,
   PopupLoginOptions,

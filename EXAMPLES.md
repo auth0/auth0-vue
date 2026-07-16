@@ -1221,27 +1221,6 @@ try {
 }
 ```
 
-### Revoking the Online Refresh Token
-
-Use `revokeRefreshToken()` from `useAuth0()` to explicitly revoke the refresh token via the `/oauth/revoke` endpoint:
-
-```js
-const { revokeRefreshToken } = useAuth0();
-
-await revokeRefreshToken();
-// Revoke for a specific audience:
-await revokeRefreshToken({ audience: 'https://api.example.com' });
-```
-
-> [!WARNING]
-> In online mode, `revokeRefreshToken()` behaves differently from offline mode:
-> - The ORT **is** revoked at the authorization server, and because it is session-bound, the Auth0 **session is terminated server-side** as part of revocation.
-> - The entire local cache is cleared immediately — `isAuthenticated` becomes `false`, and `user`/`idTokenClaims` become `undefined` right away, without waiting for the access token to expire.
->
-> In **offline mode**, only the refresh token is invalidated — the cached access token and user profile remain valid until the access token expires.
->
-> After calling `revokeRefreshToken()` in online mode, redirect the user to login. For a redirect-based sign-out in either mode, use `logout()` instead.
-
 ### Using Online Access with MRRT
 
 Online access is compatible with Multi-Resource Refresh Tokens (MRRT): a single ORT can be exchanged for access tokens across the audiences allowed by your refresh-token policies. The ORT remains non-rotating throughout.
