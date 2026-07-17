@@ -11,6 +11,7 @@
 - [Accessing Auth0Client outside of a component](#accessing-auth0client-outside-of-a-component)
 - [Organizations](#organizations)
 - [Device-bound tokens with DPoP](#device-bound-tokens-with-dpop)
+- [Online Access (Online Refresh Tokens)](#online-access-online-refresh-tokens)
 - [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
 - [Step-Up Authentication](#step-up-authentication)
 - [Custom Token Exchange](#custom-token-exchange)
@@ -1245,6 +1246,24 @@ app.use(
 > [!IMPORTANT]
 > In order for MRRT to work, it needs a previous configuration setting the refresh token policies.
 > Visit [configure and implement MRRT](https://auth0.com/docs/secure/tokens/refresh-tokens/multi-resource-refresh-token/configure-and-implement-multi-resource-refresh-token).
+
+If the authorization server grants fewer scopes than requested during an MRRT cross-audience exchange, `getAccessTokenSilently` throws a `MissingScopesError`. Catch it to handle downscoped responses gracefully:
+
+```js
+import { MissingScopesError } from '@auth0/auth0-vue';
+
+const { getAccessTokenSilently } = useAuth0();
+
+try {
+  const token = await getAccessTokenSilently({
+    authorizationParams: { audience: 'https://api2.example.com' }
+  });
+} catch (e) {
+  if (e instanceof MissingScopesError) {
+    // server granted fewer scopes than requested for this audience
+  }
+}
+```
 
 ## Multi-Factor Authentication (MFA)
 
