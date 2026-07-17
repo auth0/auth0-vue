@@ -11,6 +11,7 @@
 - [Accessing Auth0Client outside of a component](#accessing-auth0client-outside-of-a-component)
 - [Organizations](#organizations)
 - [Device-bound tokens with DPoP](#device-bound-tokens-with-dpop)
+- [Online Access (Online Refresh Tokens)](#online-access-online-refresh-tokens)
 - [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
 - [Step-Up Authentication](#step-up-authentication)
 - [Custom Token Exchange](#custom-token-exchange)
@@ -1149,6 +1150,120 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
 ```
 
 </details>
+
+## Online Access (Online Refresh Tokens)
+
+> [!NOTE]
+> Online Access (Online Refresh Tokens) support via SDKs is currently in Early Access. To request access to this feature, contact your Auth0 representative.
+
+**Online Refresh Tokens (ORTs)** are a refresh token type bound to the lifetime of the user's Auth0 session, unlike rotating offline refresh tokens. An ORT is:
+
+- **Session-bound** — valid only while the underlying Auth0 session is active. When the session ends (logout, idle/absolute session expiry, or an admin revoking the session), the ORT stops working.
+- **Non-rotating** — refreshing an access token with an ORT does **not** issue a new refresh token; the same ORT is reused for the life of the session.
+
+Read more about [Online Refresh Tokens](https://auth0.com/docs/secure/tokens/refresh-tokens/online-refresh-tokens/online-refresh-tokens) to decide whether this fits your application.
+
+> [!IMPORTANT]
+> Online access requires DPoP. Sender-constraining the token via [DPoP](#device-bound-tokens-with-dpop) is mandatory because the ORT is non-rotating — binding it to the browser's key pair is what mitigates token replay if it is exfiltrated. You must set `useDpop: true` explicitly; the SDK does not enable it for you.
+>
+> This also requires the `online_refresh_tokens` flag to be enabled for your Auth0 tenant, and `allow_online_access` to be enabled on the resource server you log in with (on by default).
+
+### Enabling Online Access
+
+Set `refreshTokenMode` to `RefreshTokenMode.Online` together with `useRefreshTokens: true` and `useDpop: true`:
+
+```js
+import { createAuth0, RefreshTokenMode } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    useRefreshTokens: true, // required — online access is a refresh-token grant
+    refreshTokenMode: RefreshTokenMode.Online, // 👈
+    useDpop: true, // required — DPoP is mandatory for online access
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+    },
+  })
+);
+
+app.mount('#app');
+```
+
+`refreshTokenMode` defaults to `RefreshTokenMode.Offline` (rotating refresh tokens). Enabling online mode causes the underlying SDK to:
+
+- Send the `online_access` scope to the authorization server (instead of `offline_access`) — you do **not** need to add it to `authorizationParams.scope` yourself.
+- Route token renewal through the `refresh_token` grant against `/oauth/token` rather than a hidden iframe.
+- Store the non-rotating ORT in the existing cache and reuse it on every refresh, never replacing it.
+
+### Configuration validation
+
+If `refreshTokenMode: RefreshTokenMode.Online` is set without `useRefreshTokens: true` and `useDpop: true`, the underlying `Auth0Client` constructor throws an `InvalidConfigurationError`:
+
+```js
+import { InvalidConfigurationError } from '@auth0/auth0-vue';
+
+try {
+  app.use(
+    createAuth0({
+      domain: '<AUTH0_DOMAIN>',
+      clientId: '<AUTH0_CLIENT_ID>',
+      refreshTokenMode: RefreshTokenMode.Online,
+      useRefreshTokens: true, // missing useDpop: true
+    })
+  );
+} catch (e) {
+  if (e instanceof InvalidConfigurationError) {
+    console.error(e.error_description); // includes the suggested fix
+  }
+}
+```
+
+### Using Online Access with MRRT
+
+Online access is compatible with Multi-Resource Refresh Tokens (MRRT): a single ORT can be exchanged for access tokens across the audiences allowed by your refresh-token policies. The ORT remains non-rotating throughout.
+
+```js
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    useRefreshTokens: true,
+    refreshTokenMode: RefreshTokenMode.Online,
+    useDpop: true,
+    useMrrt: true, // 👈
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      audience: 'https://api.example.com',
+    },
+  })
+);
+```
+
+> [!IMPORTANT]
+> In order for MRRT to work, it needs a previous configuration setting the refresh token policies.
+> Visit [configure and implement MRRT](https://auth0.com/docs/secure/tokens/refresh-tokens/multi-resource-refresh-token/configure-and-implement-multi-resource-refresh-token).
+
+If the authorization server grants fewer scopes than requested during an MRRT cross-audience exchange, `getAccessTokenSilently` throws a `MissingScopesError`. Catch it to handle downscoped responses gracefully:
+
+```js
+import { MissingScopesError } from '@auth0/auth0-vue';
+
+const { getAccessTokenSilently } = useAuth0();
+
+try {
+  const token = await getAccessTokenSilently({
+    authorizationParams: { audience: 'https://api2.example.com' }
+  });
+} catch (e) {
+  if (e instanceof MissingScopesError) {
+    // server granted fewer scopes than requested for this audience
+  }
+}
+```
 
 ## Multi-Factor Authentication (MFA)
 
