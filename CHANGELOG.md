@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.9.0](https://github.com/auth0/auth0-vue/tree/v2.9.0) (2026-07-20)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.8.0...v2.9.0)
+
+**Added**
+- feat: add support for Online Access (Online Refresh Tokens) [\#636](https://github.com/auth0/auth0-vue/pull/636) ([NandanPrabhu](https://github.com/NandanPrabhu))
+
 ## [v2.8.0](https://github.com/auth0/auth0-vue/tree/v2.8.0) (2026-07-03)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.7.0...v2.8.0)
 
