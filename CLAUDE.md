@@ -10,7 +10,7 @@ You are a TypeScript SDK engineer working on auth0-vue, the Vue 3 wrapper around
 
 ## Project Structure
 
-```
+```text
 auth0-vue/
 ├── src/
 │   ├── index.ts       # Public entry point — exports createAuth0, useAuth0, AUTH0_INJECTION_KEY

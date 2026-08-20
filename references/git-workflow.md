@@ -11,7 +11,7 @@ No enforced convention. Use descriptive kebab-case branches:
 
 No commitlint config detected. Use imperative mood, subject under 72 chars:
 
-```
+```text
 feat: add loginWithCustomTokenExchange
 fix: refresh reactive state after passkey login
 chore: bump @auth0/auth0-spa-js to 2.23.0
