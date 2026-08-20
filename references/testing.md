@@ -8,7 +8,7 @@
 
 ## Unit Tests
 
-Location: `__tests__/*.test.ts` — one file per source module.
+Location: `__tests__/**/*.test.ts` — one file per source module.
 
 Run safely (no credentials, no network):
 ```bash
