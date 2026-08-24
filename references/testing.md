@@ -43,7 +43,7 @@ jest.mock('@auth0/auth0-spa-js', () => ({
 
 ```typescript
 jest.mock('vue', () => ({
-  ...(jest.requireActual('vue') as any),
+  ...(jest.requireActual<typeof import('vue')>('vue')),
   inject: jest.fn()
 }));
 ```
