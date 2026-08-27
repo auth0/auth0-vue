@@ -1595,4 +1595,22 @@ describe('Auth0Plugin', () => {
 
     expect(appMock.config.globalProperties.$auth0.error.value).toBeFalsy();
   });
+
+  it('should pass useMrrt to Auth0Client', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: '',
+      useRefreshTokens: true,
+      useMrrt: true
+    });
+
+    plugin.install(appMock);
+
+    expect(Auth0Client).toHaveBeenCalledWith(
+      expect.objectContaining({
+        useRefreshTokens: true,
+        useMrrt: true
+      })
+    );
+  });
 });

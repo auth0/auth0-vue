@@ -12,6 +12,7 @@
 - [Organizations](#organizations)
 - [Device-bound tokens with DPoP](#device-bound-tokens-with-dpop)
 - [Online Access (Online Refresh Tokens)](#online-access-online-refresh-tokens)
+- [Multi-Resource Refresh Tokens (MRRT)](#multi-resource-refresh-tokens-mrrt)
 - [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
 - [Step-Up Authentication](#step-up-authentication)
 - [Custom Token Exchange](#custom-token-exchange)
@@ -1268,6 +1269,108 @@ try {
 }
 ```
 
+## Multi-Resource Refresh Tokens (MRRT)
+
+> [!NOTE]
+> MRRT requires `useRefreshTokens: true` and a tenant configured with [Multi-Resource Refresh Token policies](https://auth0.com/docs/secure/tokens/refresh-tokens/multi-resource-refresh-token/configure-and-implement-multi-resource-refresh-token).
+
+**Multi-Resource Refresh Tokens (MRRT)** allow a single refresh token to be exchanged for access tokens targeting different API audiences, without requiring the user to log in again. This is useful when your application needs tokens for multiple APIs that fall under the same Auth0 tenant's refresh-token policy.
+
+### Enabling MRRT
+
+Set `useMrrt: true` alongside `useRefreshTokens: true` when configuring the plugin:
+
+```js
+import { createAuth0 } from '@auth0/auth0-vue';
+
+const app = createApp(App);
+
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    useRefreshTokens: true,  // required — MRRT relies on the refresh token grant
+    useMrrt: true,           // enable MRRT
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      audience: 'https://api.example.com'  // primary API audience
+    }
+  })
+);
+
+app.mount('#app');
+```
+
+### Requesting tokens for a different audience
+
+Once MRRT is enabled, call `getAccessTokenSilently` with a different `audience`. The SDK will use the existing refresh token to obtain an access token for that audience without requiring a new login:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { getAccessTokenSilently } = useAuth0();
+
+      return {
+        fetchFromSecondApi: async () => {
+          // The SDK exchanges the existing refresh token for a token
+          // scoped to this audience — no new login required
+          const token = await getAccessTokenSilently({
+            authorizationParams: { audience: 'https://api2.example.com' }
+          });
+
+          const response = await fetch('https://api2.example.com/data', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          return response.json();
+        }
+      };
+    }
+  };
+</script>
+```
+
+### Error handling
+
+If the authorization server grants fewer scopes than requested during an MRRT cross-audience exchange, `getAccessTokenSilently` throws a `MissingScopesError`. Catch it to handle downscoped responses gracefully:
+
+```js
+import { MissingScopesError } from '@auth0/auth0-vue';
+
+const { getAccessTokenSilently } = useAuth0();
+
+try {
+  const token = await getAccessTokenSilently({
+    authorizationParams: { audience: 'https://api2.example.com' }
+  });
+} catch (e) {
+  if (e instanceof MissingScopesError) {
+    // The server granted fewer scopes than requested for this audience.
+    // Redirect the user to log in and request the missing scopes.
+  }
+}
+```
+
+Set `useRefreshTokensFallback: true` to have the SDK automatically fall back to a hidden iframe instead of throwing when scopes are missing:
+
+```js
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    useRefreshTokens: true,
+    useMrrt: true,
+    useRefreshTokensFallback: true,  // fall back to iframe on missing scopes
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      audience: 'https://api.example.com'
+    }
+  })
+);
+```
+
 ## Multi-Factor Authentication (MFA)
 
 The `mfa` property on the object returned by `useAuth0` gives access to all MFA operations. MFA flows are triggered when `getAccessTokenSilently` throws a `MfaRequiredError`.
@@ -2059,6 +2162,8 @@ The MyAccount API lets you manage the current user's authentication methods, fac
 
 ### Setup
 
+The MyAccount API uses the `https://<YOUR_AUTH0_DOMAIN>/me/` audience. If your app is also configured with a different API audience, add `useRefreshTokens: true` and `useMrrt: true` so the SDK can automatically obtain a MyAccount-scoped token via the refresh token grant without requiring a separate login.
+
 Configure your Auth0 client with the MyAccount audience and required scopes:
 
 ```js
@@ -2076,6 +2181,23 @@ app.use(
       redirect_uri: window.location.origin,
       audience: 'https://YOUR_AUTH0_DOMAIN/me/',
       scope: 'openid profile email read:me:factors read:me:authentication_methods create:me:authentication_methods update:me:authentication_methods delete:me:authentication_methods'
+    }
+  })
+);
+```
+
+If your application also calls a separate API, configure MRRT so both audiences share the same refresh token:
+
+```js
+app.use(
+  createAuth0({
+    domain: 'YOUR_AUTH0_DOMAIN',
+    clientId: 'YOUR_AUTH0_CLIENT_ID',
+    useRefreshTokens: true,
+    useMrrt: true,  // allows the refresh token to be used across multiple audiences
+    authorizationParams: {
+      redirect_uri: window.location.origin,
+      audience: 'https://api.example.com',  // your own API — MyAccount tokens are fetched automatically via MRRT
     }
   })
 );
