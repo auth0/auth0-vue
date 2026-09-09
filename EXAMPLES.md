@@ -606,6 +606,135 @@ Accept a user invitation through the SDK by creating a route within your applica
 </script>
 ```
 
+## Enterprise Connect
+
+Enterprise Connect lets a B2B SaaS layer enterprise SSO (SAML, OIDC federation) on top of its own auth server without replacing it. Auth0 acts as a relay: it authenticates the enterprise user against their IdP and returns an enriched ID token, which the SDK caches like any other login.
+
+> [!IMPORTANT]
+> Enterprise Connect is an Early Access feature. The tenant setup (entitlements, connection type, and the claims a token carries) depends on your Auth0 configuration and may change. Confirm the tenant-side requirements with your Auth0 contact. The SDK surface described here is stable.
+
+### How the flow works
+
+1. The user enters their email. Your app calls `isFederatedDomain` with the email domain to run [WebFinger](https://datatracker.ietf.org/doc/html/rfc7033) discovery.
+2. If the domain is managed by Auth0 for enterprise SSO, call `loginWithRedirect` with the email as `login_hint` so Auth0 can resolve the connection and organization. If it is not managed, fall back to your own login.
+3. The user authenticates at their identity provider and is redirected back to your callback.
+4. The plugin handles the callback automatically on install (as with a normal login). The ID token is verified and cached; read the claims with `idTokenClaims` / `user`.
+
+> [!IMPORTANT]
+> `isFederatedDomain` is a routing hint, not a security control. It returns `false` on any failure (a 429, a network error, or a genuinely unmanaged domain all look the same), so a discovery failure routes the user to your fallback login rather than granting access. It never, on its own, signs anyone in: the callback must still complete, and you must still validate the resulting claims (see [Validate the organization](#validate-the-organization)).
+
+### Configure the SDK
+
+Register the plugin as usual. Do not set `organization`: Home Realm Discovery resolves it from the `login_hint`.
+
+```js
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      scope: 'openid profile email' // no offline_access -- EC issues no refresh token
+    }
+  })
+);
+```
+
+### Login
+
+`isFederatedDomain` is a standalone export (it runs before any client session exists), so import it directly from the package. Check the email domain, then start the redirect with the email as `login_hint`:
+
+```js
+<script>
+  import { useAuth0, isFederatedDomain } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { loginWithRedirect } = useAuth0();
+
+      return {
+        login: async email => {
+          const emailDomain = email.split('@')[1];
+
+          // 1. Discover whether the domain is managed for enterprise SSO
+          const federated = await isFederatedDomain('<AUTH0_DOMAIN>', emailDomain);
+
+          if (!federated) {
+            // Domain is not managed by Auth0; fall back to your own login
+            showPasswordForm(email);
+            return;
+          }
+
+          // 2. Redirect to Auth0 with the email as login_hint. Home Realm
+          //    Discovery resolves the connection and organization from the
+          //    domain -- do not pass organization yourself, or you break
+          //    multi-customer setups.
+          await loginWithRedirect({
+            authorizationParams: { login_hint: email }
+          });
+        }
+      };
+    }
+  };
+</script>
+```
+
+### Validate the organization
+
+> [!WARNING]
+> Validate `org_id` after every login. WebFinger discovery and `login_hint` are routing mechanisms, not proof that the user belongs to a customer you serve: on their own they do not authorize anyone. Read `org_id` from the ID token claims and check it against your own list of known organizations before treating the user as signed in for that customer. Without this check, a user authenticating through any managed connection could obtain a session in a context you did not intend.
+
+```js
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+  import { watch } from 'vue';
+
+  export default {
+    setup() {
+      const { idTokenClaims, logout } = useAuth0();
+
+      // `allowedOrgs` is a placeholder for illustration -- replace it with your
+      // own list of org_id values that this app is allowed to serve.
+      const allowedOrgs = ['org_...'];
+
+      watch(idTokenClaims, claims => {
+        if (claims && !allowedOrgs.includes(claims.org_id)) {
+          logout({ logoutParams: { federated: true } });
+        }
+      });
+    }
+  };
+</script>
+```
+
+This runs in the browser, so treat it as a UX guard, not real security. Always check `org_id` server-side too. Keep the check even if you serve one org today, or you silently let in other tenants the day you add a second customer.
+
+### Logout
+
+EC logout must use `federated: true` to terminate the enterprise IdP session (SAML SLO). Without it the IdP session stays alive and the next login silently reuses the previous user:
+
+```js
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { logout } = useAuth0();
+
+      return {
+        logout: () =>
+          logout({
+            logoutParams: {
+              federated: true,
+              returnTo: window.location.origin
+            }
+          })
+      };
+    }
+  };
+</script>
+```
+
 ## Device-bound tokens with DPoP
 
 **Demonstrating Proof-of-Possession** —or simply **DPoP**— is a recent OAuth 2.0 extension defined in [RFC9449](https://datatracker.ietf.org/doc/html/rfc9449).
