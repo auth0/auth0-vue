@@ -2,15 +2,12 @@ import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 
 // The spa-js module is mocked so the re-export chain resolves without a real
 // network call. isFederatedDomain is given a controllable implementation so we
-// can drive the federated / non-federated branches of the login handoff.
+// can drive the federated / non-federated branches of discovery.
 const isFederatedDomainMock = jest.fn<any>();
-const loginWithRedirectMock = jest.fn<any>().mockResolvedValue(null);
 
 jest.mock('@auth0/auth0-spa-js', () => ({
   __esModule: true,
-  Auth0Client: jest.fn().mockImplementation(() => ({
-    loginWithRedirect: loginWithRedirectMock
-  })),
+  Auth0Client: jest.fn(),
   isFederatedDomain: (...args: unknown[]) => isFederatedDomainMock(...args)
 }));
 
@@ -21,56 +18,34 @@ describe('Enterprise Connect', () => {
     jest.clearAllMocks();
   });
 
-  it('re-exports isFederatedDomain as a callable function', () => {
-    expect(typeof isFederatedDomain).toBe('function');
-  });
-
-  it('routes the email domain through isFederatedDomain', async () => {
+  it('re-exports isFederatedDomain from the package root', async () => {
     isFederatedDomainMock.mockResolvedValue(true);
 
-    await isFederatedDomain('tenant.auth0.com', 'acme.com');
+    const federated = await isFederatedDomain('tenant.auth0.com', 'acme.com');
 
+    expect(federated).toBe(true);
     expect(isFederatedDomainMock).toHaveBeenCalledWith(
       'tenant.auth0.com',
       'acme.com'
     );
   });
 
-  it('hands off to the app fallback without login when the domain is not federated', async () => {
+  it('propagates false for an unmanaged domain', async () => {
     isFederatedDomainMock.mockResolvedValue(false);
 
-    // Mirrors the non-federated branch from the EXAMPLES.md login flow.
     const federated = await isFederatedDomain('tenant.auth0.com', 'gmail.com');
 
     expect(federated).toBe(false);
-    expect(loginWithRedirectMock).not.toHaveBeenCalled();
   });
 
-  it('forwards the email as login_hint on the federated path', async () => {
-    isFederatedDomainMock.mockResolvedValue(true);
-
-    const email = 'user@acme.com';
-    const federated = await isFederatedDomain(
-      'tenant.auth0.com',
-      email.split('@')[1]
-    );
-
-    if (federated) {
-      await loginWithRedirectMock({
-        authorizationParams: { login_hint: email }
-      });
-    }
-
-    expect(loginWithRedirectMock).toHaveBeenCalledWith({
-      authorizationParams: { login_hint: email }
-    });
-  });
-
-  it('returns false on discovery failure so the flow fails closed', async () => {
+  // spa-js fails closed: a network error, 429, or any non-ok status resolves to
+  // false rather than throwing, so discovery failures route to the fallback
+  // login instead of surfacing an error the caller must catch.
+  it('resolves false rather than rejecting when discovery fails', async () => {
     isFederatedDomainMock.mockResolvedValue(false);
 
-    const federated = await isFederatedDomain('tenant.auth0.com', 'acme.com');
-
-    expect(federated).toBe(false);
+    await expect(
+      isFederatedDomain('tenant.auth0.com', 'acme.com')
+    ).resolves.toBe(false);
   });
 });

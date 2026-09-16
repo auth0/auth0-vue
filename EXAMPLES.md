@@ -18,6 +18,7 @@
 - [Custom Token Exchange](#custom-token-exchange)
 - [Passkeys](#passkeys)
 - [MyAccount API](#myaccount-api)
+- [Enterprise Connect](#enterprise-connect)
 
 ## Add login to your application
 
