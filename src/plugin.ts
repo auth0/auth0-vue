@@ -168,15 +168,15 @@ export class Auth0Plugin implements Auth0VueClient {
   /* istanbul ignore next */
   async getAccessTokenSilently(
     options: GetTokenSilentlyOptions & { detailedResponse: true }
-  ): Promise<GetTokenSilentlyVerboseResponse>;
+  ): Promise<GetTokenSilentlyVerboseResponse | undefined>;
   /* istanbul ignore next */
   async getAccessTokenSilently(
     options?: GetTokenSilentlyOptions
-  ): Promise<string>;
+  ): Promise<string | undefined>;
   /* istanbul ignore next */
   async getAccessTokenSilently(
     options: GetTokenSilentlyOptions = {}
-  ): Promise<string | GetTokenSilentlyVerboseResponse> {
+  ): Promise<string | GetTokenSilentlyVerboseResponse | undefined> {
     deprecateRedirectUri(options);
     return this.__proxy(() => this._client.getTokenSilently(options));
   }
