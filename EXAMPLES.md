@@ -621,24 +621,32 @@ Enterprise Connect lets a B2B SaaS layer enterprise SSO (SAML, OIDC federation) 
 4. The plugin handles the callback automatically on install (as with a normal login). The ID token is verified and cached; read the claims with `idTokenClaims` / `user`.
 
 > [!IMPORTANT]
-> `isFederatedDomain` is a routing hint, not a security control. It returns `false` on any failure (a 429, a network error, or a genuinely unmanaged domain all look the same), so a discovery failure routes the user to your fallback login rather than granting access. It never, on its own, signs anyone in: the callback must still complete, and you must still validate the resulting claims (see [Validate the organization](#validate-the-organization)).
+> `isFederatedDomain` is a routing hint, not a security control. It returns `false` on any failure (a 429, a network error, or a genuinely unmanaged domain all look the same), so a discovery failure routes the user to your fallback login rather than granting access. It never, on its own, signs anyone in: the callback must still complete, and if you serve multiple customers you should validate the resulting claims (see [Validate the organization](#validate-the-organization)).
 
 ### Configure the SDK
 
-Register the plugin as usual. Do not set `organization`: Home Realm Discovery resolves it from the `login_hint`.
+Register the plugin as usual and set `enterpriseConnect: true`.
 
 ```js
 app.use(
   createAuth0({
     domain: '<AUTH0_DOMAIN>',
     clientId: '<AUTH0_CLIENT_ID>',
+    enterpriseConnect: true,
     authorizationParams: {
       redirect_uri: '<MY_CALLBACK_URL>',
       scope: 'openid profile email' // no offline_access -- EC issues no refresh token
+      // Do not set organization -- HRD resolves it from login_hint
     }
   })
 );
 ```
+
+Set `enterpriseConnect: true` to put the SDK into this mode.
+
+Enterprise Connect issues no refresh token, so the access token expires (24h by default) with no silent renewal. Plan to re-authenticate the user through the login flow when the token expires; `getAccessTokenSilently` will not refresh it.
+
+Treat Enterprise Connect as identity only: extract the ID token claims after login and issue your own application session or API tokens from them. Do not rely on the Auth0 access token for long-lived API authorization.
 
 ### Login
 
@@ -660,8 +668,8 @@ app.use(
           const federated = await isFederatedDomain('<AUTH0_DOMAIN>', emailDomain);
 
           if (!federated) {
-            // Domain is not managed by Auth0; fall back to your own login
-            showPasswordForm(email);
+            // Domain is not managed by Auth0; fall back to your own login.
+            // e.g. router.push({ name: 'login', query: { email } })
             return;
           }
 
@@ -681,8 +689,8 @@ app.use(
 
 ### Validate the organization
 
-> [!WARNING]
-> Validate `org_id` after every login. WebFinger discovery and `login_hint` are routing mechanisms, not proof that the user belongs to a customer you serve: on their own they do not authorize anyone. Read `org_id` from the ID token claims and check it against your own list of known organizations before treating the user as signed in for that customer. Without this check, a user authenticating through any managed connection could obtain a session in a context you did not intend.
+> [!NOTE]
+> We recommend validating `org_id` after the callback. WebFinger discovery and `login_hint` route the login; they do not, on their own, establish which customer the user belongs to. If your app serves multiple organizations, read `org_id` from the ID token claims and check it against your own list of known organizations. This is an application-level authorization decision, not a check the SDK enforces.
 
 ```js
 <script>
@@ -707,7 +715,7 @@ app.use(
 </script>
 ```
 
-This runs in the browser, so treat it as a UX guard, not real security. Always check `org_id` server-side too. Keep the check even if you serve one org today, or you silently let in other tenants the day you add a second customer.
+Because this runs in the browser, treat it as a routing/UX guard, not a security boundary: a user controls their own client. Enforce the real `org_id` check server-side on every API call that trusts the token. If you serve exactly one organization today, this is still a single check worth keeping: an app that skips it silently lets in users from other tenants the day it onboards a second customer.
 
 ### Logout
 
@@ -734,6 +742,8 @@ EC logout must use `federated: true` to terminate the enterprise IdP session (SA
   };
 </script>
 ```
+
+The `returnTo` URL must be registered in your application's **Allowed Logout URLs** in the Auth0 Dashboard. The SDK sends the client ID to the logout endpoint, so Auth0 validates `returnTo` against that application's list; an unregistered value fails validation rather than falling back. If you omit `returnTo`, Auth0 uses the first allowed logout URL.
 
 ## Device-bound tokens with DPoP
 
