@@ -277,7 +277,7 @@ export default {
             audience,
             scope
           }
-        }).then(function (token: string) {
+        }).then(function (token: string | undefined) {
           access_tokens.push({
             token: obfuscateToken(token),
             __raw: token
@@ -297,7 +297,7 @@ export default {
               scope
             }
           })
-          .then(function (token: string) {
+          .then(function (token: string | undefined) {
             access_tokens.push({
               token: obfuscateToken(token),
               __raw: token

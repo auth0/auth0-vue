@@ -154,14 +154,16 @@ export interface Auth0VueClient {
    */
   getAccessTokenSilently(
     options: GetTokenSilentlyOptions & { detailedResponse: true }
-  ): Promise<GetTokenSilentlyVerboseResponse>;
+  ): Promise<GetTokenSilentlyVerboseResponse | undefined>;
 
   /**
    * Fetches a new access token and returns it.
    *
    * @param options
    */
-  getAccessTokenSilently(options?: GetTokenSilentlyOptions): Promise<string>;
+  getAccessTokenSilently(
+    options?: GetTokenSilentlyOptions
+  ): Promise<string | undefined>;
 
   /**
    * ```js
