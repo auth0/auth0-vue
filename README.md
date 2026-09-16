@@ -145,6 +145,7 @@ Explore public API's available in auth0-vue.
 - [createAuth0](https://auth0.github.io/auth0-vue/functions/createAuth0.html)
 - [createAuthGuard](https://auth0.github.io/auth0-vue/functions/createAuthGuard.html)
 - [useAuth0](https://auth0.github.io/auth0-vue/functions/useAuth0.html)
+- [isFederatedDomain](https://auth0.github.io/auth0-vue/functions/isFederatedDomain.html)
 - [Auth0PluginOptions](https://auth0.github.io/auth0-vue/interfaces/Auth0PluginOptions.html)
 - [Auth0VueClientOptions](https://auth0.github.io/auth0-vue/interfaces/Auth0VueClientOptions.html)
 - [Auth0VueClient](https://auth0.github.io/auth0-vue/interfaces/Auth0VueClient.html)

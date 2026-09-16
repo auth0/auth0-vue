@@ -21,7 +21,8 @@ export {
   MyAccountApiError,
   MissingScopesError,
   InvalidConfigurationError,
-  RefreshTokenMode
+  RefreshTokenMode,
+  isFederatedDomain
 } from '@auth0/auth0-spa-js';
 
 export type {
@@ -70,5 +71,6 @@ export type {
   UpdateAuthenticationMethodRequest,
   EnrollmentChallengeOptions,
   EnrollmentChallengeResponse,
-  EnrollmentVerifyOptions
+  EnrollmentVerifyOptions,
+  IsFederatedDomainOptions
 } from '@auth0/auth0-spa-js';

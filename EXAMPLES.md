@@ -18,6 +18,7 @@
 - [Custom Token Exchange](#custom-token-exchange)
 - [Passkeys](#passkeys)
 - [MyAccount API](#myaccount-api)
+- [Enterprise Connect](#enterprise-connect)
 
 ## Add login to your application
 
@@ -605,6 +606,145 @@ Accept a user invitation through the SDK by creating a route within your applica
   };
 </script>
 ```
+
+## Enterprise Connect
+
+Enterprise Connect lets a B2B SaaS layer enterprise SSO (SAML, OIDC federation) on top of its own auth server without replacing it. Auth0 acts as a relay: it authenticates the enterprise user against their IdP and returns an enriched ID token, which the SDK caches like any other login.
+
+> [!IMPORTANT]
+> Enterprise Connect is an Early Access feature. The tenant setup (entitlements, connection type, and the claims a token carries) depends on your Auth0 configuration and may change. Confirm the tenant-side requirements with your Auth0 contact. The SDK surface described here is stable.
+
+### How the flow works
+
+1. The user enters their email. Your app calls `isFederatedDomain` with the email domain to run [WebFinger](https://datatracker.ietf.org/doc/html/rfc7033) discovery.
+2. If the domain is managed by Auth0 for enterprise SSO, call `loginWithRedirect` with the email as `login_hint` so Auth0 can resolve the connection and organization. If it is not managed, fall back to your own login.
+3. The user authenticates at their identity provider and is redirected back to your callback.
+4. The plugin handles the callback automatically on install (as with a normal login). The ID token is verified and cached; read the claims with `idTokenClaims` / `user`.
+
+> [!IMPORTANT]
+> `isFederatedDomain` is a routing hint, not a security control. It returns `false` on any failure (a 429, a network error, or a genuinely unmanaged domain all look the same), so a discovery failure routes the user to your fallback login rather than granting access. It never, on its own, signs anyone in: the callback must still complete, and if you serve multiple customers you should validate the resulting claims (see [Validate the organization](#validate-the-organization)).
+
+### Configure the SDK
+
+Register the plugin as usual and set `enterpriseConnect: true`.
+
+```js
+app.use(
+  createAuth0({
+    domain: '<AUTH0_DOMAIN>',
+    clientId: '<AUTH0_CLIENT_ID>',
+    enterpriseConnect: true,
+    authorizationParams: {
+      redirect_uri: '<MY_CALLBACK_URL>',
+      scope: 'openid profile email' // no offline_access -- EC issues no refresh token
+      // Do not set organization -- HRD resolves it from login_hint
+    }
+  })
+);
+```
+
+Set `enterpriseConnect: true` to put the SDK into this mode.
+
+Enterprise Connect issues no refresh token, so the access token expires (24h by default) with no silent renewal. Plan to re-authenticate the user through the login flow when the token expires; `getAccessTokenSilently` will not refresh it.
+
+Treat Enterprise Connect as identity only: extract the ID token claims after login and issue your own application session or API tokens from them. Do not rely on the Auth0 access token for long-lived API authorization.
+
+### Login
+
+`isFederatedDomain` is a standalone export (it runs before any client session exists), so import it directly from the package. Check the email domain, then start the redirect with the email as `login_hint`:
+
+```js
+<script>
+  import { useAuth0, isFederatedDomain } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { loginWithRedirect } = useAuth0();
+
+      return {
+        login: async email => {
+          const emailDomain = email.split('@')[1];
+
+          // 1. Discover whether the domain is managed for enterprise SSO
+          const federated = await isFederatedDomain('<AUTH0_DOMAIN>', emailDomain);
+
+          if (!federated) {
+            // Domain is not managed by Auth0; fall back to your own login.
+            // e.g. router.push({ name: 'login', query: { email } })
+            return;
+          }
+
+          // 2. Redirect to Auth0 with the email as login_hint. Home Realm
+          //    Discovery resolves the connection and organization from the
+          //    domain -- do not pass organization yourself, or you break
+          //    multi-customer setups.
+          await loginWithRedirect({
+            authorizationParams: { login_hint: email }
+          });
+        }
+      };
+    }
+  };
+</script>
+```
+
+### Validate the organization
+
+> [!NOTE]
+> We recommend validating `org_id` after the callback. WebFinger discovery and `login_hint` route the login; they do not, on their own, establish which customer the user belongs to. If your app serves multiple organizations, read `org_id` from the ID token claims and check it against your own list of known organizations. This is an application-level authorization decision, not a check the SDK enforces.
+
+```js
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+  import { watch } from 'vue';
+
+  export default {
+    setup() {
+      const { idTokenClaims, logout } = useAuth0();
+
+      // `allowedOrgs` is a placeholder for illustration -- replace it with your
+      // own list of org_id values that this app is allowed to serve.
+      const allowedOrgs = ['org_...'];
+
+      watch(idTokenClaims, claims => {
+        if (claims && !allowedOrgs.includes(claims.org_id)) {
+          logout({ logoutParams: { federated: true } });
+        }
+      });
+    }
+  };
+</script>
+```
+
+Because this runs in the browser, treat it as a routing/UX guard, not a security boundary: a user controls their own client. Enforce the real `org_id` check server-side on every API call that trusts the token. If you serve exactly one organization today, this is still a single check worth keeping: an app that skips it silently lets in users from other tenants the day it onboards a second customer.
+
+### Logout
+
+EC logout must use `federated: true` to terminate the enterprise IdP session (SAML SLO). Without it the IdP session stays alive and the next login silently reuses the previous user:
+
+```js
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { logout } = useAuth0();
+
+      return {
+        logout: () =>
+          logout({
+            logoutParams: {
+              federated: true,
+              returnTo: window.location.origin
+            }
+          })
+      };
+    }
+  };
+</script>
+```
+
+The `returnTo` URL must be registered in your application's **Allowed Logout URLs** in the Auth0 Dashboard. The SDK sends the client ID to the logout endpoint, so Auth0 validates `returnTo` against that application's list; an unregistered value fails validation rather than falling back. If you omit `returnTo`, Auth0 uses the first allowed logout URL.
 
 ## Device-bound tokens with DPoP
 
