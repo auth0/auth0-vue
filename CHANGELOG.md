@@ -1,5 +1,15 @@
 # Change Log
 
+## [v2.10.0](https://github.com/auth0/auth0-vue/tree/v2.10.0) (2026-09-17)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.9.0...v2.10.0)
+
+**Added**
+- feat: add Enterprise Connect support [\#713](https://github.com/auth0/auth0-vue/pull/713) ([gyaneshgouraw](https://github.com/gyaneshgouraw))
+- docs: Document Ephemeral Sessions limitation [\#670](https://github.com/auth0/auth0-vue/pull/670) ([NandanPrabhu](https://github.com/NandanPrabhu))
+
+**Fixed**
+- ⚠️ **BREAKING** fix: align getAccessTokenSilently return type with auth0-spa-js [\#722](https://github.com/auth0/auth0-vue/pull/722) ([gyaneshgouraw](https://github.com/gyaneshgouraw))
+
 ## [v2.9.0](https://github.com/auth0/auth0-vue/tree/v2.9.0) (2026-07-20)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.8.0...v2.9.0)
 
