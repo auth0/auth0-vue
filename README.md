@@ -136,6 +136,23 @@ Once setup returns the correct method, you can call that method from your compon
 
 </details>
 
+### Forcing an Experiment Center variant
+
+You can pass additional authorization parameters to `loginWithRedirect` (and `loginWithPopup`) via `authorizationParams`. For example, to force an [Experiment Center](https://auth0.com/docs/customize/experiment-center) variant (Early Access), pass `experiment_id`, `variation_id` and the optional `segment_id`:
+
+```js
+loginWithRedirect({
+  authorizationParams: {
+    experiment_id: 'YOUR_EXPERIMENT_ID',
+    variation_id: 'YOUR_VARIATION_ID',
+    // segment_id is optional
+    segment_id: 'YOUR_SEGMENT_ID'
+  }
+});
+```
+
+Pass these on the individual login call rather than on `createAuth0`, so they are not applied to silent token renewal. See the [Experiment Center example](https://github.com/auth0/auth0-vue/tree/main/EXAMPLES.md#experiment-center) for details.
+
 For more code samples on how to integrate the **auth0-vue** SDK in your **Vue 3** application, have a look at our [examples](https://github.com/auth0/auth0-vue/tree/main/EXAMPLES.md).
 
 ## API reference
