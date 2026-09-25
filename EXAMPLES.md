@@ -2698,7 +2698,7 @@ All MyAccount API errors throw `MyAccountApiError` with RFC 7807 fields.
 
 Experiment Center lets you A/B test your login flow. To force a specific variant - for testing or to apply a decision from a feature-flag service - pass `experiment_id` and `variation_id` via `authorizationParams`. Auth0 will use them instead of its server-side deterministic assignment. Both IDs are obtained from your Auth0 Dashboard or the Management API. You can also pass the optional `segment_id` when the experiment uses segment targeting.
 
-```js
+```html
 <script>
   import { useAuth0 } from '@auth0/auth0-vue';
 
@@ -2709,6 +2709,33 @@ Experiment Center lets you A/B test your login flow. To force a specific variant
       return {
         login: () => {
           loginWithRedirect({
+            authorizationParams: {
+              experiment_id: 'YOUR_EXPERIMENT_ID',
+              variation_id: 'YOUR_VARIATION_ID',
+              // segment_id is optional
+              segment_id: 'YOUR_SEGMENT_ID'
+            }
+          });
+        }
+      };
+    }
+  };
+</script>
+```
+
+The same params work with `loginWithPopup`:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { loginWithPopup } = useAuth0();
+
+      return {
+        login: () => {
+          loginWithPopup({
             authorizationParams: {
               experiment_id: 'YOUR_EXPERIMENT_ID',
               variation_id: 'YOUR_VARIATION_ID',

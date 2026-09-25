@@ -758,12 +758,6 @@ describe('Auth0Plugin', () => {
     );
 
     expect(loginWithRedirectMock).toHaveBeenCalledWith(loginOptions);
-    const calls = loginWithRedirectMock.mock.calls as any[];
-    const authorizationParams =
-      calls[calls.length - 1][0].authorizationParams;
-    expect(authorizationParams.experiment_id).toBe('exp_123');
-    expect(authorizationParams.variation_id).toBe('var_456');
-    expect(authorizationParams.segment_id).toBe('seg_789');
   });
 
   it('should omit segment_id when it is not provided to loginWithRedirect', async () => {
@@ -857,12 +851,6 @@ describe('Auth0Plugin', () => {
     await appMock.config.globalProperties.$auth0.loginWithPopup(loginOptions);
 
     expect(loginWithPopupMock).toHaveBeenCalledWith(loginOptions, undefined);
-    const calls = loginWithPopupMock.mock.calls as any[];
-    const authorizationParams =
-      calls[calls.length - 1][0].authorizationParams;
-    expect(authorizationParams.experiment_id).toBe('exp_123');
-    expect(authorizationParams.variation_id).toBe('var_456');
-    expect(authorizationParams.segment_id).toBe('seg_789');
   });
 
   it('should omit segment_id when it is not provided to loginWithPopup', async () => {
