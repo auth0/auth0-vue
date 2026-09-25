@@ -137,7 +137,7 @@ Once setup returns the correct method, you can call that method from your compon
 </details>
 <br>
 
-You can also force a specific [Experiment Center](https://auth0.com/docs/customize/experiment-center) variant per login by passing `experiment_id`, `variation_id`, and the optional `segment_id` in `authorizationParams` - see the [Experiment Center example](https://github.com/auth0/auth0-vue/tree/main/EXAMPLES.md#experiment-center).
+You can also force a specific [Experiment Center](https://auth0.com/docs/customize/experiment-center) variant per login by passing `experiment_id`, `variation_id`, and the optional `segment_id` in `authorizationParams` - see the [Experiment Center example](https://github.com/auth0/auth0-vue/blob/main/EXAMPLES.md#experiment-center).
 
 For more code samples on how to integrate the **auth0-vue** SDK in your **Vue 3** application, have a look at our [examples](https://github.com/auth0/auth0-vue/tree/main/EXAMPLES.md).
 
