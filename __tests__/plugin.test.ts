@@ -737,6 +737,55 @@ describe('Auth0Plugin', () => {
     });
   });
 
+  it('should forward Experiment Center params through loginWithRedirect to the authorize request', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const loginOptions = {
+      authorizationParams: {
+        experiment_id: 'exp_123',
+        variation_id: 'var_456',
+        segment_id: 'seg_789'
+      }
+    };
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.loginWithRedirect(
+      loginOptions
+    );
+
+    expect(loginWithRedirectMock).toHaveBeenCalledWith(loginOptions);
+  });
+
+  it('should omit segment_id when it is not provided to loginWithRedirect', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const loginOptions = {
+      authorizationParams: {
+        experiment_id: 'exp_123',
+        variation_id: 'var_456'
+      }
+    };
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.loginWithRedirect(
+      loginOptions
+    );
+
+    expect(loginWithRedirectMock).toHaveBeenCalledWith(loginOptions);
+    const calls = loginWithRedirectMock.mock.calls as any[];
+    expect(
+      calls[calls.length - 1][0].authorizationParams
+    ).not.toHaveProperty('segment_id');
+  });
+
   it('should proxy loginWithPopup', async () => {
     const plugin = createAuth0({
       domain: '',
@@ -781,6 +830,51 @@ describe('Auth0Plugin', () => {
       },
       undefined
     );
+  });
+
+  it('should forward Experiment Center params through loginWithPopup to the authorize request', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const loginOptions = {
+      authorizationParams: {
+        experiment_id: 'exp_123',
+        variation_id: 'var_456',
+        segment_id: 'seg_789'
+      }
+    };
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.loginWithPopup(loginOptions);
+
+    expect(loginWithPopupMock).toHaveBeenCalledWith(loginOptions, undefined);
+  });
+
+  it('should omit segment_id when it is not provided to loginWithPopup', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    const loginOptions = {
+      authorizationParams: {
+        experiment_id: 'exp_123',
+        variation_id: 'var_456'
+      }
+    };
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.loginWithPopup(loginOptions);
+
+    expect(loginWithPopupMock).toHaveBeenCalledWith(loginOptions, undefined);
+    const calls = loginWithPopupMock.mock.calls as any[];
+    expect(
+      calls[calls.length - 1][0].authorizationParams
+    ).not.toHaveProperty('segment_id');
   });
 
   it('should proxy logout', async () => {
