@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.11.0](https://github.com/auth0/auth0-vue/tree/v2.11.0) (2026-09-28)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.10.0...v2.11.0)
+
+**Added**
+- feat(experiment-center): add Experiment Center variant override support [\#731](https://github.com/auth0/auth0-vue/pull/731) ([siddhikotak](https://github.com/siddhikotak))
+
 ## [v2.10.0](https://github.com/auth0/auth0-vue/tree/v2.10.0) (2026-09-17)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.9.0...v2.10.0)
 
