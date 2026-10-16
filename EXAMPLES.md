@@ -20,6 +20,7 @@
 - [MyAccount API](#myaccount-api)
 - [Enterprise Connect](#enterprise-connect)
 - [Experiment Center](#experiment-center)
+- [Session Expiry from Upstream IdP (IPSIE)](#session-expiry-from-upstream-idp-ipsie)
 
 ## Add login to your application
 
@@ -2757,3 +2758,162 @@ The same params work with `loginWithPopup`:
 - **Production:** pass the variant decision from a feature-flag tool (e.g. LaunchDarkly) that has already decided which variant the user should see for this request.
 
 The override applies only to this request; the next login without these params reverts to normal server-side assignment.
+
+## Session Expiry from Upstream IdP (IPSIE)
+
+When using an Okta or OIDC enterprise connection configured with `id_token_session_expiry_supported: true`, Auth0 includes a `session_expiry` claim in the ID token. This is an absolute Unix timestamp (seconds) that acts as a hard ceiling on the local session — the SDK will not return tokens or a user once this point in time is reached.
+
+You can also emit the claim from a Post-Login Action:
+
+```js
+exports.onExecutePostLogin = async (event, api) => {
+  // Value must be Unix seconds, not milliseconds.
+  api.idToken.setCustomClaim('session_expiry', Math.floor(Date.now() / 1000) + 7200); // 2-hour ceiling
+};
+```
+
+### Behavior
+
+When the ceiling is reached, the reactive state returned by `useAuth0()` reflects the expired state on the next call to `getAccessTokenSilently` or `checkSession`, or on the next page load. There is no background timer or automatic re-check:
+
+- `isAuthenticated` becomes `false`
+- `user` becomes `undefined`
+- `idTokenClaims` becomes `undefined`
+- `getAccessTokenSilently()` returns `undefined` (no error thrown, `error` stays `null`)
+
+If your routes are protected with `authGuard` (or `createAuthGuard`), no code changes are required — once the state has updated, the next navigation to a protected route redirects the user to login. The guard only runs on navigation, so a user sitting on a page that makes no token calls will remain authenticated in the Vue state until the next such call.
+
+```ts
+const router = createRouter({
+  routes: [
+    {
+      path: '/profile',
+      name: 'profile',
+      component: Profile,
+      // After the ceiling, the next navigation here redirects to login.
+      beforeEnter: authGuard
+    }
+  ],
+  history: createWebHashHistory()
+});
+```
+
+To redirect the user as soon as the state changes, without waiting for a navigation, watch `isAuthenticated`:
+
+```html
+<script>
+  import { watch } from 'vue';
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+
+      // Note: this also fires after `logout({ openUrl: false })`, so skip the
+      // redirect if your app logs users out without leaving the page.
+      watch(isAuthenticated, (authenticated, wasAuthenticated) => {
+        if (wasAuthenticated && !authenticated && !isLoading.value) {
+          loginWithRedirect();
+        }
+      });
+    }
+  };
+</script>
+```
+
+### Reading the claim
+
+`session_expiry` is a standard ID token claim and is available on the reactive `idTokenClaims` property. Note that `idTokenClaims` becomes `undefined` once the ceiling is reached — this is useful for displaying time remaining before expiry, not for detecting expiry itself.
+
+```html
+<script>
+  import { computed } from 'vue';
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { idTokenClaims } = useAuth0();
+
+      const sessionCeiling = computed(() =>
+        idTokenClaims.value?.session_expiry
+          ? new Date(idTokenClaims.value.session_expiry * 1000)
+          : undefined
+      );
+
+      return {
+        sessionCeiling
+      };
+    }
+  };
+</script>
+
+<template>
+  <p v-if="sessionCeiling">
+    Your session ends at {{ sessionCeiling.toLocaleTimeString() }}
+  </p>
+</template>
+```
+
+### Upgrading existing apps
+
+Once the feature is enabled, `user` and `getAccessTokenSilently()` can return `undefined` for a previously authenticated user when the ceiling is reached. Apps that assume these are always set after login should add null checks:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { getAccessTokenSilently } = useAuth0();
+
+      return {
+        fetchData: async () => {
+          const token = await getAccessTokenSilently();
+
+          if (!token) {
+            // Ceiling was reached — return here and let your route guard or
+            // `isAuthenticated` watcher handle the redirect.
+            // Calling loginWithRedirect() here as well risks a double redirect.
+            return;
+          }
+
+          await fetch('/api/data', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        }
+      };
+    }
+  };
+</script>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<script>
+  export default {
+    methods: {
+      async fetchData() {
+        const token = await this.$auth0.getAccessTokenSilently();
+
+        if (!token) {
+          return;
+        }
+
+        await fetch('/api/data', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
+Using `authGuard` on protected routes is the simpler alternative — the redirect happens on the next navigation without the null check.
