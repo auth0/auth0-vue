@@ -1,7 +1,12 @@
 import { Auth0Client } from '@auth0/auth0-spa-js';
 import { App, inject } from 'vue';
 import { Router } from 'vue-router';
-import { AUTH0_INJECTION_KEY, createAuth0, useAuth0 } from '../src/index';
+import {
+  AUTH0_INJECTION_KEY,
+  createAuth0,
+  createAuthGuard,
+  useAuth0
+} from '../src/index';
 import {
   afterEach,
   beforeEach,
@@ -1706,5 +1711,102 @@ describe('Auth0Plugin', () => {
         useMrrt: true
       })
     );
+  });
+
+  describe('session_expiry ceiling (IPSIE SL1)', () => {
+    const userMock = { sub: '__test_user__', name: 'Test User' };
+    const sessionExpiry = Math.floor(Date.now() / 1000) + 120;
+    const claimsMock = { __raw: '__raw__', session_expiry: sessionExpiry };
+
+    function expireSession() {
+      getTokenSilentlyMock.mockResolvedValue(undefined);
+      isAuthenticatedMock.mockResolvedValue(false);
+      getUserMock.mockResolvedValue(undefined);
+      getIdTokenClaimsMock.mockResolvedValue(undefined);
+    }
+
+    beforeEach(() => {
+      isAuthenticatedMock.mockResolvedValue(true);
+      getUserMock.mockResolvedValue(userMock);
+      getIdTokenClaimsMock.mockResolvedValue(claimsMock);
+      getTokenSilentlyMock.mockResolvedValue('__test_access_token__');
+    });
+
+    it('should expose the session_expiry claim before the ceiling is reached', async () => {
+      const plugin = createAuth0({
+        domain: '',
+        clientId: ''
+      });
+
+      plugin.install(appMock);
+      await flushPromises();
+
+      const token =
+        await appMock.config.globalProperties.$auth0.getAccessTokenSilently();
+
+      expect(token).toBe('__test_access_token__');
+      expect(
+        appMock.config.globalProperties.$auth0.isAuthenticated.value
+      ).toBe(true);
+      expect(
+        appMock.config.globalProperties.$auth0.idTokenClaims.value
+          ?.session_expiry
+      ).toBe(sessionExpiry);
+    });
+
+    it('should return undefined and clear auth state when getTokenSilently returns undefined', async () => {
+      const plugin = createAuth0({
+        domain: '',
+        clientId: ''
+      });
+
+      plugin.install(appMock);
+      await flushPromises();
+
+      expect(
+        appMock.config.globalProperties.$auth0.isAuthenticated.value
+      ).toBe(true);
+
+      expireSession();
+
+      const token =
+        await appMock.config.globalProperties.$auth0.getAccessTokenSilently();
+
+      expect(getTokenSilentlyMock).toHaveBeenCalled();
+      expect(token).toBeUndefined();
+      expect(
+        appMock.config.globalProperties.$auth0.isAuthenticated.value
+      ).toBe(false);
+      expect(appMock.config.globalProperties.$auth0.user.value).toBeUndefined();
+      expect(
+        appMock.config.globalProperties.$auth0.idTokenClaims.value
+      ).toBeUndefined();
+      expect(appMock.config.globalProperties.$auth0.error.value).toBeNull();
+    });
+
+    it('should redirect to login from the auth guard once the ceiling is reached', async () => {
+      const plugin = createAuth0({
+        domain: '',
+        clientId: ''
+      });
+
+      plugin.install(appMock);
+      await flushPromises();
+
+      const guard = createAuthGuard(appMock);
+
+      expect(await guard({ fullPath: '/profile' } as any)).toBe(true);
+      expect(loginWithRedirectMock).not.toHaveBeenCalled();
+
+      expireSession();
+      await appMock.config.globalProperties.$auth0.getAccessTokenSilently();
+
+      expect(await guard({ fullPath: '/profile' } as any)).toBe(false);
+      expect(loginWithRedirectMock).toHaveBeenCalledWith({
+        appState: {
+          target: '/profile'
+        }
+      });
+    });
   });
 });
