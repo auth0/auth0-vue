@@ -348,10 +348,26 @@ export interface Auth0VueClient {
    *
    * - `signup(options)` — register a new user and create a passkey credential
    * - `login(options?)` — authenticate an existing user via passkey assertion
+   * - `continueSignup(verification)` — finish a `signup()` that stopped for
+   *   identifier verification, passing the OTP codes the user entered
+   * - `getSignupChallenge(options)` / `getLoginChallenge(options?)` /
+   *   `getTokenWithPasskey(options)` — granular APIs for running the WebAuthn
+   *   ceremony yourself
    *
-   * Both methods handle the full WebAuthn flow internally (challenge → browser
-   * credential ceremony → token exchange) and automatically update
+   * `signup()` and `login()` handle the full WebAuthn flow internally (challenge →
+   * browser credential ceremony → token exchange). `signup()`, `login()`,
+   * `continueSignup()`, and `getTokenWithPasskey()` automatically update
    * `isAuthenticated`, `user`, and `idTokenClaims` on completion.
+   *
+   * **Identifier verification:** when the connection requires users to verify
+   * their email or phone with a one-time code, `signup()` throws
+   * `PasskeyVerificationRequiredError` before the passkey prompt. Collect a code
+   * for each identifier in `error.verificationRequired` and call
+   * `continueSignup(codes)`. A wrong code throws a `PasskeyGetTokenError` with
+   * `isRetryable: true`; call `continueSignup()` again with new codes (the same
+   * passkey is reused). With the granular APIs, check
+   * `challenge.verificationRequired` and pass the codes as `verification` to
+   * `getTokenWithPasskey()`.
    *
    * **Note:** Errors thrown by `passkey` methods are captured in the `error`
    * ref. You can also wrap calls in a `try/catch` to handle typed passkey

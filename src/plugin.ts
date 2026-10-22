@@ -29,6 +29,9 @@ import type {
   PasskeyApiClient,
   PasskeySignupOptions,
   PasskeyLoginOptions,
+  PasskeySignupChallengeOptions,
+  PasskeyLoginChallengeOptions,
+  PasskeyGetTokenOptions,
   MyAccountApiClient
 } from '@auth0/auth0-spa-js';
 import { Auth0Client, User } from '@auth0/auth0-spa-js';
@@ -73,7 +76,11 @@ const PLUGIN_NOT_INSTALLED_CLIENT: Auth0VueClient = {
   } as unknown as MfaApiClient,
   passkey: {
     signup: PLUGIN_NOT_INSTALLED_HANDLER,
-    login: PLUGIN_NOT_INSTALLED_HANDLER
+    login: PLUGIN_NOT_INSTALLED_HANDLER,
+    continueSignup: PLUGIN_NOT_INSTALLED_HANDLER,
+    getSignupChallenge: PLUGIN_NOT_INSTALLED_HANDLER,
+    getLoginChallenge: PLUGIN_NOT_INSTALLED_HANDLER,
+    getTokenWithPasskey: PLUGIN_NOT_INSTALLED_HANDLER
   } as unknown as PasskeyApiClient,
   myAccount: {
     getFactors: PLUGIN_NOT_INSTALLED_HANDLER,
@@ -132,7 +139,15 @@ export class Auth0Plugin implements Auth0VueClient {
     const passkeyClient = this._client.passkey;
     this.passkey = {
       signup: (options: PasskeySignupOptions) => this.__proxy(() => passkeyClient.signup(options)),
-      login: (options?: PasskeyLoginOptions) => this.__proxy(() => passkeyClient.login(options))
+      login: (options?: PasskeyLoginOptions) => this.__proxy(() => passkeyClient.login(options)),
+      continueSignup: (verification: { email?: string; phone?: string }) =>
+        this.__proxy(() => passkeyClient.continueSignup(verification)),
+      getSignupChallenge: (options: PasskeySignupChallengeOptions) =>
+        this.__proxy(() => passkeyClient.getSignupChallenge(options), false),
+      getLoginChallenge: (options?: PasskeyLoginChallengeOptions) =>
+        this.__proxy(() => passkeyClient.getLoginChallenge(options), false),
+      getTokenWithPasskey: (options: PasskeyGetTokenOptions) =>
+        this.__proxy(() => passkeyClient.getTokenWithPasskey(options))
     } as unknown as PasskeyApiClient;
 
     this.__checkSession(app.config.globalProperties.$router);

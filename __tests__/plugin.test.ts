@@ -128,6 +128,24 @@ describe('Client', () => {
     );
   });
 
+  it('logs console error when passkey identifier verification methods are called before installing the plugin', async () => {
+    const spy = jest.spyOn(console, 'error');
+    spy.mockClear();
+
+    await client.value.passkey.continueSignup({ email: '123456' });
+    await client.value.passkey.getSignupChallenge({ email: 'user@example.com' });
+    await client.value.passkey.getLoginChallenge();
+    await client.value.passkey.getTokenWithPasskey({
+      authSession: 'auth-session',
+      credential: {} as PublicKeyCredential
+    });
+
+    expect(spy).toHaveBeenCalledTimes(4);
+    expect(spy).toHaveBeenCalledWith(
+      `Please ensure Auth0's Vue plugin is correctly installed.`
+    );
+  });
+
   it('logs console error when myAccount methods are called before installing the plugin', async () => {
     const spy = jest.spyOn(console, 'error');
 
