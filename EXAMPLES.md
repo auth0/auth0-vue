@@ -2251,6 +2251,7 @@ The SDK supports this in both signup flows. The codes are collected **before** t
           // The first call shows the passkey prompt. Retries reuse the same passkey
           await passkey.continueSignup(verification);
           verificationRequired.value = [];
+          errorMessage.value = '';
           // isAuthenticated and user are now updated automatically
         } catch (error) {
           if (error instanceof PasskeyGetTokenError && error.isRetryable) {
