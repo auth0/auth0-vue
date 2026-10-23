@@ -1987,10 +1987,12 @@ Passkeys provide password-less authentication using platform biometrics (Face ID
 - **Signup**: Register a new user with a passkey
 - **Login**: Authenticate an existing user with a passkey
 
-- [Setup](#setup-1)
+- [Setup](#setup-2)
 - [Important: Use Refresh Tokens with Passkeys](#important-use-refresh-tokens-with-passkeys)
 - [Signup with Passkey](#signup-with-passkey)
 - [Login with Passkey](#login-with-passkey)
+- [Granular Passkey APIs](#granular-passkey-apis)
+- [Identifier Verification](#identifier-verification)
 - [Complete Passkey Flow Example](#complete-passkey-flow-example)
 - [Passkey Error Handling](#passkey-error-handling)
 
@@ -2083,6 +2085,7 @@ All supported options:
           // Context — optional
           realm: 'Username-Password-Authentication', // database connection name
           organization: 'org_abc123',
+          deliveryMethod: 'text', // 'text' (SMS) or 'voice' — phone OTP channel, see Identifier Verification
 
           // Token control — optional
           scope: 'openid profile email read:products',
@@ -2120,7 +2123,243 @@ Authenticate an existing user with their registered passkey. A single call handl
 </script>
 ```
 
+### Granular Passkey APIs
+
+If you need control over the WebAuthn ceremony (for example, to show your own UI between steps), use the granular APIs. Get a challenge, run `navigator.credentials.create()` or `navigator.credentials.get()` yourself, then exchange the credential for tokens with `getTokenWithPasskey()`.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey } = useAuth0();
+
+      const granularSignup = async () => {
+        const challenge = await passkey.getSignupChallenge({ email: 'user@example.com' });
+
+        const credential = await navigator.credentials.create({
+          publicKey: challenge.publicKey
+        });
+
+        if (!credential) {
+          throw new Error('Credential creation cancelled');
+        }
+
+        await passkey.getTokenWithPasskey({
+          authSession: challenge.authSession,
+          credential
+        });
+      };
+
+      const granularLogin = async () => {
+        const challenge = await passkey.getLoginChallenge();
+
+        const credential = await navigator.credentials.get({
+          publicKey: challenge.publicKey
+        });
+
+        if (!credential) {
+          throw new Error('Credential request cancelled');
+        }
+
+        await passkey.getTokenWithPasskey({
+          authSession: challenge.authSession,
+          credential
+        });
+      };
+
+      return { granularSignup, granularLogin };
+    }
+  };
+</script>
+```
+
+> [!NOTE]
+> `getTokenWithPasskey()` updates `isAuthenticated`, `user`, and `idTokenClaims` just like `signup()` and `login()`. `getSignupChallenge()` and `getLoginChallenge()` do not change the auth state.
+
+### Identifier Verification
+
+Your database connection can ask new users to verify their email or phone number with a one-time code (OTP) during passkey signup. This is off by default and is turned on from the server side. When it's on, the server sends the codes and gives tokens only after they are correct.
+
+The SDK supports this in both signup flows. The codes are collected **before** the passkey prompt, and the user sees the passkey prompt only once, even if they type a wrong code.
+
+#### With `signup()`
+
+`signup()` stops before the passkey prompt and throws `PasskeyVerificationRequiredError`. Ask the user for a code for each identifier in `error.verificationRequired`, then call `continueSignup()`:
+
+```html
+<template>
+  <form v-if="!verificationRequired.length" @submit.prevent="startSignup">
+    <input v-model="email" type="email" placeholder="Email" required />
+    <button type="submit">Sign up with Passkey</button>
+  </form>
+  <form v-else @submit.prevent="submitCodes">
+    <label v-for="identifier in verificationRequired" :key="identifier">
+      Code sent to your {{ identifier }}
+      <input
+        v-model="codes[identifier]"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        required
+      />
+    </label>
+    <button type="submit">Verify and create passkey</button>
+  </form>
+  <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+</template>
+
+<script>
+  import { reactive, ref } from 'vue';
+  import {
+    useAuth0,
+    PasskeyVerificationRequiredError,
+    PasskeyGetTokenError,
+    PasskeyError
+  } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey } = useAuth0();
+      const email = ref('');
+      const verificationRequired = ref([]);
+      const codes = reactive({});
+      const errorMessage = ref('');
+
+      const startSignup = async () => {
+        errorMessage.value = '';
+        try {
+          await passkey.signup({ email: email.value });
+          // No verification needed: the user is now signed in
+        } catch (error) {
+          if (error instanceof PasskeyVerificationRequiredError) {
+            // Stopped before the passkey prompt
+            verificationRequired.value = error.verificationRequired; // e.g. ['email']
+          } else {
+            errorMessage.value = error.message;
+          }
+        }
+      };
+
+      const submitCodes = async () => {
+        // Send codes only for the identifiers that are still required
+        const verification = Object.fromEntries(
+          verificationRequired.value.map(identifier => [identifier, codes[identifier]])
+        );
+
+        try {
+          // The first call shows the passkey prompt. Retries reuse the same passkey
+          await passkey.continueSignup(verification);
+          verificationRequired.value = [];
+          errorMessage.value = '';
+          // isAuthenticated and user are now updated automatically
+        } catch (error) {
+          if (error instanceof PasskeyGetTokenError && error.isRetryable) {
+            // Wrong code, session still active. Ask again for these identifiers only
+            verificationRequired.value = error.verificationRequired;
+            verificationRequired.value.forEach(identifier => (codes[identifier] = ''));
+            errorMessage.value = 'That code is not correct. Please try again.';
+          } else if (
+            error instanceof PasskeyError &&
+            error.code === 'missing_verification_code'
+          ) {
+            // Nothing was sent and the pending signup is kept. Keep the form open
+            errorMessage.value = 'Enter a code for each field.';
+          } else {
+            verificationRequired.value = [];
+            errorMessage.value = 'Signup could not be completed. Please start again.';
+          }
+        }
+      };
+
+      return { email, verificationRequired, codes, errorMessage, startSignup, submitCodes };
+    }
+  };
+</script>
+```
+
+> [!NOTE]
+> The pending signup is kept in memory only. If the page reloads, `continueSignup()` throws a `PasskeyError` with code `no_pending_signup`. Call `signup()` again to start over.
+
+> [!NOTE]
+> Like other passkey errors, `PasskeyVerificationRequiredError` is also captured in the `error` ref returned by `useAuth0()`. If your app shows `error` globally, skip this error there. The `error` ref is cleared once `continueSignup()` succeeds.
+
+#### With the granular APIs
+
+Check `verificationRequired` on the challenge and collect the codes **before** calling `navigator.credentials.create()`. Pass them as `verification` to `getTokenWithPasskey()`. On a retry, send the **same** `credential` with `error.authSession` and new codes for `error.verificationRequired`:
+
+```html
+<script>
+  import { useAuth0, PasskeyGetTokenError } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { passkey } = useAuth0();
+
+      const granularSignupWithVerification = async email => {
+        const challenge = await passkey.getSignupChallenge({ email });
+
+        // Collect codes first, so the passkey prompt shows only once
+        let codes = challenge.verificationRequired
+          ? await askUserForCodes(challenge.verificationRequired) // your UI, e.g. { email: '123456' }
+          : undefined;
+
+        const credential = await navigator.credentials.create({
+          publicKey: challenge.publicKey
+        });
+
+        if (!credential) {
+          throw new Error('Credential creation cancelled');
+        }
+
+        let authSession = challenge.authSession;
+        // The server limits the attempts. Retry only while the error is retryable
+        for (;;) {
+          try {
+            return await passkey.getTokenWithPasskey({
+              authSession,
+              credential, // same credential on every retry
+              verification: codes
+            });
+          } catch (error) {
+            if (!(error instanceof PasskeyGetTokenError && error.isRetryable)) {
+              throw error;
+            }
+            authSession = error.authSession;
+            codes = await askUserForCodes(error.verificationRequired);
+          }
+        }
+      };
+
+      return { granularSignupWithVerification };
+    }
+  };
+</script>
+```
+
+#### Which errors can be retried
+
+| Error | Retry? | What to do |
+|---|---|---|
+| `PasskeyGetTokenError` with `isRetryable: true` (wrong code, session still active) | Yes | The error has `code`, `authSession` and `verificationRequired`. Ask for new codes for `error.verificationRequired`. With the granular APIs, also pass `error.authSession` and the same `credential` |
+| `PasskeyError` with code `missing_verification_code` (a code is missing or empty) | Yes | Call the same method again with a code for each identifier. Nothing was sent, so the session is still active |
+| `MfaRequiredError` | No | Finish with MFA using `error.mfa_token`. See [Multi-Factor Authentication](#multi-factor-authentication-mfa) |
+| Any other error, for example an expired code or session, or a `PasskeyGetTokenError` with `isRetryable: false` | No | Start the signup again with `signup()` |
+
+
+The server decides how many attempts are allowed. A wrong code is retryable only while the error response includes an auth session (`isRetryable: true`). When the attempts run out, the error is no longer retryable, so start the signup again.
+
+#### Phone delivery method
+
+For phone verification, pass `deliveryMethod: 'text'` (SMS) or `'voice'` to `signup()` or `getSignupChallenge()` to choose how the code is sent.
+
+```js
+await passkey.signup({ phoneNumber: '+14155550100', deliveryMethod: 'voice' });
+```
+
 ### Complete Passkey Flow Example
+
+If the connection requires identifier verification, `signup()` throws `PasskeyVerificationRequiredError` (it is not a `PasskeyError`). Handle it as shown in [Identifier Verification](#identifier-verification).
 
 ```html
 <template>
@@ -2136,7 +2375,12 @@ Authenticate an existing user with their registered passkey. A single call handl
 
 <script>
   import { ref } from 'vue';
-  import { useAuth0, PasskeyError, PasskeyRegisterError } from '@auth0/auth0-vue';
+  import {
+    useAuth0,
+    PasskeyError,
+    PasskeyRegisterError,
+    PasskeyVerificationRequiredError
+  } from '@auth0/auth0-vue';
 
   export default {
     setup() {
@@ -2148,7 +2392,10 @@ Authenticate an existing user with their registered passkey. A single call handl
           await passkey.signup({ email: 'user@example.com' });
           // isAuthenticated and user are now updated automatically
         } catch (error) {
-          if (error instanceof PasskeyRegisterError) {
+          if (error instanceof PasskeyVerificationRequiredError) {
+            // Collect codes for error.verificationRequired and call
+            // passkey.continueSignup(). See Identifier Verification
+          } else if (error instanceof PasskeyRegisterError) {
             errorMessage.value = `Registration failed: ${error.message}`;
           } else if (error instanceof PasskeyError) {
             errorMessage.value = `Passkey error: ${error.message}`;
@@ -2178,7 +2425,11 @@ Authenticate an existing user with their registered passkey. A single call handl
 
 ```html
 <script>
-  import { PasskeyError, PasskeyRegisterError } from '@auth0/auth0-vue';
+  import {
+    PasskeyError,
+    PasskeyRegisterError,
+    PasskeyVerificationRequiredError
+  } from '@auth0/auth0-vue';
 
   export default {
     data() {
@@ -2189,7 +2440,10 @@ Authenticate an existing user with their registered passkey. A single call handl
         try {
           await this.$auth0.passkey.signup({ email: 'user@example.com' });
         } catch (error) {
-          if (error instanceof PasskeyRegisterError) {
+          if (error instanceof PasskeyVerificationRequiredError) {
+            // Collect codes for error.verificationRequired and call
+            // this.$auth0.passkey.continueSignup(). See Identifier Verification
+          } else if (error instanceof PasskeyRegisterError) {
             this.errorMessage = `Registration failed: ${error.message}`;
           } else if (error instanceof PasskeyError) {
             this.errorMessage = `Passkey error: ${error.message}`;
@@ -2214,7 +2468,7 @@ Authenticate an existing user with their registered passkey. A single call handl
 
 ### Passkey Error Handling
 
-Both `signup()` and `login()` throw typed errors for precise error handling:
+All passkey methods throw typed errors for precise error handling:
 
 ```html
 <script>
@@ -2289,6 +2543,22 @@ If your tenant requires MFA after a passkey login, `passkey.login()` will throw 
 ```
 
 > **Tip:** Both `signup()` and `login()` throw an error if the user cancels the biometric prompt. Wrap calls in `try/catch` to handle cancellation, network failures, or misconfigured connections.
+
+When identifier verification is required and the user enters a wrong code, `continueSignup()` and `getTokenWithPasskey()` throw a `PasskeyGetTokenError` with `isRetryable: true`. Collect new codes for `error.verificationRequired` and call `continueSignup()` again (the same passkey is reused), or call `getTokenWithPasskey()` again with `error.authSession` and the same `credential`. See [Identifier Verification](#identifier-verification). Other token exchange failures are thrown as before (or an `MfaRequiredError` for `mfa_required`).
+
+```js
+import { PasskeyGetTokenError } from '@auth0/auth0-vue';
+
+try {
+  await passkey.continueSignup(codes);
+} catch (error) {
+  if (error instanceof PasskeyGetTokenError && error.isRetryable) {
+    // Wrong code, session still active. Ask again for error.verificationRequired
+  } else {
+    throw error;
+  }
+}
+```
 
 ## MyAccount API
 
