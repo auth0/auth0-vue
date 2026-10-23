@@ -623,8 +623,7 @@ Enterprise Connect lets a B2B SaaS layer enterprise SSO (SAML, OIDC federation) 
 3. The user authenticates at their identity provider and is redirected back to your callback.
 4. The plugin handles the callback automatically on install (as with a normal login). The ID token is verified and cached; read the claims with `idTokenClaims` / `user`.
 
-> [!IMPORTANT]
-> `isFederatedDomain` is a routing hint, not a security control. It returns `false` on any failure (a 429, a network error, or a genuinely unmanaged domain all look the same), so a discovery failure routes the user to your fallback login rather than granting access. It never, on its own, signs anyone in: the callback must still complete, and if you serve multiple customers you should validate the resulting claims (see [Validate the organization](#validate-the-organization)).
+> [!IMPORTANT] > `isFederatedDomain` is a routing hint, not a security control. It returns `false` on any failure (a 429, a network error, or a genuinely unmanaged domain all look the same), so a discovery failure routes the user to your fallback login rather than granting access. It never, on its own, signs anyone in: the callback must still complete, and if you serve multiple customers you should validate the resulting claims (see [Validate the organization](#validate-the-organization)).
 
 ### Configure the SDK
 
@@ -784,8 +783,8 @@ app.use(
     clientId: '<AUTH0_CLIENT_ID>',
     useDpop: true, // 👈
     authorizationParams: {
-      redirect_uri: '<MY_CALLBACK_URL>',
-    },
+      redirect_uri: '<MY_CALLBACK_URL>'
+    }
   })
 );
 
@@ -834,7 +833,7 @@ For example, if you had this code:
 ```js
 const response = await fetch('https://api.example.com/foo', {
   method: 'GET',
-  headers: { 'user-agent': 'My Client 1.0' },
+  headers: { 'user-agent': 'My Client 1.0' }
 });
 
 console.log(response.status);
@@ -855,20 +854,23 @@ You would change it as follows:
       return {
         fetchData: async () => {
           const fetcher = createFetcher({
-            dpopNonceId: 'my_api_request',
+            dpopNonceId: 'my_api_request'
           });
 
-          const response = await fetcher.fetchWithAuth('https://api.example.com/foo', {
-            method: 'GET',
-            headers: { 'user-agent': 'My Client 1.0' },
-          });
+          const response = await fetcher.fetchWithAuth(
+            'https://api.example.com/foo',
+            {
+              method: 'GET',
+              headers: { 'user-agent': 'My Client 1.0' }
+            }
+          );
 
           console.log(response.status);
           console.log(response.headers);
           console.log(await response.json());
-        },
+        }
       };
-    },
+    }
   };
 </script>
 ```
@@ -882,19 +884,22 @@ You would change it as follows:
     methods: {
       async fetchData() {
         const fetcher = this.$auth0.createFetcher({
-          dpopNonceId: 'my_api_request',
+          dpopNonceId: 'my_api_request'
         });
 
-        const response = await fetcher.fetchWithAuth('https://api.example.com/foo', {
-          method: 'GET',
-          headers: { 'user-agent': 'My Client 1.0' },
-        });
+        const response = await fetcher.fetchWithAuth(
+          'https://api.example.com/foo',
+          {
+            method: 'GET',
+            headers: { 'user-agent': 'My Client 1.0' }
+          }
+        );
 
         console.log(response.status);
         console.log(response.headers);
         console.log(await response.json());
-      },
-    },
+      }
+    }
   };
 </script>
 ```
@@ -938,7 +943,7 @@ If you need to make requests to different endpoints of the same API, passing a `
 
       const fetcher = createFetcher({
         dpopNonceId: 'my-api',
-        baseUrl: 'https://api.example.com',
+        baseUrl: 'https://api.example.com'
       });
 
       return {
@@ -947,9 +952,10 @@ If you need to make requests to different endpoints of the same API, passing a `
         getXyz: async () => fetcher.fetchWithAuth('/xyz'), // => https://api.example.com/xyz
 
         // If the passed URL is absolute, `baseUrl` will be ignored for convenience:
-        getFromOtherApi: async () => fetcher.fetchWithAuth('https://other-api.example.com/foo'),
+        getFromOtherApi: async () =>
+          fetcher.fetchWithAuth('https://other-api.example.com/foo')
       };
-    },
+    }
   };
 </script>
 ```
@@ -964,8 +970,8 @@ If you need to make requests to different endpoints of the same API, passing a `
       return {
         fetcher: this.$auth0.createFetcher({
           dpopNonceId: 'my-api',
-          baseUrl: 'https://api.example.com',
-        }),
+          baseUrl: 'https://api.example.com'
+        })
       };
     },
     methods: {
@@ -981,8 +987,8 @@ If you need to make requests to different endpoints of the same API, passing a `
       async getFromOtherApi() {
         // If the passed URL is absolute, `baseUrl` will be ignored for convenience:
         return this.fetcher.fetchWithAuth('https://other-api.example.com/foo');
-      },
-    },
+      }
+    }
   };
 </script>
 ```
@@ -1004,12 +1010,12 @@ When working with multiple APIs, create separate fetchers for each. Each fetcher
       // Create separate fetchers for different APIs
       const internalApi = createFetcher({
         dpopNonceId: 'internal-api',
-        baseUrl: 'https://internal.example.com',
+        baseUrl: 'https://internal.example.com'
       });
 
       const partnerApi = createFetcher({
         dpopNonceId: 'partner-api',
-        baseUrl: 'https://partner.example.com',
+        baseUrl: 'https://partner.example.com'
       });
 
       return {
@@ -1024,15 +1030,15 @@ When working with multiple APIs, create separate fetchers for each. Each fetcher
         fetchAllData: async () => {
           const [internal, partner] = await Promise.all([
             internalApi.fetchWithAuth('/data'),
-            partnerApi.fetchWithAuth('/resources'),
+            partnerApi.fetchWithAuth('/resources')
           ]);
           return {
             internal: await internal.json(),
-            partner: await partner.json(),
+            partner: await partner.json()
           };
-        },
+        }
       };
-    },
+    }
   };
 </script>
 ```
@@ -1047,12 +1053,12 @@ When working with multiple APIs, create separate fetchers for each. Each fetcher
       return {
         internalApi: this.$auth0.createFetcher({
           dpopNonceId: 'internal-api',
-          baseUrl: 'https://internal.example.com',
+          baseUrl: 'https://internal.example.com'
         }),
         partnerApi: this.$auth0.createFetcher({
           dpopNonceId: 'partner-api',
-          baseUrl: 'https://partner.example.com',
-        }),
+          baseUrl: 'https://partner.example.com'
+        })
       };
     },
     methods: {
@@ -1067,14 +1073,14 @@ When working with multiple APIs, create separate fetchers for each. Each fetcher
       async fetchAllData() {
         const [internal, partner] = await Promise.all([
           this.internalApi.fetchWithAuth('/data'),
-          this.partnerApi.fetchWithAuth('/resources'),
+          this.partnerApi.fetchWithAuth('/resources')
         ]);
         return {
           internal: await internal.json(),
-          partner: await partner.json(),
+          partner: await partner.json()
         };
-      },
-    },
+      }
+    }
   };
 </script>
 ```
@@ -1095,17 +1101,17 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
 
       const fetcher = createFetcher({
         dpopNonceId: 'my-api',
-        baseUrl: 'https://api.example.com',
+        baseUrl: 'https://api.example.com'
       });
 
       return {
-        createPost: async (postData) => {
+        createPost: async postData => {
           const response = await fetcher.fetchWithAuth('/posts', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json'
             },
-            body: JSON.stringify(postData),
+            body: JSON.stringify(postData)
           });
           return response.json();
         },
@@ -1113,19 +1119,19 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
           const response = await fetcher.fetchWithAuth(`/posts/${postId}`, {
             method: 'PUT',
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json'
             },
-            body: JSON.stringify(postData),
+            body: JSON.stringify(postData)
           });
           return response.json();
         },
-        deletePost: async (postId) => {
+        deletePost: async postId => {
           await fetcher.fetchWithAuth(`/posts/${postId}`, {
-            method: 'DELETE',
+            method: 'DELETE'
           });
-        },
+        }
       };
-    },
+    }
   };
 </script>
 ```
@@ -1140,8 +1146,8 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
       return {
         fetcher: this.$auth0.createFetcher({
           dpopNonceId: 'my-api',
-          baseUrl: 'https://api.example.com',
-        }),
+          baseUrl: 'https://api.example.com'
+        })
       };
     },
     methods: {
@@ -1149,9 +1155,9 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
         const response = await this.fetcher.fetchWithAuth('/posts', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify(postData),
+          body: JSON.stringify(postData)
         });
         return response.json();
       },
@@ -1159,18 +1165,18 @@ The fetcher supports all HTTP methods and automatically includes DPoP proofs:
         const response = await this.fetcher.fetchWithAuth(`/posts/${postId}`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify(postData),
+          body: JSON.stringify(postData)
         });
         return response.json();
       },
       async deletePost(postId) {
         await this.fetcher.fetchWithAuth(`/posts/${postId}`, {
-          method: 'DELETE',
+          method: 'DELETE'
         });
-      },
-    },
+      }
+    }
   };
 </script>
 ```
@@ -1187,7 +1193,12 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
 
   export default {
     setup() {
-      const { getAccessTokenSilently, getDpopNonce, setDpopNonce, generateDpopProof } = useAuth0();
+      const {
+        getAccessTokenSilently,
+        getDpopNonce,
+        setDpopNonce,
+        generateDpopProof
+      } = useAuth0();
 
       return {
         manualDpopRequest: async () => {
@@ -1203,7 +1214,7 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
               url: 'https://api.example.com/data',
               method: 'POST',
               accessToken: token,
-              nonce,
+              nonce
             });
 
             // 4. Make request with DPoP headers
@@ -1212,9 +1223,9 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
               headers: {
                 Authorization: `DPoP ${token}`,
                 DPoP: proof,
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ data: 'example' }),
+              body: JSON.stringify({ data: 'example' })
             });
 
             // 5. Update nonce if server provides a new one
@@ -1230,9 +1241,9 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
             }
             throw error;
           }
-        },
+        }
       };
-    },
+    }
   };
 </script>
 ```
@@ -1259,7 +1270,7 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
             url: 'https://api.example.com/data',
             method: 'POST',
             accessToken: token,
-            nonce,
+            nonce
           });
 
           // 4. Make request with DPoP headers
@@ -1268,9 +1279,9 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
             headers: {
               Authorization: `DPoP ${token}`,
               DPoP: proof,
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ data: 'example' }),
+            body: JSON.stringify({ data: 'example' })
           });
 
           // 5. Update nonce if server provides a new one
@@ -1286,8 +1297,8 @@ For scenarios requiring full control over DPoP proof generation and nonce manage
           }
           throw error;
         }
-      },
-    },
+      }
+    }
   };
 </script>
 ```
@@ -1331,8 +1342,8 @@ app.use(
     refreshTokenMode: RefreshTokenMode.Online, // 👈
     useDpop: true, // required — DPoP is mandatory for online access
     authorizationParams: {
-      redirect_uri: '<MY_CALLBACK_URL>',
-    },
+      redirect_uri: '<MY_CALLBACK_URL>'
+    }
   })
 );
 
@@ -1358,7 +1369,7 @@ try {
       domain: '<AUTH0_DOMAIN>',
       clientId: '<AUTH0_CLIENT_ID>',
       refreshTokenMode: RefreshTokenMode.Online,
-      useRefreshTokens: true, // missing useDpop: true
+      useRefreshTokens: true // missing useDpop: true
     })
   );
 } catch (e) {
@@ -1383,8 +1394,8 @@ app.use(
     useMrrt: true, // 👈
     authorizationParams: {
       redirect_uri: '<MY_CALLBACK_URL>',
-      audience: 'https://api.example.com',
-    },
+      audience: 'https://api.example.com'
+    }
   })
 );
 ```
@@ -1431,11 +1442,11 @@ app.use(
   createAuth0({
     domain: '<AUTH0_DOMAIN>',
     clientId: '<AUTH0_CLIENT_ID>',
-    useRefreshTokens: true,  // required — MRRT relies on the refresh token grant
-    useMrrt: true,           // enable MRRT
+    useRefreshTokens: true, // required — MRRT relies on the refresh token grant
+    useMrrt: true, // enable MRRT
     authorizationParams: {
       redirect_uri: '<MY_CALLBACK_URL>',
-      audience: 'https://api.example.com'  // primary API audience
+      audience: 'https://api.example.com' // primary API audience
     }
   })
 );
@@ -1504,7 +1515,7 @@ app.use(
     clientId: '<AUTH0_CLIENT_ID>',
     useRefreshTokens: true,
     useMrrt: true,
-    useRefreshTokensFallback: true,  // fall back to iframe on missing scopes
+    useRefreshTokensFallback: true, // fall back to iframe on missing scopes
     authorizationParams: {
       redirect_uri: '<MY_CALLBACK_URL>',
       audience: 'https://api.example.com'
@@ -1601,7 +1612,7 @@ Use the challenge flow when the user already has an enrolled authenticator.
       const { mfa, checkSession } = useAuth0();
       const otpCode = ref('');
 
-      const verifyOtp = async (mfaToken) => {
+      const verifyOtp = async mfaToken => {
         // For OTP, no challenge call is required — the user enters
         // the code directly from their authenticator app.
         await mfa.verify({
@@ -1640,7 +1651,7 @@ Use the challenge flow when the user already has an enrolled authenticator.
         oobCode.value = challenge.oobCode;
       };
 
-      const verifyOob = async (mfaToken) => {
+      const verifyOob = async mfaToken => {
         await mfa.verify({
           mfaToken,
           oobCode: oobCode.value,
@@ -1668,7 +1679,7 @@ Use the challenge flow when the user already has an enrolled authenticator.
       const { mfa, checkSession } = useAuth0();
       const recoveryCode = ref('');
 
-      const verifyRecoveryCode = async (mfaToken) => {
+      const verifyRecoveryCode = async mfaToken => {
         const tokens = await mfa.verify({
           mfaToken,
           recoveryCode: recoveryCode.value
@@ -1704,7 +1715,7 @@ Use the enrollment flow when the user has no authenticators yet. Call `getEnroll
       const { mfa } = useAuth0();
       const enrollmentFactors = ref([]);
 
-      const loadEnrollmentOptions = async (mfaToken) => {
+      const loadEnrollmentOptions = async mfaToken => {
         enrollmentFactors.value = await mfa.getEnrollmentFactors(mfaToken);
         // e.g. [{ type: 'otp' }, { type: 'phone' }, { type: 'push-notification' }]
       };
@@ -1728,13 +1739,13 @@ Use the enrollment flow when the user has no authenticators yet. Call `getEnroll
       const barcodeUri = ref('');
       const secret = ref('');
 
-      const enrollTotp = async (mfaToken) => {
+      const enrollTotp = async mfaToken => {
         const enrollment = await mfa.enroll({
           mfaToken,
           factorType: 'otp'
         });
         barcodeUri.value = enrollment.barcodeUri; // Render as QR code
-        secret.value = enrollment.secret;         // Show as manual entry fallback
+        secret.value = enrollment.secret; // Show as manual entry fallback
       };
 
       return { barcodeUri, secret, enrollTotp };
@@ -1799,7 +1810,10 @@ The `mfa` client throws typed errors for each operation:
             // ... drive challenge/enrollment UI
           } catch (mfaError) {
             if (mfaError instanceof MfaListAuthenticatorsError) {
-              console.error('Failed to list authenticators:', mfaError.error_description);
+              console.error(
+                'Failed to list authenticators:',
+                mfaError.error_description
+              );
             } else if (mfaError instanceof MfaVerifyError) {
               console.error('Verification failed:', mfaError.error_description);
             } else if (mfaError instanceof MfaEnrollmentError) {
@@ -1807,7 +1821,10 @@ The `mfa` client throws typed errors for each operation:
             } else if (mfaError instanceof MfaChallengeError) {
               console.error('Challenge failed:', mfaError.error_description);
             } else if (mfaError instanceof MfaEnrollmentFactorsError) {
-              console.error('Failed to retrieve enrollment factors:', mfaError.error_description);
+              console.error(
+                'Failed to retrieve enrollment factors:',
+                mfaError.error_description
+              );
             }
           }
         }
@@ -1847,7 +1864,9 @@ All MFA operations are also available via the Options API using `this.$auth0.mfa
               // User needs to enroll — show enrollment UI
             } else {
               // User is already enrolled — show challenge UI
-              this.authenticators = await this.$auth0.mfa.getAuthenticators(e.mfa_token);
+              this.authenticators = await this.$auth0.mfa.getAuthenticators(
+                e.mfa_token
+              );
             }
           }
         }
@@ -1928,9 +1947,10 @@ Exchange an external token for Auth0 tokens using the Custom Token Exchange gran
 
   export default {
     setup() {
-      const { loginWithCustomTokenExchange, isAuthenticated, user } = useAuth0();
+      const { loginWithCustomTokenExchange, isAuthenticated, user } =
+        useAuth0();
 
-      const exchangeToken = async (externalToken) => {
+      const exchangeToken = async externalToken => {
         try {
           await loginWithCustomTokenExchange({
             subject_token: externalToken,
@@ -1976,6 +1996,7 @@ Exchange an external token for Auth0 tokens using the Custom Token Exchange gran
 </details>
 
 **Notes:**
+
 - `subject_token_type` must be a namespaced URI under your organization's control. Well-known prefixes such as `urn:ietf:params:oauth:*`, `urn:auth0:*`, and `https://auth0.com/*` are reserved and should not be used for custom token types. See the [Auth0 Custom Token Exchange documentation](https://auth0.com/docs/authenticate/login/custom-token-exchange) for details.
 - The external token must be validated in an Auth0 Action using strong cryptographic verification.
 - `audience` and `scope` fall back to the SDK's configured defaults if not provided.
@@ -2075,7 +2096,7 @@ All supported options:
           username: 'janedoe',
 
           // Profile fields — all optional
-          name: 'Jane Doe',           // display name
+          name: 'Jane Doe', // display name
           givenName: 'Jane',
           familyName: 'Doe',
           nickname: 'janie',
@@ -2136,7 +2157,9 @@ If you need control over the WebAuthn ceremony (for example, to show your own UI
       const { passkey } = useAuth0();
 
       const granularSignup = async () => {
-        const challenge = await passkey.getSignupChallenge({ email: 'user@example.com' });
+        const challenge = await passkey.getSignupChallenge({
+          email: 'user@example.com'
+        });
 
         const credential = await navigator.credentials.create({
           publicKey: challenge.publicKey
@@ -2175,8 +2198,7 @@ If you need control over the WebAuthn ceremony (for example, to show your own UI
 </script>
 ```
 
-> [!NOTE]
-> `getTokenWithPasskey()` updates `isAuthenticated`, `user`, and `idTokenClaims` just like `signup()` and `login()`. `getSignupChallenge()` and `getLoginChallenge()` do not change the auth state.
+> [!NOTE] > `getTokenWithPasskey()` updates `isAuthenticated`, `user`, and `idTokenClaims` just like `signup()` and `login()`. `getSignupChallenge()` and `getLoginChallenge()` do not change the auth state.
 
 ### Identifier Verification
 
@@ -2214,10 +2236,9 @@ The SDK supports this in both signup flows. The codes are collected **before** t
   import {
     useAuth0,
     PasskeyVerificationRequiredError,
-    PasskeyGetTokenError
+    PasskeyGetTokenError,
+    PasskeyError
   } from '@auth0/auth0-vue';
-
-  const MAX_ATTEMPTS = 3;
 
   export default {
     setup() {
@@ -2226,7 +2247,6 @@ The SDK supports this in both signup flows. The codes are collected **before** t
       const verificationRequired = ref([]);
       const codes = reactive({});
       const errorMessage = ref('');
-      let attempts = 0;
 
       const startSignup = async () => {
         errorMessage.value = '';
@@ -2236,7 +2256,6 @@ The SDK supports this in both signup flows. The codes are collected **before** t
         } catch (error) {
           if (error instanceof PasskeyVerificationRequiredError) {
             // Stopped before the passkey prompt
-            attempts = 0;
             verificationRequired.value = error.verificationRequired; // e.g. ['email']
           } else {
             errorMessage.value = error.message;
@@ -2245,10 +2264,12 @@ The SDK supports this in both signup flows. The codes are collected **before** t
       };
 
       const submitCodes = async () => {
-        attempts++;
         // Send codes only for the identifiers that are still required
         const verification = Object.fromEntries(
-          verificationRequired.value.map(identifier => [identifier, codes[identifier]])
+          verificationRequired.value.map(identifier => [
+            identifier,
+            codes[identifier]
+          ])
         );
 
         try {
@@ -2257,23 +2278,35 @@ The SDK supports this in both signup flows. The codes are collected **before** t
           verificationRequired.value = [];
           // isAuthenticated and user are now updated automatically
         } catch (error) {
-          if (
-            error instanceof PasskeyGetTokenError &&
-            error.isRetryable &&
-            attempts < MAX_ATTEMPTS
-          ) {
+          if (error instanceof PasskeyGetTokenError && error.isRetryable) {
             // Wrong code, session still active. Ask again for these identifiers only
             verificationRequired.value = error.verificationRequired;
-            verificationRequired.value.forEach(identifier => (codes[identifier] = ''));
+            verificationRequired.value.forEach(
+              identifier => (codes[identifier] = '')
+            );
             errorMessage.value = 'That code is not correct. Please try again.';
+          } else if (
+            error instanceof PasskeyError &&
+            error.code === 'missing_verification_code'
+          ) {
+            // Nothing was sent and the pending signup is kept. Keep the form open
+            errorMessage.value = 'Enter a code for each field.';
           } else {
             verificationRequired.value = [];
-            errorMessage.value = 'Signup could not be completed. Please start again.';
+            errorMessage.value =
+              'Signup could not be completed. Please start again.';
           }
         }
       };
 
-      return { email, verificationRequired, codes, errorMessage, startSignup, submitCodes };
+      return {
+        email,
+        verificationRequired,
+        codes,
+        errorMessage,
+        startSignup,
+        submitCodes
+      };
     }
   };
 </script>
@@ -2292,8 +2325,6 @@ Check `verificationRequired` on the challenge and collect the codes **before** c
 ```html
 <script>
   import { useAuth0, PasskeyGetTokenError } from '@auth0/auth0-vue';
-
-  const MAX_ATTEMPTS = 3;
 
   export default {
     setup() {
@@ -2316,7 +2347,8 @@ Check `verificationRequired` on the challenge and collect the codes **before** c
         }
 
         let authSession = challenge.authSession;
-        for (let attempt = 1; ; attempt++) {
+        // The server limits the attempts. Retry only while the error is retryable
+        for (;;) {
           try {
             return await passkey.getTokenWithPasskey({
               authSession,
@@ -2324,10 +2356,7 @@ Check `verificationRequired` on the challenge and collect the codes **before** c
               verification: codes
             });
           } catch (error) {
-            if (
-              !(error instanceof PasskeyGetTokenError && error.isRetryable) ||
-              attempt === MAX_ATTEMPTS
-            ) {
+            if (!(error instanceof PasskeyGetTokenError && error.isRetryable)) {
               throw error;
             }
             authSession = error.authSession;
@@ -2344,14 +2373,14 @@ Check `verificationRequired` on the challenge and collect the codes **before** c
 
 #### Which errors can be retried
 
-| Error | Retry? | What to do |
-|---|---|---|
-| `PasskeyGetTokenError` with `isRetryable: true` (wrong code, session still active) | Yes | Ask for new codes for `error.verificationRequired`. With the granular APIs, also pass `error.authSession` and the same `credential` |
-| `PasskeyError` with code `missing_verification_code` (a code is missing or empty) | Yes | Call the same method again with a code for each identifier. Nothing was sent, so the session is still active |
-| `MfaRequiredError` | No | Finish with MFA using `error.mfa_token`. See [Multi-Factor Authentication](#multi-factor-authentication-mfa) |
-| Any other error, for example an expired code or session, or a missing code with the granular APIs | No | Start the signup again |
+| Error                                                                                             | Retry? | What to do                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PasskeyGetTokenError` with `isRetryable: true` (wrong code, session still active)                | Yes    | The error has `code`, `authSession` and `verificationRequired`. Ask for new codes for `error.verificationRequired`. With the granular APIs, also pass `error.authSession` and the same `credential` |
+| `PasskeyError` with code `missing_verification_code` (a code is missing or empty)                 | Yes    | Call the same method again with a code for each identifier. Nothing was sent, so the session is still active                                                                                        |
+| `MfaRequiredError`                                                                                | No     | Finish with MFA using `error.mfa_token`. See [Multi-Factor Authentication](#multi-factor-authentication-mfa)                                                                                        |
+| Any other error, for example an expired code or session, or a missing code with the granular APIs | No     | Start the signup again                                                                                                                                                                              |
 
-Always cap retries in your app, like `MAX_ATTEMPTS` above.
+The server decides how many attempts are allowed. A wrong code is retryable only while the error response includes an auth session (`isRetryable: true`). When the attempts run out, the error is no longer retryable, so start the signup again.
 
 #### Phone delivery method
 
@@ -2362,6 +2391,8 @@ await passkey.signup({ phoneNumber: '+14155550100', deliveryMethod: 'voice' });
 ```
 
 ### Complete Passkey Flow Example
+
+If the connection requires identifier verification, `signup()` throws `PasskeyVerificationRequiredError` (it is not a `PasskeyError`). Handle it as shown in [Identifier Verification](#identifier-verification).
 
 ```html
 <template>
@@ -2377,7 +2408,12 @@ await passkey.signup({ phoneNumber: '+14155550100', deliveryMethod: 'voice' });
 
 <script>
   import { ref } from 'vue';
-  import { useAuth0, PasskeyError, PasskeyRegisterError } from '@auth0/auth0-vue';
+  import {
+    useAuth0,
+    PasskeyError,
+    PasskeyRegisterError,
+    PasskeyVerificationRequiredError
+  } from '@auth0/auth0-vue';
 
   export default {
     setup() {
@@ -2389,7 +2425,10 @@ await passkey.signup({ phoneNumber: '+14155550100', deliveryMethod: 'voice' });
           await passkey.signup({ email: 'user@example.com' });
           // isAuthenticated and user are now updated automatically
         } catch (error) {
-          if (error instanceof PasskeyRegisterError) {
+          if (error instanceof PasskeyVerificationRequiredError) {
+            // Collect codes for error.verificationRequired and call
+            // passkey.continueSignup(). See Identifier Verification
+          } else if (error instanceof PasskeyRegisterError) {
             errorMessage.value = `Registration failed: ${error.message}`;
           } else if (error instanceof PasskeyError) {
             errorMessage.value = `Passkey error: ${error.message}`;
@@ -2419,7 +2458,11 @@ await passkey.signup({ phoneNumber: '+14155550100', deliveryMethod: 'voice' });
 
 ```html
 <script>
-  import { PasskeyError, PasskeyRegisterError } from '@auth0/auth0-vue';
+  import {
+    PasskeyError,
+    PasskeyRegisterError,
+    PasskeyVerificationRequiredError
+  } from '@auth0/auth0-vue';
 
   export default {
     data() {
@@ -2430,7 +2473,10 @@ await passkey.signup({ phoneNumber: '+14155550100', deliveryMethod: 'voice' });
         try {
           await this.$auth0.passkey.signup({ email: 'user@example.com' });
         } catch (error) {
-          if (error instanceof PasskeyRegisterError) {
+          if (error instanceof PasskeyVerificationRequiredError) {
+            // Collect codes for error.verificationRequired and call
+            // this.$auth0.passkey.continueSignup(). See Identifier Verification
+          } else if (error instanceof PasskeyRegisterError) {
             this.errorMessage = `Registration failed: ${error.message}`;
           } else if (error instanceof PasskeyError) {
             this.errorMessage = `Passkey error: ${error.message}`;
@@ -2459,7 +2505,12 @@ All passkey methods throw typed errors for precise error handling:
 
 ```html
 <script>
-  import { useAuth0, PasskeyError, PasskeyRegisterError, PasskeyChallengeError } from '@auth0/auth0-vue';
+  import {
+    useAuth0,
+    PasskeyError,
+    PasskeyRegisterError,
+    PasskeyChallengeError
+  } from '@auth0/auth0-vue';
 
   export default {
     setup() {
@@ -2579,7 +2630,8 @@ app.use(
     authorizationParams: {
       redirect_uri: window.location.origin,
       audience: 'https://YOUR_AUTH0_DOMAIN/me/',
-      scope: 'openid profile email read:me:factors read:me:authentication_methods create:me:authentication_methods update:me:authentication_methods delete:me:authentication_methods'
+      scope:
+        'openid profile email read:me:factors read:me:authentication_methods create:me:authentication_methods update:me:authentication_methods delete:me:authentication_methods'
     }
   })
 );
@@ -2593,10 +2645,10 @@ app.use(
     domain: 'YOUR_AUTH0_DOMAIN',
     clientId: 'YOUR_AUTH0_CLIENT_ID',
     useRefreshTokens: true,
-    useMrrt: true,  // allows the refresh token to be used across multiple audiences
+    useMrrt: true, // allows the refresh token to be used across multiple audiences
     authorizationParams: {
       redirect_uri: window.location.origin,
-      audience: 'https://api.example.com',  // your own API — MyAccount tokens are fetched automatically via MRRT
+      audience: 'https://api.example.com' // your own API — MyAccount tokens are fetched automatically via MRRT
     }
   })
 );
@@ -2659,7 +2711,7 @@ Get the list of MFA factors and their enabled status for the current user.
     setup() {
       const { myAccount } = useAuth0();
 
-      const loadMethod = async (methodId) => {
+      const loadMethod = async methodId => {
         const method = await myAccount.getAuthenticationMethod(methodId);
         console.log(method);
       };
@@ -2683,7 +2735,7 @@ Rename a `totp` or `push-notification` method using the `name` field. For `phone
       const { myAccount } = useAuth0();
 
       // Rename a totp or push-notification method
-      const renameMethod = async (methodId) => {
+      const renameMethod = async methodId => {
         const updated = await myAccount.updateAuthenticationMethod(methodId, {
           name: 'My Authenticator App'
         });
@@ -2691,7 +2743,7 @@ Rename a `totp` or `push-notification` method using the `name` field. For `phone
       };
 
       // Update preferred delivery channel for a phone method
-      const updatePhoneMethod = async (methodId) => {
+      const updatePhoneMethod = async methodId => {
         const updated = await myAccount.updateAuthenticationMethod(methodId, {
           preferred_authentication_method: 'voice' // 'sms' | 'voice'
         });
@@ -2714,7 +2766,7 @@ Rename a `totp` or `push-notification` method using the `name` field. For `phone
     setup() {
       const { myAccount } = useAuth0();
 
-      const deleteMethod = async (methodId) => {
+      const deleteMethod = async methodId => {
         await myAccount.deleteAuthenticationMethod(methodId);
       };
 
@@ -2740,13 +2792,17 @@ Enrollment is a two-step flow: request a challenge, then verify the credential.
 
       const enrollPasskey = async () => {
         // Step 1: get the WebAuthn creation challenge
-        const challenge = await myAccount.enrollmentChallenge({ type: 'passkey' });
+        const challenge = await myAccount.enrollmentChallenge({
+          type: 'passkey'
+        });
 
         // Step 2: trigger the browser WebAuthn ceremony
         const credential = await navigator.credentials.create({
           publicKey: {
             ...challenge.authn_params_public_key,
-            challenge: base64urlToBuffer(challenge.authn_params_public_key.challenge), // decode base64url → ArrayBuffer
+            challenge: base64urlToBuffer(
+              challenge.authn_params_public_key.challenge
+            ), // decode base64url → ArrayBuffer
             user: {
               ...challenge.authn_params_public_key.user,
               id: base64urlToBuffer(challenge.authn_params_public_key.user.id) // decode base64url → ArrayBuffer
@@ -2772,6 +2828,7 @@ Enrollment is a two-step flow: request a challenge, then verify the credential.
 ```
 
 > **Note:** The WebAuthn API requires binary buffers for `challenge` and `user.id`, and expects a plain serializable object when sending the credential back to Auth0. You will need two small helpers:
+>
 > - `base64urlToBuffer(str)` — converts a base64url string to `ArrayBuffer`. See [MDN: Base64 encoding and decoding](https://developer.mozilla.org/en-US/docs/Glossary/Base64) or use a library such as [`@simplewebauthn/browser`](https://simplewebauthn.dev).
 > - `serializeCredential(credential)` — converts the `PublicKeyCredential` returned by `navigator.credentials.create()` into a plain JSON-serializable object. Most WebAuthn libraries provide this out of the box.
 
@@ -2850,7 +2907,7 @@ Enrollment is a two-step flow: request a challenge, then verify the credential.
     setup() {
       const { myAccount } = useAuth0();
 
-      const enrollTotp = async (otpCode) => {
+      const enrollTotp = async otpCode => {
         // Step 1: get the TOTP secret and QR code URI
         const challenge = await myAccount.enrollmentChallenge({ type: 'totp' });
         // challenge.barcode_uri  — render as a QR code for the user to scan
@@ -2885,19 +2942,23 @@ All MyAccount API errors throw `MyAccountApiError` with RFC 7807 fields.
 
       const enrollPasskey = async () => {
         try {
-          const challenge = await myAccount.enrollmentChallenge({ type: 'passkey' });
+          const challenge = await myAccount.enrollmentChallenge({
+            type: 'passkey'
+          });
           // ... complete enrollment
         } catch (err) {
           if (err instanceof MyAccountApiError) {
             console.error(err.status, err.title, err.detail);
             if (err.validation_errors) {
-              err.validation_errors.forEach(e => console.error(e.field, e.detail));
+              err.validation_errors.forEach(e =>
+                console.error(e.field, e.detail)
+              );
             }
           }
         }
       };
 
-      const deleteMethod = async (methodId) => {
+      const deleteMethod = async methodId => {
         try {
           await myAccount.deleteAuthenticationMethod(methodId);
         } catch (err) {
@@ -2934,7 +2995,9 @@ All MyAccount API errors throw `MyAccountApiError` with RFC 7807 fields.
       },
       async enrollPasskey() {
         try {
-          const challenge = await this.$auth0.myAccount.enrollmentChallenge({ type: 'passkey' });
+          const challenge = await this.$auth0.myAccount.enrollmentChallenge({
+            type: 'passkey'
+          });
           // ... complete enrollment
         } catch (err) {
           if (err instanceof MyAccountApiError) {
@@ -2951,8 +3014,7 @@ All MyAccount API errors throw `MyAccountApiError` with RFC 7807 fields.
 
 ## Experiment Center
 
-> [!NOTE]
-> [Experiment Center](https://auth0.com/docs/customize/experiment-center/overview) support via SDKs is currently in Early Access. To request access to this feature, contact your Auth0 representative.
+> [!NOTE] > [Experiment Center](https://auth0.com/docs/customize/experiment-center/overview) support via SDKs is currently in Early Access. To request access to this feature, contact your Auth0 representative.
 
 Experiment Center lets you A/B test your login flow. To force a specific variant - for testing or to apply a decision from a feature-flag service - pass `experiment_id` and `variation_id` via `authorizationParams`. Auth0 will use them instead of its server-side deterministic assignment. Both IDs are obtained from your Auth0 Dashboard or the Management API. You can also pass the optional `segment_id` when the experiment uses segment targeting.
 
@@ -3025,7 +3087,10 @@ You can also emit the claim from a Post-Login Action:
 ```js
 exports.onExecutePostLogin = async (event, api) => {
   // Value must be Unix seconds, not milliseconds.
-  api.idToken.setCustomClaim('session_expiry', Math.floor(Date.now() / 1000) + 7200); // 2-hour ceiling
+  api.idToken.setCustomClaim(
+    'session_expiry',
+    Math.floor(Date.now() / 1000) + 7200
+  ); // 2-hour ceiling
 };
 ```
 
