@@ -693,6 +693,30 @@ describe('Passkey API', () => {
 
       expect(passkeyGetLoginChallengeMock).toHaveBeenCalledWith(undefined);
     });
+
+    it('should not refresh the auth state', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      isAuthenticatedMock.mockClear();
+
+      await plugin.passkey.getLoginChallenge();
+
+      expect(isAuthenticatedMock).not.toHaveBeenCalled();
+    });
+
+    it('should rethrow errors and capture them in the error ref', async () => {
+      const challengeError = new Error('Too Many Requests');
+      passkeyGetLoginChallengeMock.mockRejectedValueOnce(challengeError);
+
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await expect(plugin.passkey.getLoginChallenge()).rejects.toBe(
+        challengeError
+      );
+      expect(plugin.error.value).toBe(challengeError);
+    });
   });
 
   describe('passkey.getTokenWithPasskey', () => {
@@ -767,6 +791,8 @@ describe('Passkey API', () => {
       expect(error.isRetryable).toBe(true);
       expect(error.authSession).toBe('auth-session-a');
       expect(error.verificationRequired).toEqual(['phone']);
+      expect(plugin.error.value).toBe(error);
+      expect(plugin.isAuthenticated.value).toBe(false);
     });
 
     it('should succeed on a retry with the auth session from the error', async () => {
@@ -774,7 +800,7 @@ describe('Passkey API', () => {
         new PasskeyGetTokenError('Invalid or expired session', {
           error: 'invalid_grant',
           error_description: 'Invalid or expired session',
-          auth_session: 'auth-session-a',
+          auth_session: 'auth-session-retry',
           verification_required: ['email']
         })
       );
@@ -786,6 +812,7 @@ describe('Passkey API', () => {
         .getTokenWithPasskey({ authSession: 'auth-session-a', credential, verification: { email: '000000' } })
         .catch(e => e);
 
+      isAuthenticatedMock.mockResolvedValue(true);
       const tokenResponse = await plugin.passkey.getTokenWithPasskey({
         authSession: error.authSession,
         credential,
@@ -793,11 +820,13 @@ describe('Passkey API', () => {
       });
 
       expect(passkeyGetTokenWithPasskeyMock).toHaveBeenLastCalledWith({
-        authSession: 'auth-session-a',
+        authSession: 'auth-session-retry',
         credential,
         verification: { email: '123456' }
       });
       expect(tokenResponse.access_token).toBe('passkey-token');
+      expect(plugin.isAuthenticated.value).toBe(true);
+      expect(plugin.error.value).toBeNull();
     });
 
     it('should rethrow other token errors unchanged', async () => {
