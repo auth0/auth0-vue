@@ -2344,7 +2344,8 @@ Check `verificationRequired` on the challenge and collect the codes **before** c
 | `PasskeyGetTokenError` with `isRetryable: true` (wrong code, session still active) | Yes | The error has `code`, `authSession` and `verificationRequired`. Ask for new codes for `error.verificationRequired`. With the granular APIs, also pass `error.authSession` and the same `credential` |
 | `PasskeyError` with code `missing_verification_code` (a code is missing or empty) | Yes | Call the same method again with a code for each identifier. Nothing was sent, so the session is still active |
 | `MfaRequiredError` | No | Finish with MFA using `error.mfa_token`. See [Multi-Factor Authentication](#multi-factor-authentication-mfa) |
-| Any other error, for example an expired code or session, or a missing code with the granular APIs | No | Start the signup again |
+| Any other error, for example an expired code or session, or a `PasskeyGetTokenError` with `isRetryable: false` | No | Start the signup again with `signup()` |
+
 
 The server decides how many attempts are allowed. A wrong code is retryable only while the error response includes an auth session (`isRetryable: true`). When the attempts run out, the error is no longer retryable, so start the signup again.
 
