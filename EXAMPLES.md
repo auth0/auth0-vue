@@ -2202,9 +2202,6 @@ If you need control over the WebAuthn ceremony (for example, to show your own UI
 
 ### Identifier Verification
 
-> [!NOTE]
-> Passkey identifier verification support via SDKs is currently in Early Access. To request access to this feature, contact your Auth0 representative.
-
 Your database connection can ask new users to verify their email or phone number with a one-time code (OTP) during passkey signup. This is off by default and is turned on from the server side. When it's on, the server sends the codes and gives tokens only after they are correct.
 
 The SDK supports this in both signup flows. The codes are collected **before** the passkey prompt, and the user sees the passkey prompt only once, even if they type a wrong code.
