@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.12.0](https://github.com/auth0/auth0-vue/tree/v2.12.0) (2026-10-23)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.11.0...v2.12.0)
+
+**Added**
+- feat: add identifier verification support for passkey signup [\#763](https://github.com/auth0/auth0-vue/pull/763) ([siddhikotak](https://github.com/siddhikotak))
+
 ## [v2.11.0](https://github.com/auth0/auth0-vue/tree/v2.11.0) (2026-09-28)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.10.0...v2.11.0)
 
