@@ -89,7 +89,9 @@ const PLUGIN_NOT_INSTALLED_CLIENT: Auth0VueClient = {
     updateAuthenticationMethod: PLUGIN_NOT_INSTALLED_HANDLER,
     deleteAuthenticationMethod: PLUGIN_NOT_INSTALLED_HANDLER,
     enrollmentChallenge: PLUGIN_NOT_INSTALLED_HANDLER,
-    enrollmentVerify: PLUGIN_NOT_INSTALLED_HANDLER
+    enrollmentVerify: PLUGIN_NOT_INSTALLED_HANDLER,
+    getUserProfile: PLUGIN_NOT_INSTALLED_HANDLER,
+    updateUserProfile: PLUGIN_NOT_INSTALLED_HANDLER
   } as unknown as MyAccountApiClient
 };
 

@@ -78,5 +78,9 @@ export type {
   EnrollmentChallengeOptions,
   EnrollmentChallengeResponse,
   EnrollmentVerifyOptions,
+  UserProfile,
+  ProfileFieldPolicy,
+  GetUserProfileOptions,
+  UpdateUserProfileRequest,
   IsFederatedDomainOptions
 } from '@auth0/auth0-spa-js';

@@ -90,7 +90,9 @@ jest.mock('@auth0/auth0-spa-js', () => {
           updateAuthenticationMethod: jest.fn<any>().mockResolvedValue({ id: 'test-id' }),
           deleteAuthenticationMethod: jest.fn<any>().mockResolvedValue(undefined),
           enrollmentChallenge: jest.fn<any>().mockResolvedValue({ id: 'test-challenge-id' }),
-          enrollmentVerify: jest.fn<any>().mockResolvedValue({ id: 'test-method-id' })
+          enrollmentVerify: jest.fn<any>().mockResolvedValue({ id: 'test-method-id' }),
+          getUserProfile: jest.fn<any>().mockResolvedValue({ user_id: 'test-id' }),
+          updateUserProfile: jest.fn<any>().mockResolvedValue({ user_id: 'test-id' })
         }
       };
     })
@@ -151,6 +153,19 @@ describe('Client', () => {
 
     await client.value.myAccount.getFactors();
 
+    expect(spy).toHaveBeenCalledWith(
+      `Please ensure Auth0's Vue plugin is correctly installed.`
+    );
+  });
+
+  it('logs console error when myAccount profile methods are called before installing the plugin', async () => {
+    const spy = jest.spyOn(console, 'error');
+    spy.mockClear();
+
+    await client.value.myAccount.getUserProfile();
+    await client.value.myAccount.updateUserProfile({ given_name: 'Alice' });
+
+    expect(spy).toHaveBeenCalledTimes(2);
     expect(spy).toHaveBeenCalledWith(
       `Please ensure Auth0's Vue plugin is correctly installed.`
     );

@@ -398,8 +398,8 @@ export interface Auth0VueClient {
    *
    * MyAccount API client for self-service account management operations.
    *
-   * Provides methods for managing the authenticated user's authentication
-   * methods and factors:
+   * Provides methods for managing the authenticated user's profile,
+   * authentication methods and factors:
    * - `getFactors()` — list all enabled factors and those available for enrollment
    * - `getAuthenticationMethods(type?)` — list enrolled authentication methods, optionally filtered by type
    * - `getAuthenticationMethod(id)` — get a single authentication method by ID
@@ -407,16 +407,23 @@ export interface Auth0VueClient {
    * - `deleteAuthenticationMethod(id)` — remove an enrolled authentication method
    * - `enrollmentChallenge(options)` — initiate a two-step enrollment challenge
    * - `enrollmentVerify(options)` — complete enrollment by verifying the challenge
+   * - `getUserProfile(options?)` — get the user's profile, including `profile_policy` with per-field edit permissions
+   * - `updateUserProfile(data)` — update the user's profile; only the fields you send are changed
    *
    * **Note:** MyAccount API calls require an access token with the appropriate
-   * scope (e.g. `read:me:authentication_methods`). Use MRRT to exchange a
-   * refresh token for a scoped access token if needed.
+   * scope (e.g. `read:me:authentication_methods`, or `read:me:profile` for
+   * `getUserProfile()` and `update:me:profile` for `updateUserProfile()`).
+   * Use MRRT to exchange a refresh token for a scoped access token if needed.
    *
    * ```js
    * const { myAccount } = useAuth0();
    *
    * // List passkey authentication methods
    * const methods = await myAccount.getAuthenticationMethods('passkey');
+   *
+   * // Read and update the user's profile
+   * const profile = await myAccount.getUserProfile();
+   * await myAccount.updateUserProfile({ given_name: 'Alice' });
    *
    * // Enroll a new passkey
    * const challenge = await myAccount.enrollmentChallenge({ type: 'passkey' });

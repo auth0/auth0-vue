@@ -2562,14 +2562,15 @@ try {
 
 ## MyAccount API
 
-The MyAccount API lets you manage the current user's authentication methods, factors, and connected accounts directly from your Vue application.
+The MyAccount API lets you manage the current user's profile, authentication methods, factors, and connected accounts directly from your Vue application.
 
 > **Note:** The MyAccount API requires the MyAccount audience (`https://{your-domain}/me/`) and the corresponding scopes in your `authorizationParams`. If your app uses a custom API audience alongside MyAccount, you will also need refresh tokens and MRRT.
 
-- [Setup](#setup-2)
+- [Setup](#setup-3)
 - [Factors](#factors)
 - [Authentication Methods](#authentication-methods)
 - [Enrollment](#enrollment)
+- [Profile](#profile)
 - [MyAccount Error Handling](#myaccount-error-handling)
 
 ### Setup
@@ -2592,7 +2593,7 @@ app.use(
     authorizationParams: {
       redirect_uri: window.location.origin,
       audience: 'https://YOUR_AUTH0_DOMAIN/me/',
-      scope: 'openid profile email read:me:factors read:me:authentication_methods create:me:authentication_methods update:me:authentication_methods delete:me:authentication_methods'
+      scope: 'openid profile email read:me:factors read:me:authentication_methods create:me:authentication_methods update:me:authentication_methods delete:me:authentication_methods read:me:profile update:me:profile'
     }
   })
 );
@@ -2884,6 +2885,156 @@ Enrollment is a two-step flow: request a challenge, then verify the credential.
 </script>
 ```
 
+### Profile
+
+> [!NOTE]
+> My Account Profile API support via SDKs is currently in Early Access. To request access to this feature, contact your Auth0 representative.
+
+Read and update the current user's profile. `getUserProfile()` needs the `read:me:profile` scope, and `updateUserProfile()` needs `update:me:profile`. Add the scopes your app uses to the `scope` in your `authorizationParams` (see [Setup](#setup-3)).
+
+> **Note:** The profile endpoints must be enabled for your tenant. If they aren't, or the scopes weren't granted, both methods fail: with a `MyAccountApiError` with `status` `403`, or with a `MissingScopesError` if you use refresh tokens with MRRT.
+
+#### Get Profile
+
+The response includes `profile_policy`, which describes each field. Use it to decide which fields the user can edit. `profile_policy` can be missing (for example, when you select `fields` without it), so fall back to an empty object:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const loadProfile = async () => {
+        const profile = await myAccount.getUserProfile();
+        // profile.given_name, profile.email, ...
+
+        for (const [pointer, policy] of Object.entries(profile.profile_policy ?? {})) {
+          const field = pointer.slice(1); // '/given_name' -> 'given_name'
+          const editable = policy.access === 'read_write';
+          // policy.reason — why the field is read-only, e.g. 'managed_by_identity_provider'
+        }
+      };
+
+      return { loadProfile };
+    }
+  };
+</script>
+```
+
+#### Select Fields
+
+When you pass `fields`, `profile_policy` is only returned if you include it, and then only for the selected fields. Call `getUserProfile()` without `fields` to get the full policy.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const loadProfileFields = async () => {
+        // Only these fields, without profile_policy
+        const basic = await myAccount.getUserProfile({
+          fields: ['given_name', 'family_name', 'picture']
+        });
+
+        // These fields, with profile_policy for just these fields (for an edit form)
+        const editable = await myAccount.getUserProfile({
+          fields: ['given_name', 'family_name', 'profile_policy']
+        });
+
+        // Everything except profile_policy
+        const withoutPolicy = await myAccount.getUserProfile({
+          fields: ['profile_policy'],
+          includeFields: false
+        });
+      };
+
+      return { loadProfileFields };
+    }
+  };
+</script>
+```
+
+#### Update Profile
+
+Only the fields you send are changed. The response is the full updated profile. You can update `given_name`, `family_name`, `name`, `nickname` and `picture`. `email`, `phone_number` and `username` can't be changed here, and `null` isn't accepted for any field.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const updateProfile = async () => {
+        const updated = await myAccount.updateUserProfile({
+          given_name: 'Alice',
+          nickname: 'wonderland_alice'
+        });
+        console.log(updated);
+      };
+
+      return { updateProfile };
+    }
+  };
+</script>
+```
+
+`updateUserProfile()` doesn't change `user` from `useAuth0()`. `user` comes from the ID token, so it keeps the old values until the SDK gets a new ID token. To show the new values right away, use the profile that `updateUserProfile()` returns. To update `user`, get new tokens with `getAccessTokenSilently({ cacheMode: 'off' })`:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount, getAccessTokenSilently, user } = useAuth0();
+
+      const updateAndRefreshUser = async () => {
+        const updated = await myAccount.updateUserProfile({ given_name: 'Alice' });
+        // updated.given_name is 'Alice', but user.value.given_name still has the old value
+
+        await getAccessTokenSilently({ cacheMode: 'off' });
+        // user.value now comes from the new ID token
+      };
+
+      return { user, updateAndRefreshUser };
+    }
+  };
+</script>
+```
+
+If a field is read-only for this user (for example, `given_name` for a social login user), the request fails with a `MyAccountApiError` and nothing is saved. `err.validation_errors` says which field was rejected:
+
+```html
+<script>
+  import { useAuth0, MyAccountApiError } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount } = useAuth0();
+
+      const updateGivenName = async () => {
+        try {
+          await myAccount.updateUserProfile({ given_name: 'Alice' });
+        } catch (err) {
+          if (err instanceof MyAccountApiError) {
+            err.validation_errors?.forEach(e => console.error(e.pointer, e.detail));
+          }
+        }
+      };
+
+      return { updateGivenName };
+    }
+  };
+</script>
+```
+
 ### MyAccount Error Handling
 
 All MyAccount API errors throw `MyAccountApiError` with RFC 7807 fields.
@@ -2949,6 +3100,16 @@ All MyAccount API errors throw `MyAccountApiError` with RFC 7807 fields.
         try {
           const challenge = await this.$auth0.myAccount.enrollmentChallenge({ type: 'passkey' });
           // ... complete enrollment
+        } catch (err) {
+          if (err instanceof MyAccountApiError) {
+            console.error(err.status, err.title, err.detail);
+          }
+        }
+      },
+      async loadProfile() {
+        try {
+          const profile = await this.$auth0.myAccount.getUserProfile();
+          console.log(profile);
         } catch (err) {
           if (err instanceof MyAccountApiError) {
             console.error(err.status, err.title, err.detail);

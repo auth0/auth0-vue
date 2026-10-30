@@ -20,12 +20,29 @@ const myAccountEnrollmentChallengeMock = jest.fn<any>().mockResolvedValue({
   location: 'https://example.auth0.com/me/v1/authentication-methods/test-challenge-id'
 });
 const myAccountEnrollmentVerifyMock = jest.fn<any>().mockResolvedValue({ id: 'test-method-id', type: 'passkey' });
+const myAccountGetUserProfileMock = jest.fn<any>().mockResolvedValue({
+  user_id: 'auth0|123',
+  given_name: 'Alice',
+  email: 'alice@example.com',
+  email_verified: true,
+  profile_policy: {
+    '/given_name': { access: 'read_write', source: 'user' }
+  }
+});
+const myAccountUpdateUserProfileMock = jest.fn<any>().mockResolvedValue({
+  given_name: 'Alice',
+  nickname: 'wonderland_alice',
+  profile_policy: {
+    '/given_name': { access: 'read_write', source: 'user' }
+  }
+});
 
 const checkSessionMock = jest.fn<any>().mockResolvedValue(null);
 const handleRedirectCallbackMock = jest.fn<any>().mockResolvedValue(null);
 const isAuthenticatedMock = jest.fn<any>().mockResolvedValue(false);
 const getUserMock = jest.fn<any>().mockResolvedValue(null);
 const getIdTokenClaimsMock = jest.fn<any>().mockResolvedValue(null);
+const getTokenSilentlyMock = jest.fn<any>().mockResolvedValue(null);
 
 jest.mock('vue', () => {
   const originalModule = jest.requireActual('vue');
@@ -48,7 +65,7 @@ jest.mock('@auth0/auth0-spa-js', () => {
         isAuthenticated: isAuthenticatedMock,
         getUser: getUserMock,
         getIdTokenClaims: getIdTokenClaimsMock,
-        getTokenSilently: jest.fn<any>().mockResolvedValue(null),
+        getTokenSilently: getTokenSilentlyMock,
         getTokenWithPopup: jest.fn<any>().mockResolvedValue(null),
         getDpopNonce: jest.fn<any>().mockResolvedValue(undefined),
         setDpopNonce: jest.fn<any>().mockResolvedValue(undefined),
@@ -74,7 +91,9 @@ jest.mock('@auth0/auth0-spa-js', () => {
           updateAuthenticationMethod: myAccountUpdateAuthenticationMethodMock,
           deleteAuthenticationMethod: myAccountDeleteAuthenticationMethodMock,
           enrollmentChallenge: myAccountEnrollmentChallengeMock,
-          enrollmentVerify: myAccountEnrollmentVerifyMock
+          enrollmentVerify: myAccountEnrollmentVerifyMock,
+          getUserProfile: myAccountGetUserProfileMock,
+          updateUserProfile: myAccountUpdateUserProfileMock
         }
       };
     }),
@@ -83,13 +102,15 @@ jest.mock('@auth0/auth0-spa-js', () => {
       public status: number;
       public title: string;
       public detail: string;
-      constructor({ type, status, title, detail }: any) {
+      public validation_errors?: any[];
+      constructor({ type, status, title, detail, validation_errors }: any) {
         super(detail);
         this.name = 'MyAccountApiError';
         this.type = type;
         this.status = status;
         this.title = title;
         this.detail = detail;
+        this.validation_errors = validation_errors;
       }
     }
   };
@@ -146,6 +167,8 @@ describe('MyAccount API', () => {
       expect(plugin.myAccount.deleteAuthenticationMethod).toBeDefined();
       expect(plugin.myAccount.enrollmentChallenge).toBeDefined();
       expect(plugin.myAccount.enrollmentVerify).toBeDefined();
+      expect(plugin.myAccount.getUserProfile).toBeDefined();
+      expect(plugin.myAccount.updateUserProfile).toBeDefined();
     });
   });
 
@@ -262,6 +285,190 @@ describe('MyAccount API', () => {
 
       expect((result as any).id).toBe('test-method-id');
       expect(myAccountEnrollmentVerifyMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('getUserProfile', () => {
+    it('should return the user profile with profile_policy', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const profile = await plugin.myAccount.getUserProfile();
+
+      expect(profile.user_id).toBe('auth0|123');
+      expect(profile.given_name).toBe('Alice');
+      expect(profile.email_verified).toBe(true);
+      expect(profile.profile_policy?.['/given_name']).toEqual({
+        access: 'read_write',
+        source: 'user'
+      });
+      expect(myAccountGetUserProfileMock).toHaveBeenCalledWith();
+    });
+
+    it('should forward fields to underlying client', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      await plugin.myAccount.getUserProfile({
+        fields: ['given_name', 'family_name', 'profile_policy']
+      });
+
+      expect(myAccountGetUserProfileMock).toHaveBeenCalledWith({
+        fields: ['given_name', 'family_name', 'profile_policy']
+      });
+    });
+
+    it('should forward includeFields: false to underlying client', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      await plugin.myAccount.getUserProfile({
+        fields: ['profile_policy'],
+        includeFields: false
+      });
+
+      expect(myAccountGetUserProfileMock).toHaveBeenCalledWith({
+        fields: ['profile_policy'],
+        includeFields: false
+      });
+    });
+
+    it('should propagate MyAccountApiError when the profile endpoints are not enabled', async () => {
+      const { MyAccountApiError } = await import('@auth0/auth0-spa-js') as any;
+      const error = new MyAccountApiError({
+        type: 'https://auth0.com/api-errors/A0E-403-0003',
+        status: 403,
+        title: 'Not Entitled',
+        detail: 'This feature is currently not enabled'
+      });
+      myAccountGetUserProfileMock.mockRejectedValueOnce(error);
+
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const promise = plugin.myAccount.getUserProfile();
+
+      await expect(promise).rejects.toBeInstanceOf(MyAccountApiError);
+      await expect(promise).rejects.toMatchObject({
+        status: 403,
+        title: 'Not Entitled'
+      });
+    });
+  });
+
+  describe('updateUserProfile', () => {
+    it('should update and return the full profile', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const updated = await plugin.myAccount.updateUserProfile({
+        given_name: 'Alice',
+        nickname: 'wonderland_alice'
+      });
+
+      expect(updated.nickname).toBe('wonderland_alice');
+      expect(updated.profile_policy).toBeDefined();
+      expect(myAccountUpdateUserProfileMock).toHaveBeenCalledWith({
+        given_name: 'Alice',
+        nickname: 'wonderland_alice'
+      });
+    });
+
+    it('should forward an empty update without modification', async () => {
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      await plugin.myAccount.updateUserProfile({});
+
+      expect(myAccountUpdateUserProfileMock).toHaveBeenCalledWith({});
+    });
+
+    it('should propagate MyAccountApiError with validation_errors for read-only fields', async () => {
+      const { MyAccountApiError } = await import('@auth0/auth0-spa-js') as any;
+      const error = new MyAccountApiError({
+        type: 'A0E-400-0008',
+        status: 400,
+        title: 'read_only_field',
+        detail: 'Field is read-only',
+        validation_errors: [
+          {
+            pointer: '/given_name',
+            detail: 'Field is managed by the identity provider',
+            source: 'managed_by_identity_provider'
+          }
+        ]
+      });
+      myAccountUpdateUserProfileMock.mockRejectedValueOnce(error);
+
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const promise = plugin.myAccount.updateUserProfile({ given_name: 'Alice' });
+
+      await expect(promise).rejects.toBeInstanceOf(MyAccountApiError);
+      await expect(promise).rejects.toMatchObject({
+        status: 400,
+        title: 'read_only_field',
+        validation_errors: [
+          { pointer: '/given_name', source: 'managed_by_identity_provider' }
+        ]
+      });
+    });
+
+    it('should propagate MyAccountApiError when the profile endpoints are not enabled', async () => {
+      const { MyAccountApiError } = await import('@auth0/auth0-spa-js') as any;
+      const error = new MyAccountApiError({
+        type: 'https://auth0.com/api-errors/A0E-403-0003',
+        status: 403,
+        title: 'Not Entitled',
+        detail: 'This feature is currently not enabled'
+      });
+      myAccountUpdateUserProfileMock.mockRejectedValueOnce(error);
+
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      await expect(
+        plugin.myAccount.updateUserProfile({ given_name: 'Alice' })
+      ).rejects.toMatchObject({ name: 'MyAccountApiError', status: 403 });
+    });
+
+    it('should not change user until new tokens are fetched with cacheMode off', async () => {
+      getUserMock.mockResolvedValueOnce({ sub: 'auth0|123', given_name: 'Old' });
+
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const updated = await plugin.myAccount.updateUserProfile({ given_name: 'Alice' });
+
+      expect(updated.given_name).toBe('Alice');
+      expect(plugin.user.value?.given_name).toBe('Old');
+
+      // The new ID token from the token response has the updated values
+      getUserMock.mockResolvedValueOnce({ sub: 'auth0|123', given_name: 'Alice' });
+
+      await plugin.getAccessTokenSilently({ cacheMode: 'off' });
+
+      expect(getTokenSilentlyMock).toHaveBeenCalledWith({ cacheMode: 'off' });
+      expect(plugin.user.value?.given_name).toBe('Alice');
     });
   });
 
