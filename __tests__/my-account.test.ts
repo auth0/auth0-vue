@@ -42,6 +42,7 @@ const handleRedirectCallbackMock = jest.fn<any>().mockResolvedValue(null);
 const isAuthenticatedMock = jest.fn<any>().mockResolvedValue(false);
 const getUserMock = jest.fn<any>().mockResolvedValue(null);
 const getIdTokenClaimsMock = jest.fn<any>().mockResolvedValue(null);
+const getTokenSilentlyMock = jest.fn<any>().mockResolvedValue(null);
 
 jest.mock('vue', () => {
   const originalModule = jest.requireActual('vue');
@@ -64,7 +65,7 @@ jest.mock('@auth0/auth0-spa-js', () => {
         isAuthenticated: isAuthenticatedMock,
         getUser: getUserMock,
         getIdTokenClaims: getIdTokenClaimsMock,
-        getTokenSilently: jest.fn<any>().mockResolvedValue(null),
+        getTokenSilently: getTokenSilentlyMock,
         getTokenWithPopup: jest.fn<any>().mockResolvedValue(null),
         getDpopNonce: jest.fn<any>().mockResolvedValue(undefined),
         setDpopNonce: jest.fn<any>().mockResolvedValue(undefined),
@@ -446,6 +447,28 @@ describe('MyAccount API', () => {
       await expect(
         plugin.myAccount.updateUserProfile({ given_name: 'Alice' })
       ).rejects.toMatchObject({ name: 'MyAccountApiError', status: 403 });
+    });
+
+    it('should not change user until new tokens are fetched with cacheMode off', async () => {
+      getUserMock.mockResolvedValueOnce({ sub: 'auth0|123', given_name: 'Old' });
+
+      const plugin = createAuth0({ domain: '', clientId: '' });
+      plugin.install(appMock);
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const updated = await plugin.myAccount.updateUserProfile({ given_name: 'Alice' });
+
+      expect(updated.given_name).toBe('Alice');
+      expect(plugin.user.value?.given_name).toBe('Old');
+
+      // The new ID token from the token response has the updated values
+      getUserMock.mockResolvedValueOnce({ sub: 'auth0|123', given_name: 'Alice' });
+
+      await plugin.getAccessTokenSilently({ cacheMode: 'off' });
+
+      expect(getTokenSilentlyMock).toHaveBeenCalledWith({ cacheMode: 'off' });
+      expect(plugin.user.value?.given_name).toBe('Alice');
     });
   });
 
