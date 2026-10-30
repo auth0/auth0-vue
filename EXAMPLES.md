@@ -2593,7 +2593,7 @@ app.use(
     authorizationParams: {
       redirect_uri: window.location.origin,
       audience: 'https://YOUR_AUTH0_DOMAIN/me/',
-      scope: 'openid profile email read:me:factors read:me:authentication_methods create:me:authentication_methods update:me:authentication_methods delete:me:authentication_methods'
+      scope: 'openid profile email read:me:factors read:me:authentication_methods create:me:authentication_methods update:me:authentication_methods delete:me:authentication_methods read:me:profile update:me:profile'
     }
   })
 );
@@ -2887,6 +2887,9 @@ Enrollment is a two-step flow: request a challenge, then verify the credential.
 
 ### Profile
 
+> [!NOTE]
+> My Account Profile API support via SDKs is currently in Early Access. To request access to this feature, contact your Auth0 representative.
+
 Read and update the current user's profile. `getUserProfile()` needs the `read:me:profile` scope, and `updateUserProfile()` needs `update:me:profile`. Add the scopes your app uses to the `scope` in your `authorizationParams` (see [Setup](#setup-3)).
 
 > **Note:** The profile endpoints must be enabled for your tenant. If they aren't, or the scopes weren't granted, both methods fail: with a `MyAccountApiError` with `status` `403`, or with a `MissingScopesError` if you use refresh tokens with MRRT.
@@ -2977,6 +2980,30 @@ Only the fields you send are changed. The response is the full updated profile. 
       };
 
       return { updateProfile };
+    }
+  };
+</script>
+```
+
+`updateUserProfile()` doesn't change `user` from `useAuth0()`. `user` comes from the ID token, so it keeps the old values until the SDK gets a new ID token. To show the new values right away, use the profile that `updateUserProfile()` returns. To update `user`, get new tokens with `getAccessTokenSilently({ cacheMode: 'off' })`:
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { myAccount, getAccessTokenSilently, user } = useAuth0();
+
+      const updateAndRefreshUser = async () => {
+        const updated = await myAccount.updateUserProfile({ given_name: 'Alice' });
+        // updated.given_name is 'Alice', but user.value.given_name still has the old value
+
+        await getAccessTokenSilently({ cacheMode: 'off' });
+        // user.value now comes from the new ID token
+      };
+
+      return { user, updateAndRefreshUser };
     }
   };
 </script>
