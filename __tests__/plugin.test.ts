@@ -20,6 +20,7 @@ import { client } from '../src/plugin';
 const loginWithRedirectMock = jest.fn<any>().mockResolvedValue(null);
 const loginWithPopupMock = jest.fn<any>().mockResolvedValue(null);
 const logoutMock = jest.fn<any>();
+const revokeRefreshTokenMock = jest.fn<any>().mockResolvedValue(undefined);
 const checkSessionMock = jest.fn<any>().mockResolvedValue(null);
 const handleRedirectCallbackMock = jest.fn<any>().mockResolvedValue(null);
 const isAuthenticatedMock = jest.fn<any>().mockResolvedValue(false);
@@ -59,6 +60,7 @@ jest.mock('@auth0/auth0-spa-js', () => {
         loginWithRedirect: loginWithRedirectMock,
         loginWithPopup: loginWithPopupMock,
         logout: logoutMock,
+        revokeRefreshToken: revokeRefreshTokenMock,
         isAuthenticated: isAuthenticatedMock,
         getUser: getUserMock,
         getIdTokenClaims: getIdTokenClaimsMock,
@@ -104,6 +106,16 @@ describe('Client', () => {
     const spy = jest.spyOn(console, 'error');
 
     await client.value.loginWithRedirect();
+
+    expect(spy).toHaveBeenCalledWith(
+      `Please ensure Auth0's Vue plugin is correctly installed.`
+    );
+  });
+
+  it('logs console error when revokeRefreshToken is called before installing the plugin', async () => {
+    const spy = jest.spyOn(console, 'error');
+
+    await client.value.revokeRefreshToken();
 
     expect(spy).toHaveBeenCalledWith(
       `Please ensure Auth0's Vue plugin is correctly installed.`
@@ -221,6 +233,7 @@ describe('Auth0Plugin', () => {
       token_type: 'Bearer'
     });
     checkSessionMock.mockResolvedValue(null);
+    revokeRefreshTokenMock.mockResolvedValue(undefined);
 
     appMock = {
       config: {
@@ -989,6 +1002,171 @@ describe('Auth0Plugin', () => {
     expect(getUserMock).not.toHaveBeenCalled();
     expect(getIdTokenClaimsMock).not.toHaveBeenCalled();
     expect(isAuthenticatedMock).not.toHaveBeenCalled();
+  });
+
+  it('should proxy revokeRefreshToken', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    // Destructured to verify the method stays bound when used via inject
+    const { revokeRefreshToken } = appMock.config.globalProperties.$auth0;
+    const result = await revokeRefreshToken({
+      audience: 'https://api.example.com'
+    });
+
+    expect(revokeRefreshTokenMock).toHaveBeenCalledWith({
+      audience: 'https://api.example.com'
+    });
+    expect(result).toBeUndefined();
+  });
+
+  it('should proxy revokeRefreshToken without options', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    await appMock.config.globalProperties.$auth0.revokeRefreshToken();
+
+    expect(revokeRefreshTokenMock).toHaveBeenCalledWith(undefined);
+  });
+
+  it('should keep the user authenticated after revokeRefreshToken when the session is preserved', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    isAuthenticatedMock.mockResolvedValue(true);
+    getUserMock.mockResolvedValue({ name: '__test_user__' });
+
+    plugin.install(appMock);
+    await flushPromises();
+    jest.clearAllMocks();
+
+    await appMock.config.globalProperties.$auth0.revokeRefreshToken();
+
+    expect(revokeRefreshTokenMock).toHaveBeenCalledTimes(1);
+    expect(isAuthenticatedMock).toHaveBeenCalledTimes(1);
+    expect(getUserMock).toHaveBeenCalledTimes(1);
+    expect(getIdTokenClaimsMock).toHaveBeenCalledTimes(1);
+    expect(
+      appMock.config.globalProperties.$auth0.isAuthenticated.value
+    ).toEqual(true);
+    expect(appMock.config.globalProperties.$auth0.user.value).toEqual({
+      name: '__test_user__'
+    });
+  });
+
+  it('should update auth state after revokeRefreshToken clears the local session', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    isAuthenticatedMock.mockResolvedValue(true);
+    getUserMock.mockResolvedValue({ name: '__test_user__' });
+    getIdTokenClaimsMock.mockResolvedValue({ __raw: '__test_raw__' });
+
+    plugin.install(appMock);
+    await flushPromises();
+
+    expect(
+      appMock.config.globalProperties.$auth0.isAuthenticated.value
+    ).toEqual(true);
+
+    // With RefreshTokenMode.Online, auth0-spa-js clears the local session
+    revokeRefreshTokenMock.mockImplementation(async () => {
+      isAuthenticatedMock.mockResolvedValue(false);
+      getUserMock.mockResolvedValue(undefined);
+      getIdTokenClaimsMock.mockResolvedValue(undefined);
+    });
+
+    await appMock.config.globalProperties.$auth0.revokeRefreshToken();
+
+    expect(
+      appMock.config.globalProperties.$auth0.isAuthenticated.value
+    ).toEqual(false);
+    expect(appMock.config.globalProperties.$auth0.user.value).toBeUndefined();
+    expect(
+      appMock.config.globalProperties.$auth0.idTokenClaims.value
+    ).toBeUndefined();
+  });
+
+  it('should track errors when revokeRefreshToken throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    revokeRefreshTokenMock.mockRejectedValue('Some Error');
+
+    await expect(
+      appMock.config.globalProperties.$auth0.revokeRefreshToken()
+    ).rejects.toEqual('Some Error');
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+  });
+
+  it('should refresh auth state even when revokeRefreshToken throws', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    isAuthenticatedMock.mockResolvedValue(true);
+
+    plugin.install(appMock);
+    await flushPromises();
+
+    // e.g. auth0-spa-js revoked and cleared part of the cache before failing
+    revokeRefreshTokenMock.mockImplementation(async () => {
+      isAuthenticatedMock.mockResolvedValue(false);
+      throw 'Some Error';
+    });
+
+    await expect(
+      appMock.config.globalProperties.$auth0.revokeRefreshToken()
+    ).rejects.toEqual('Some Error');
+
+    expect(
+      appMock.config.globalProperties.$auth0.isAuthenticated.value
+    ).toEqual(false);
+  });
+
+  it('should clear errors when revokeRefreshToken is successful', async () => {
+    const plugin = createAuth0({
+      domain: '',
+      clientId: ''
+    });
+
+    plugin.install(appMock);
+
+    revokeRefreshTokenMock.mockRejectedValue('Some Error');
+
+    try {
+      await appMock.config.globalProperties.$auth0.revokeRefreshToken();
+    } catch (e) {}
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toEqual(
+      'Some Error'
+    );
+
+    revokeRefreshTokenMock.mockResolvedValue(undefined);
+
+    await appMock.config.globalProperties.$auth0.revokeRefreshToken();
+
+    expect(appMock.config.globalProperties.$auth0.error.value).toBeFalsy();
   });
 
   it('should proxy getAccessTokenSilently', async () => {
