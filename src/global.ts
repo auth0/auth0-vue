@@ -35,6 +35,7 @@ export type {
   PopupConfigOptions,
   GetTokenWithPopupOptions,
   LogoutUrlOptions,
+  RevokeRefreshTokenOptions,
   CacheLocation,
   GetTokenSilentlyOptions,
   IdToken,
