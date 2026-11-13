@@ -445,6 +445,12 @@ export interface Auth0VueClient {
    * `getUserProfile()` and `update:me:profile` for `updateUserProfile()`).
    * Use MRRT to exchange a refresh token for a scoped access token if needed.
    *
+   * **Note:** `getUserProfile()` and `updateUserProfile()` are currently in
+   * [Beta](https://auth0.com/docs/troubleshoot/product-lifecycle/product-release-stages#beta).
+   * They might change before General Availability, and Auth0 does not support
+   * beta functionality for production use. The feature must be enabled for
+   * your tenant.
+   *
    * ```js
    * const { myAccount } = useAuth0();
    *
