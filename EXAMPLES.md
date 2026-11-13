@@ -13,6 +13,7 @@
 - [Device-bound tokens with DPoP](#device-bound-tokens-with-dpop)
 - [Online Access (Online Refresh Tokens)](#online-access-online-refresh-tokens)
 - [Multi-Resource Refresh Tokens (MRRT)](#multi-resource-refresh-tokens-mrrt)
+- [Revoke Refresh Token](#revoke-refresh-token)
 - [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
 - [Step-Up Authentication](#step-up-authentication)
 - [Custom Token Exchange](#custom-token-exchange)
@@ -1512,6 +1513,93 @@ app.use(
   })
 );
 ```
+
+## Revoke Refresh Token
+
+Invalidate the current refresh token via the `/oauth/revoke` endpoint. Once revoked, the token can no longer be used to obtain new access tokens. This is useful when you want to stop silent token renewal — for example, after a password change or detecting suspicious activity — without performing a full logout.
+
+> [!NOTE]
+> This is a no-op if `useRefreshTokens` is not enabled.
+
+```html
+<script>
+  import { useAuth0 } from '@auth0/auth0-vue';
+
+  export default {
+    setup() {
+      const { revokeRefreshToken } = useAuth0();
+
+      return {
+        revoke: async () => {
+          try {
+            await revokeRefreshToken();
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      };
+    }
+  };
+</script>
+```
+
+```html
+<template>
+  <div>
+    <button @click="revoke">Revoke Refresh Token</button>
+  </div>
+</template>
+```
+
+<details>
+  <summary>Using Options API</summary>
+
+```html
+<template>
+  <div>
+    <button @click="revoke">Revoke Refresh Token</button>
+  </div>
+</template>
+
+<script>
+  export default {
+    methods: {
+      async revoke() {
+        try {
+          await this.$auth0.revokeRefreshToken();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  };
+</script>
+```
+
+</details>
+
+To target a specific audience, pass it as an option. When omitted, the audience configured in `authorizationParams` is used:
+
+```js
+const { revokeRefreshToken } = useAuth0();
+
+await revokeRefreshToken({ audience: 'https://api.example.com' });
+```
+
+> [!IMPORTANT]
+> With [MRRT](#multi-resource-refresh-tokens-mrrt) enabled, a single refresh token can cover multiple audiences — revoking it for one audience invalidates it for every audience that shares it.
+
+Errors thrown by `revokeRefreshToken` are captured in the `error` ref returned by `useAuth0()`, in addition to being re-thrown.
+
+> [!NOTE]
+> Revoking the refresh token does not end the session — `isAuthenticated` remains `true` and the current access token stays valid until it expires. After that, `getAccessTokenSilently` throws an error with `error: 'missing_refresh_token'`. If `useRefreshTokensFallback` is enabled, the SDK instead falls back to a hidden iframe, which can still obtain new tokens silently while the Auth0 session is active. To immediately tear down the session, call `logout()` after revoking:
+> ```js
+> const { revokeRefreshToken, logout } = useAuth0();
+> await revokeRefreshToken();
+> await logout({ openUrl: false });
+> ```
+>
+> With [Online Access](#online-access-online-refresh-tokens) (`refreshTokenMode: RefreshTokenMode.Online`), revoking the Online Refresh Token also ends the Auth0 session and clears the local cache, so `isAuthenticated` becomes `false` and `user` and `idTokenClaims` are cleared right away.
 
 ## Multi-Factor Authentication (MFA)
 
