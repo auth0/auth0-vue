@@ -32,7 +32,8 @@ import type {
   PasskeySignupChallengeOptions,
   PasskeyLoginChallengeOptions,
   PasskeyGetTokenOptions,
-  MyAccountApiClient
+  MyAccountApiClient,
+  RevokeRefreshTokenOptions
 } from '@auth0/auth0-spa-js';
 import { Auth0Client, User } from '@auth0/auth0-spa-js';
 import { bindPluginMethods, deprecateRedirectUri } from './utils';
@@ -60,6 +61,7 @@ const PLUGIN_NOT_INSTALLED_CLIENT: Auth0VueClient = {
   getAccessTokenSilently: PLUGIN_NOT_INSTALLED_HANDLER,
   getAccessTokenWithPopup: PLUGIN_NOT_INSTALLED_HANDLER,
   logout: PLUGIN_NOT_INSTALLED_HANDLER,
+  revokeRefreshToken: PLUGIN_NOT_INSTALLED_HANDLER,
   checkSession: PLUGIN_NOT_INSTALLED_HANDLER,
   handleRedirectCallback: PLUGIN_NOT_INSTALLED_HANDLER,
   getDpopNonce: PLUGIN_NOT_INSTALLED_HANDLER,
@@ -180,6 +182,10 @@ export class Auth0Plugin implements Auth0VueClient {
     }
 
     return this._client.logout(options);
+  }
+
+  async revokeRefreshToken(options?: RevokeRefreshTokenOptions): Promise<void> {
+    return this.__proxy(() => this._client.revokeRefreshToken(options));
   }
 
   /* istanbul ignore next */

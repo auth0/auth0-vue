@@ -16,7 +16,8 @@ import type {
   CustomTokenExchangeOptions,
   TokenEndpointResponse,
   PasskeyApiClient,
-  MyAccountApiClient
+  MyAccountApiClient,
+  RevokeRefreshTokenOptions
 } from '@auth0/auth0-spa-js';
 import type { Ref } from 'vue';
 import type { AppState } from './app-state';
@@ -201,6 +202,35 @@ export interface Auth0VueClient {
    * @param options
    */
   logout(options?: LogoutOptions): Promise<void>;
+
+  /**
+   * ```js
+   * await revokeRefreshToken();
+   * // or for a specific audience:
+   * await revokeRefreshToken({ audience: 'https://api.example.com' });
+   * ```
+   *
+   * Revokes the refresh token for the current session by calling the
+   * `/oauth/revoke` endpoint. Once revoked, the token can no longer be
+   * used to obtain new access tokens.
+   *
+   * If `useRefreshTokens` is not enabled this is a no-op.
+   * When multiple audiences share the same refresh token (MRRT), revoking it
+   * for one audience invalidates it for every audience that shares it.
+   *
+   * The access token stays in the cache, so `isAuthenticated` remains `true`.
+   * Once it expires, `getAccessTokenSilently` throws a `missing_refresh_token`
+   * error (or falls back to a hidden iframe when `useRefreshTokensFallback` is
+   * enabled). When `refreshTokenMode` is `RefreshTokenMode.Online`, the local
+   * session is also cleared and `isAuthenticated`, `user` and `idTokenClaims`
+   * are updated accordingly.
+   *
+   * To terminate the user's session with a redirect, use `logout()` instead.
+   *
+   * @param options - Optional parameters to identify which refresh token to revoke.
+   *   Defaults to the audience configured in `authorizationParams`.
+   */
+  revokeRefreshToken(options?: RevokeRefreshTokenOptions): Promise<void>;
 
   /**
    * ```js
