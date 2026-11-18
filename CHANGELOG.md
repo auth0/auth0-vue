@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.14.0](https://github.com/auth0/auth0-vue/tree/v2.14.0) (2026-11-17)
+[Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.13.0...v2.14.0)
+
+**Added**
+- feat: add revokeRefreshToken functionality and update documentation [\#778](https://github.com/auth0/auth0-vue/pull/778) ([siddhikotak](https://github.com/siddhikotak))
+
 ## [v2.13.0](https://github.com/auth0/auth0-vue/tree/v2.13.0) (2026-10-30)
 [Full Changelog](https://github.com/auth0/auth0-vue/compare/v2.12.0...v2.13.0)
 
